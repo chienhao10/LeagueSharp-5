@@ -40,11 +40,11 @@ namespace xc_TwistedFate
             Menu orbwalkerMenu = Menu.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
             Orbwalker = new Orbwalking.Orbwalker(orbwalkerMenu);
 
-            Menu ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector")); ;
+            Menu ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector"));
             TargetSelector.AddToMenu(ts);
 
-            Menu havefun = Menu.AddSubMenu(new Menu("Have fun!", "Have fun"));
-            Menu.AddSubMenu(havefun);
+            var havefun = new MenuItem("Have fun!", "Have fun");
+            Menu.AddItem(havefun);
 
             Menu.AddToMainMenu();
 
