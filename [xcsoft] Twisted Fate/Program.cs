@@ -31,7 +31,7 @@ namespace xc_TwistedFate
             Q = new Spell(SpellSlot.Q, 1450);
             Q.SetSkillshot(0.25f, 40f, 1000f, false, SkillshotType.SkillshotLine);
 
-            W = new Spell(SpellSlot.W, 800);
+            W = new Spell(SpellSlot.W, 900);
 
             Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, 750);
 
