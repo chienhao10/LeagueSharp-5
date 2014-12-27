@@ -43,6 +43,8 @@ namespace xc_TwistedFate
             Menu ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector")); ;
             TargetSelector.AddToMenu(ts);
 
+            Menu havefun = Menu.AddSubMenu(new Menu("Have fun!", "Have fun"));
+            Menu.AddSubMenu(havefun);
 
             Menu.AddToMainMenu();
 
@@ -162,10 +164,15 @@ namespace xc_TwistedFate
                         CardSelector.StartSelecting(Cards.Red);
                     }
                     else
+                    {
                         CardSelector.StartSelecting(Cards.Blue);
+                    }
+                        
                 }
                 else
+                {
                     CardSelector.StartSelecting(Cards.Blue);
+                }
             }
         }
     }
