@@ -43,7 +43,7 @@ namespace xc_TwistedFate
             Menu ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector"));
             TargetSelector.AddToMenu(ts);
 
-            var havefun = new MenuItem("Have fun!", "Have fun");
+            var havefun = new MenuItem("Have fun!", "Have fun!");
             Menu.AddItem(havefun);
 
             Menu.AddToMainMenu();
