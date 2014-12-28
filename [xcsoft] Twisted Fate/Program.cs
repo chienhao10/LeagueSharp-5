@@ -43,6 +43,12 @@ namespace xc_TwistedFate
             Menu ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector"));
             TargetSelector.AddToMenu(ts);
 
+            var wMenu = new Menu("Pick Card", "pickcard");
+            wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind("W".ToCharArray()[0], KeyBindType.Press)));
+            wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind("E".ToCharArray()[0], KeyBindType.Press)));
+            wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+            Menu.AddSubMenu(wMenu);
+
             var havefun = new MenuItem("Have fun!", "Have fun!");
             Menu.AddItem(havefun);
 
@@ -78,6 +84,21 @@ namespace xc_TwistedFate
                 // fast minion farming
                 LaneClear();
             }
+
+            if (Menu.Item("selectgold").GetValue<KeyBind>().Active)
+            {
+                CardSelector.StartSelecting(Cards.Yellow);
+            }
+
+            if (Menu.Item("selectblue").GetValue<KeyBind>().Active)
+            {
+                CardSelector.StartSelecting(Cards.Blue);
+            }
+
+            if (Menu.Item("selectred").GetValue<KeyBind>().Active)
+            {
+                CardSelector.StartSelecting(Cards.Red);
+            }
         }
 
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -94,10 +115,25 @@ namespace xc_TwistedFate
                 return;
 
             if (Q.IsReady())
-                Utility.DrawCircle(Player.Position, Q.Range, Color.LightSkyBlue, 2, 21);
+                Utility.DrawCircle(Player.Position, Q.Range, Color.Yellow);
+
+            Color temp = Color.Gold;
 
             if (W.IsReady())
-                Utility.DrawCircle(Player.Position, W.Range, Color.LightSkyBlue, 2, 21);
+            {
+                var wName = Player.Spellbook.GetSpell(SpellSlot.W).Name;
+
+                if (wName == "goldcardlock") temp = Color.Gold;
+                else if (wName == "bluecardlock") temp = Color.Blue;
+                else if (wName == "redcardlock") temp = Color.Red;
+                else if (wName == "PickACard") temp = Color.LightGreen;
+
+                Utility.DrawCircle(Player.Position, 545, temp);
+            }
+            else
+                Utility.DrawCircle(Player.Position, 545, Color.Gray);
+
+            Utility.DrawCircle(Player.Position, 545 + 400, Color.LightGray);//AA+Flash Range
         }
 
         static void Drawing_OnEndScene(EventArgs args)
