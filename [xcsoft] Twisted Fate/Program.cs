@@ -170,7 +170,7 @@ namespace xc_TwistedFate
                             }
                         } 
                     }
-                    else if (pred.Hitchance == HitChance.High || pred.Hitchance == HitChance.Dashing || pred.Hitchance == HitChance.Immobile || pred.Hitchance == HitChance.Dashing)
+                    else if (pred.Hitchance == HitChance.High || pred.Hitchance == HitChance.Dashing || pred.Hitchance == HitChance.Immobile)
                         Q.Cast(target);
                     
                 }
