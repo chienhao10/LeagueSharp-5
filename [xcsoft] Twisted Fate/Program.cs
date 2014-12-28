@@ -44,14 +44,14 @@ namespace xc_TwistedFate
             Menu ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector"));
             TargetSelector.AddToMenu(ts);
 
-            var wMenu = new Menu("Pick Card", "pickcard");
+            var wMenu = new Menu("Pick Card [You maybe not use it (Combomode OP)]", "pickcard");
             wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind("W".ToCharArray()[0], KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind("E".ToCharArray()[0], KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
             Menu.AddSubMenu(wMenu);
 
             var comboMenu  = new Menu("ComboMode Option", "comboset");
-            comboMenu.AddItem(new MenuItem("stunonly", "Q Cast to CC state enemy only").SetValue(true));
+            comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
             Menu.AddSubMenu(comboMenu);
 
             var predMenu = new Menu("Prediction", "pred");
@@ -159,13 +159,13 @@ namespace xc_TwistedFate
                 {
                     var pred = Q.GetPrediction(target);
 
-                    if (Menu.Item("stunonly").GetValue<bool>())
+                    if (Menu.Item("cconly").GetValue<bool>())
                     {
                         if (pred.Hitchance == HitChance.VeryHigh || pred.Hitchance == HitChance.Immobile || pred.Hitchance == HitChance.Dashing)
                         {
                             foreach (var buff in target.Buffs)
                             {
-                                if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Snare || buff.Type == BuffType.Suppression || buff.Type == BuffType.Charm)
+                                if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Snare || buff.Type == BuffType.Suppression || buff.Type == BuffType.Charm || buff.Type == BuffType.Fear || buff.Type == BuffType.Flee)
                                     Q.Cast(target);
                             }
                         } 
