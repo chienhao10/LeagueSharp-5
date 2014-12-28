@@ -51,7 +51,7 @@ namespace xc_TwistedFate
             Menu.AddSubMenu(wMenu);
 
             var comboMenu  = new Menu("ComboMode Option", "comboset");
-            comboMenu.AddItem(new MenuItem("stunonly", "Q Cast stunned enemy only").SetValue(false));
+            comboMenu.AddItem(new MenuItem("stunonly", "Q Cast Stunned enemy only").SetValue(false));
             Menu.AddSubMenu(comboMenu);
 
             var predMenu = new Menu("Prediction", "pred");
@@ -159,8 +159,17 @@ namespace xc_TwistedFate
                 {
                     var pred = Q.GetPrediction(target);
 
-                    if (Menu.Item("stunonly").GetValue<bool>() && pred.Hitchance == HitChance.Immobile)
-                        Q.Cast(target);
+                    if (Menu.Item("stunonly").GetValue<bool>())
+                    {
+                        if (pred.Hitchance == HitChance.Immobile)
+                        {
+                            foreach (var buff in target.Buffs)
+                            {
+                                if (buff.Type == BuffType.Stun)
+                                    Q.Cast(target);
+                            }
+                        }    
+                    }
                     else if (pred.Hitchance == HitChance.High || pred.Hitchance == HitChance.Dashing)
                         Q.Cast(target);
                     
