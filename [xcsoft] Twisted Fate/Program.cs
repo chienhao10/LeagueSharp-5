@@ -161,16 +161,16 @@ namespace xc_TwistedFate
 
                     if (Menu.Item("stunonly").GetValue<bool>())
                     {
-                        if (pred.Hitchance == HitChance.Immobile)
+                        foreach (var buff in target.Buffs)
                         {
-                            foreach (var buff in target.Buffs)
+                            if(pred.Hitchance == HitChance.VeryHigh || pred.Hitchance == HitChance.Immobile || pred.Hitchance == HitChance.Dashing)
                             {
-                                if (buff.Type == BuffType.Stun)
+                                if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Snare || buff.Type == BuffType.Suppression || buff.Type == BuffType.Charm)
                                     Q.Cast(target);
                             }
-                        }    
+                        } 
                     }
-                    else if (pred.Hitchance == HitChance.High || pred.Hitchance == HitChance.Dashing)
+                    else if (pred.Hitchance == HitChance.High || pred.Hitchance == HitChance.Dashing || pred.Hitchance == HitChance.Immobile || pred.Hitchance == HitChance.Dashing)
                         Q.Cast(target);
                     
                 }
