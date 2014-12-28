@@ -23,6 +23,7 @@ namespace xc_TwistedFate
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
+
         static void Game_OnGameLoad(EventArgs args)
         {
             if (Player.ChampionName != "TwistedFate")
@@ -31,9 +32,9 @@ namespace xc_TwistedFate
             Q = new Spell(SpellSlot.Q, 1450);
             Q.SetSkillshot(0.25f, 40f, 1000f, false, SkillshotType.SkillshotLine);
 
-            W = new Spell(SpellSlot.W, 900);
+            W = new Spell(SpellSlot.W, 1000);
 
-            Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, 750);
+            Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, 550);
 
             Menu = new Menu("[xcsoft] Twisted Fate", "xcoft_TF", true);
 
@@ -48,6 +49,14 @@ namespace xc_TwistedFate
             wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind("E".ToCharArray()[0], KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
             Menu.AddSubMenu(wMenu);
+
+            var comboMenu  = new Menu("ComboMode Option", "comboset");
+            comboMenu.AddItem(new MenuItem("stunonly", "Q Cast stunned enemy only").SetValue(false));
+            Menu.AddSubMenu(comboMenu);
+
+            var predMenu = new Menu("Prediction", "comboset");
+            predMenu.AddItem(new MenuItem("kappa", "Maybe Best"));
+            Menu.AddSubMenu(predMenu);
 
             var havefun = new MenuItem("Have fun!", "Have fun!");
             Menu.AddItem(havefun);
@@ -68,45 +77,28 @@ namespace xc_TwistedFate
                 return;
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-            {
-                // combo to kill the enemy
                 Combo();
-            }
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
-            {
-                // lasthit and harass
                 Harras();
-            }
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
-            {
-                // fast minion farming
                 LaneClear();
-            }
 
             if (Menu.Item("selectgold").GetValue<KeyBind>().Active)
-            {
                 CardSelector.StartSelecting(Cards.Yellow);
-            }
 
             if (Menu.Item("selectblue").GetValue<KeyBind>().Active)
-            {
                 CardSelector.StartSelecting(Cards.Blue);
-            }
 
             if (Menu.Item("selectred").GetValue<KeyBind>().Active)
-            {
                 CardSelector.StartSelecting(Cards.Red);
-            }
         }
 
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe && args.SData.Name == "gate")
-            {
                 CardSelector.StartSelecting(Cards.Yellow);
-            }
         }
 
         static void Drawing_OnDraw(EventArgs args)
@@ -128,12 +120,12 @@ namespace xc_TwistedFate
                 else if (wName == "redcardlock") temp = Color.Red;
                 else if (wName == "PickACard") temp = Color.LightGreen;
 
-                Utility.DrawCircle(Player.Position, 545, temp);
+                Utility.DrawCircle(Player.Position, 550, temp);
             }
             else
-                Utility.DrawCircle(Player.Position, 545, Color.Gray);
+                Utility.DrawCircle(Player.Position, 550, Color.Gray);
 
-            Utility.DrawCircle(Player.Position, 545 + 400, Color.LightGray);//AA+Flash Range
+            Utility.DrawCircle(Player.Position, 550 + 400, Color.LightGray);//AA+Flash Range
         }
 
         static void Drawing_OnEndScene(EventArgs args)
@@ -152,24 +144,26 @@ namespace xc_TwistedFate
             if (Dfg.IsReady())
             {
                 if (target.IsValidTarget(Dfg.Range))
-                {
                     Dfg.Cast(target);
-                }
             }
 
             if (W.IsReady())
             {
                 if (target.IsValidTarget(W.Range) && target is Obj_AI_Hero)
-                {
                     CardSelector.StartSelecting(Cards.Yellow);
-                }
             }
 
             if (Q.IsReady())
             {
                 if (target.IsValidTarget(Q.Range) && target is Obj_AI_Hero)
                 {
-                    Q.Cast(target);
+                    var pred = Q.GetPrediction(target);
+
+                    if (Menu.Item("stunonly").GetValue<bool>() && pred.Hitchance == HitChance.Immobile)
+                        Q.Cast(target);
+                    else if (pred.Hitchance == HitChance.High || pred.Hitchance == HitChance.Dashing)
+                        Q.Cast(target);
+                    
                 }
             }
         }
@@ -180,10 +174,8 @@ namespace xc_TwistedFate
 
             if (Q.IsReady())
             {
-                if (target.IsValidTarget(Q.Range))
-                {
+                if (target.IsValidTarget(Q.Range) && Q.GetPrediction(target).Hitchance == HitChance.High)
                     Q.Cast(target);
-                }
             }
         }
 
@@ -196,19 +188,12 @@ namespace xc_TwistedFate
                 if (Utility.ManaPercentage(Player) >= 20)
                 {
                     if (minionsInWRange >= 3)
-                    {
                         CardSelector.StartSelecting(Cards.Red);
-                    }
                     else
-                    {
                         CardSelector.StartSelecting(Cards.Blue);
-                    }
-                        
                 }
                 else
-                {
                     CardSelector.StartSelecting(Cards.Blue);
-                }
             }
         }
     }
