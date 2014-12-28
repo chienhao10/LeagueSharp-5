@@ -54,7 +54,7 @@ namespace xc_TwistedFate
             comboMenu.AddItem(new MenuItem("stunonly", "Q Cast stunned enemy only").SetValue(false));
             Menu.AddSubMenu(comboMenu);
 
-            var predMenu = new Menu("Prediction", "comboset");
+            var predMenu = new Menu("Prediction", "pred");
             predMenu.AddItem(new MenuItem("kappa", "Maybe Best"));
             Menu.AddSubMenu(predMenu);
 
