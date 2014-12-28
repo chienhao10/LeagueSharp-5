@@ -51,7 +51,7 @@ namespace xc_TwistedFate
             Menu.AddSubMenu(wMenu);
 
             var comboMenu  = new Menu("ComboMode Option", "comboset");
-            comboMenu.AddItem(new MenuItem("stunonly", "Q Cast to CC state enemy only").SetValue(true));
+            comboMenu.AddItem(new MenuItem("stunonly", "Q Cast to CC state enemy only").SetValue(false));
             Menu.AddSubMenu(comboMenu);
 
             var predMenu = new Menu("Prediction", "pred");
