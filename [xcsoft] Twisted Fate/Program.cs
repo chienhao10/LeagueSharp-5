@@ -59,7 +59,7 @@ namespace xc_TwistedFate
             Menu.AddSubMenu(AdditionalsMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
-            lasthitMenu.AddItem(new MenuItem("lasthitUseW", "Use W (Blue only)").SetValue(true));
+            lasthitMenu.AddItem(new MenuItem("lasthitUseW", "Use W (Blue only)").SetValue(false));
             lasthitMenu.AddItem(new MenuItem("lasthitbluemana", "Lasthit with blue if mana % <").SetValue(new Slider(20, 0, 100)));
             Menu.AddSubMenu(lasthitMenu);
 
@@ -264,7 +264,7 @@ namespace xc_TwistedFate
                 {
                     if (Utility.ManaPercentage(Player) < Menu.Item("lasthitbluemana").GetValue<Slider>().Value)
                     {
-                        var xMinions = MinionManager.GetMinions(Player.Position, 1000, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                        var xMinions = MinionManager.GetMinions(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
 
                         foreach (var xMinion in xMinions)
                         {
