@@ -92,8 +92,15 @@ namespace xc_TwistedFate
             Drawing.OnEndScene += Drawing_OnEndScene;
             Game.OnGameUpdate += Game_OnGameUpdate;
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
+            Orbwalking.BeforeAttack += OrbwalkingOnBeforeAttack;
 
             Game.PrintChat("<font color = \"#33CCCC\">[xcsoft] Twisted Fate -</font> Loaded");
+        }
+
+        private static void OrbwalkingOnBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            if (args.Target is Obj_AI_Hero || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
+                args.Process = CardSelector.Status != SelectStatus.Selecting && Environment.TickCount - CardSelector.LastWSent > 300;
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -257,11 +264,11 @@ namespace xc_TwistedFate
                 {
                     if (Utility.ManaPercentage(Player) < Menu.Item("lasthitbluemana").GetValue<Slider>().Value)
                     {
-                        var xMinions = MinionManager.GetMinions(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius + 300, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                        var xMinions = MinionManager.GetMinions(Player.Position, 1000, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
 
                         foreach (var xMinion in xMinions)
                         {
-                            if (ObjectManager.Player.GetAutoAttackDamage(xMinion, true) * 2 >= xMinion.Health)
+                            if (Player.GetAutoAttackDamage(xMinion, true) * 3 >= xMinion.Health)
                             {
                                 CardSelector.StartSelecting(Cards.Blue);
                             }
