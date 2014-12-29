@@ -44,7 +44,7 @@ namespace xc_TwistedFate
             Menu ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector"));
             TargetSelector.AddToMenu(ts);
 
-            var wMenu = new Menu("Pick Card [You maybe not use it (Combomode OP)]", "pickcard");
+            var wMenu = new Menu("Pick Card [You maybe not use it (ComboMode OP)]", "pickcard");
             wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind("W".ToCharArray()[0], KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind("E".ToCharArray()[0], KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
@@ -53,6 +53,14 @@ namespace xc_TwistedFate
             var comboMenu  = new Menu("ComboMode Option", "comboset");
             comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
             Menu.AddSubMenu(comboMenu);
+
+            var Drawings = new Menu("Drawings Settings", "Drawings");
+            Drawings.AddItem(new MenuItem("AAcircle", "AA Range").SetValue(true));
+            Drawings.AddItem(new MenuItem("FAAcircle", "Flash + AA Range").SetValue(new Circle(true, Color.LightGray)));
+            Drawings.AddItem(new MenuItem("Qcircle", "Q Range").SetValue(new Circle(true, Color.Gold)));
+            Drawings.AddItem(new MenuItem("Rcircle", "R Range").SetValue(new Circle(true, Color.LightSkyBlue)));
+            Drawings.AddItem(new MenuItem("RcircleMap", "R Range (minimap)").SetValue(new Circle(true, Color.White)));
+            Menu.AddSubMenu(Drawings);
 
             var predMenu = new Menu("Prediction", "pred");
             predMenu.AddItem(new MenuItem("kappa", "Maybe Best"));
@@ -106,26 +114,32 @@ namespace xc_TwistedFate
             if (Player.IsDead)
                 return;
 
-            if (Q.IsReady())
+            if (Q.IsReady() && Menu.Item("Qcircle").GetValue<Circle>().Active)
                 Utility.DrawCircle(Player.Position, Q.Range, Color.Yellow);
 
             Color temp = Color.Gold;
 
-            if (W.IsReady())
+            if (Menu.Item("AAcircle").GetValue<bool>())
             {
-                var wName = Player.Spellbook.GetSpell(SpellSlot.W).Name;
+                if (W.IsReady())
+                {
+                    var wName = Player.Spellbook.GetSpell(SpellSlot.W).Name;
 
-                if (wName == "goldcardlock") temp = Color.Gold;
-                else if (wName == "bluecardlock") temp = Color.Blue;
-                else if (wName == "redcardlock") temp = Color.Red;
-                else if (wName == "PickACard") temp = Color.LightGreen;
+                    if (wName == "goldcardlock") temp = Color.Gold;
+                    else if (wName == "bluecardlock") temp = Color.Blue;
+                    else if (wName == "redcardlock") temp = Color.Red;
+                    else if (wName == "PickACard") temp = Color.LightGreen;
 
-                Utility.DrawCircle(Player.Position, 550, temp);
+                    Utility.DrawCircle(Player.Position, 550, temp);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, 550, Color.Gray);
             }
-            else
-                Utility.DrawCircle(Player.Position, 550, Color.Gray);
 
-            Utility.DrawCircle(Player.Position, 550 + 400, Color.LightGray);//AA+Flash Range
+            var FAAcircle = Menu.Item("FAAcircle").GetValue<Circle>();
+
+            if (FAAcircle.Active)
+                Utility.DrawCircle(Player.Position, 550 + 400, FAAcircle.Color);//AA+Flash Range
         }
 
         static void Drawing_OnEndScene(EventArgs args)
@@ -133,8 +147,15 @@ namespace xc_TwistedFate
             if (Player.IsDead)
                 return;
 
-            Utility.DrawCircle(Player.Position, 5500, Color.LightSkyBlue);
-            Utility.DrawCircle(Player.Position, 5500, Color.White, 1, 21, true);
+            var Rcircle = Menu.Item("Rcircle").GetValue <Circle>();
+
+            if (Rcircle.Active) 
+                Utility.DrawCircle(Player.Position, 5500, Rcircle.Color);
+
+            var Rcirclemap = Menu.Item("RcircleMap").GetValue<Circle>();
+
+            if (Rcirclemap.Active) 
+            Utility.DrawCircle(Player.Position, 5500, Rcirclemap.Color, 1, 21, true);
         }
 
         static void Combo()
