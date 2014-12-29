@@ -34,7 +34,7 @@ namespace xc_TwistedFate
 
             W = new Spell(SpellSlot.W, 1000);
 
-            Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, 550);
+            Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, Orbwalking.GetRealAutoAttackRange(Player));
 
             Menu = new Menu("[xcsoft] Twisted Fate", "xcoft_TF", true);
 
@@ -150,16 +150,16 @@ namespace xc_TwistedFate
                     else if (wName == "redcardlock") temp = Color.Red;
                     else if (wName == "PickACard") temp = Color.LightGreen;
 
-                    Utility.DrawCircle(Player.Position, 550, temp);
+                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), temp);
                 }
                 else
-                    Utility.DrawCircle(Player.Position, 550, Color.Gray);
+                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), Color.Gray);
             }
 
             var FAAcircle = Menu.Item("FAAcircle").GetValue<Circle>();
 
             if (FAAcircle.Active)
-                Utility.DrawCircle(Player.Position, 550 + 400, FAAcircle.Color);//AA+Flash Range
+                Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player) + 400, FAAcircle.Color);//AA+Flash Range
 
             var drawMinionLastHit = Menu.Item("drawMinionLastHit").GetValue<Circle>();
             var drawMinionNearKill = Menu.Item("drawMinionNearKill").GetValue<Circle>();
