@@ -50,9 +50,23 @@ namespace xc_TwistedFate
             wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
             Menu.AddSubMenu(wMenu);
 
-            var comboMenu  = new Menu("ComboMode Option", "comboset");
+            var comboMenu  = new Menu("ComboMode Option", "comboop");
             comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
             Menu.AddSubMenu(comboMenu);
+
+            var AdditionalsMenu = new Menu("Additional Option", "additionals");
+            AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold When Using Ultimate").SetValue(true));
+            Menu.AddSubMenu(AdditionalsMenu);
+
+            var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
+            lasthitMenu.AddItem(new MenuItem("lasthitUseW", "Use W (Blue only)").SetValue(true));
+            lasthitMenu.AddItem(new MenuItem("lasthitbluemana", "Lasthit with blue if mana % <").SetValue(new Slider(20, 0, 100)));
+            Menu.AddSubMenu(lasthitMenu);
+
+            var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
+            laneclearMenu.AddItem(new MenuItem("laneclearUseW", "Use W").SetValue(true));
+            laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(20, 0, 100)));
+            Menu.AddSubMenu(laneclearMenu);
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
             Drawings.AddItem(new MenuItem("AAcircle", "AA Range").SetValue(true));
@@ -60,6 +74,8 @@ namespace xc_TwistedFate
             Drawings.AddItem(new MenuItem("Qcircle", "Q Range").SetValue(new Circle(true, Color.Gold)));
             Drawings.AddItem(new MenuItem("Rcircle", "R Range").SetValue(new Circle(true, Color.LightSkyBlue)));
             Drawings.AddItem(new MenuItem("RcircleMap", "R Range (minimap)").SetValue(new Circle(true, Color.White)));
+            Drawings.AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, Color.GreenYellow)));
+            Drawings.AddItem(new MenuItem("drawMinionNearKill", "Minion Near Kill").SetValue(new Circle(true, Color.Gray)));
             Menu.AddSubMenu(Drawings);
 
             var predMenu = new Menu("Prediction", "pred");
@@ -90,6 +106,9 @@ namespace xc_TwistedFate
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
                 Harras();
 
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
+                Lasthit();
+
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
                 LaneClear();
 
@@ -105,7 +124,7 @@ namespace xc_TwistedFate
 
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsMe && args.SData.Name == "gate")
+            if (sender.IsMe && args.SData.Name == "gate" || Menu.Item("goldR").GetValue<bool>())
                 CardSelector.StartSelecting(Cards.Yellow);
         }
 
@@ -140,6 +159,26 @@ namespace xc_TwistedFate
 
             if (FAAcircle.Active)
                 Utility.DrawCircle(Player.Position, 550 + 400, FAAcircle.Color);//AA+Flash Range
+
+            var drawMinionLastHit = Menu.Item("drawMinionLastHit").GetValue<Circle>();
+            var drawMinionNearKill = Menu.Item("drawMinionNearKill").GetValue<Circle>();
+            if (drawMinionLastHit.Active || drawMinionNearKill.Active)
+            {
+                var xMinions =
+                    MinionManager.GetMinions(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius + 300, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+
+                foreach (var xMinion in xMinions)
+                {
+                    if (drawMinionLastHit.Active && ObjectManager.Player.GetAutoAttackDamage(xMinion, true) >= xMinion.Health)
+                    {
+                        Utility.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionLastHit.Color);
+                    }
+                    else if (drawMinionNearKill.Active && ObjectManager.Player.GetAutoAttackDamage(xMinion, true) * 2 >= xMinion.Health)
+                    {
+                        Utility.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionNearKill.Color);
+                    }
+                }
+            }
         }
 
         static void Drawing_OnEndScene(EventArgs args)
@@ -186,7 +225,7 @@ namespace xc_TwistedFate
                         {
                             foreach (var buff in target.Buffs)
                             {
-                                if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Snare || buff.Type == BuffType.Suppression || buff.Type == BuffType.Charm || buff.Type == BuffType.Fear || buff.Type == BuffType.Flee)
+                                if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Snare || buff.Type == BuffType.Suppression || buff.Type == BuffType.Charm || buff.Type == BuffType.Fear || buff.Type == BuffType.Flee || buff.Type == BuffType.Slow)
                                     Q.Cast(target);
                             }
                         } 
@@ -209,21 +248,46 @@ namespace xc_TwistedFate
             }
         }
 
+        static void Lasthit()
+        {
+            if (W.IsReady())
+            {
+                if (Menu.Item("lasthitUseW").GetValue<bool>())
+                {
+                    if (Utility.ManaPercentage(Player) < Menu.Item("lasthitbluemana").GetValue<Slider>().Value)
+                    {
+                        var xMinions = MinionManager.GetMinions(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius + 300, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+
+                        foreach (var xMinion in xMinions)
+                        {
+                            if (ObjectManager.Player.GetAutoAttackDamage(xMinion, true) * 2 >= xMinion.Health)
+                            {
+                                CardSelector.StartSelecting(Cards.Blue);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         static void LaneClear()
         {
             if (W.IsReady())
             {
                 int minionsInWRange = MinionManager.GetMinions(Player.Position, W.Range).Count;
 
-                if (Utility.ManaPercentage(Player) >= 20)
+                if (Menu.Item("laneclearUseW").GetValue<bool>())
                 {
-                    if (minionsInWRange >= 3)
-                        CardSelector.StartSelecting(Cards.Red);
+                    if (Utility.ManaPercentage(Player) > Menu.Item("laneclearbluemana").GetValue<Slider>().Value)
+                    {
+                        if (minionsInWRange >= 3)
+                            CardSelector.StartSelecting(Cards.Red);
+                        else
+                            CardSelector.StartSelecting(Cards.Blue);
+                    }
                     else
                         CardSelector.StartSelecting(Cards.Blue);
                 }
-                else
-                    CardSelector.StartSelecting(Cards.Blue);
             }
         }
     }
