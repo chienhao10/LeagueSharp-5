@@ -66,6 +66,7 @@ namespace xc_TwistedFate
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
             laneclearMenu.AddItem(new MenuItem("laneclearUseW", "Use W").SetValue(true));
             laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(20, 0, 100)));
+            laneclearMenu.AddItem(new MenuItem("laneclearmc", "Red if Minion count >=").SetValue(new Slider(3, 1, 5)));
             Menu.AddSubMenu(laneclearMenu);
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
@@ -124,7 +125,7 @@ namespace xc_TwistedFate
 
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsMe && args.SData.Name == "gate" || Menu.Item("goldR").GetValue<bool>())
+            if (sender.IsMe && args.SData.Name == "gate" && Menu.Item("goldR").GetValue<bool>())
                 CardSelector.StartSelecting(Cards.Yellow);
         }
 
@@ -280,7 +281,7 @@ namespace xc_TwistedFate
                 {
                     if (Utility.ManaPercentage(Player) > Menu.Item("laneclearbluemana").GetValue<Slider>().Value)
                     {
-                        if (minionsInWRange >= 3)
+                        if (minionsInWRange >= Menu.Item("laneclearmc").GetValue<Slider>().Value)
                             CardSelector.StartSelecting(Cards.Red);
                         else
                             CardSelector.StartSelecting(Cards.Blue);
