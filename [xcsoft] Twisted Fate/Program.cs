@@ -66,7 +66,7 @@ namespace xc_TwistedFate
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
             laneclearMenu.AddItem(new MenuItem("laneclearUseW", "Use W").SetValue(true));
             laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(20, 0, 100)));
-            laneclearMenu.AddItem(new MenuItem("laneclearmc", "Red if Minion count >=").SetValue(new Slider(3, 1, 5)));
+            laneclearMenu.AddItem(new MenuItem("laneclearmc", "Red if Minions count >=").SetValue(new Slider(3, 2, 5)));
             Menu.AddSubMenu(laneclearMenu);
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
