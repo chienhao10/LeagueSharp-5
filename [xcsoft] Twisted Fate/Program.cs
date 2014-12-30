@@ -52,6 +52,7 @@ namespace xc_TwistedFate
 
             var comboMenu  = new Menu("ComboMode Option", "comboop");
             comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
+            comboMenu.AddItem(new MenuItem("usepacket", "Packet casting for Q").SetValue(true));
             Menu.AddSubMenu(comboMenu);
 
             var AdditionalsMenu = new Menu("Additional Option", "additionals");
@@ -234,7 +235,7 @@ namespace xc_TwistedFate
                             foreach (var buff in target.Buffs)
                             {
                                 if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Snare || buff.Type == BuffType.Suppression || buff.Type == BuffType.Charm || buff.Type == BuffType.Fear || buff.Type == BuffType.Flee || buff.Type == BuffType.Slow)
-                                    Q.Cast(target);
+                                    Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
                             }
                         } 
                     }
@@ -264,7 +265,7 @@ namespace xc_TwistedFate
                 {
                     if (Utility.ManaPercentage(Player) < Menu.Item("lasthitbluemana").GetValue<Slider>().Value)
                     {
-                        var xMinions = MinionManager.GetMinions(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                        var xMinions = MinionManager.GetMinions(Player.Position, 700, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
 
                         foreach (var xMinion in xMinions)
                         {
