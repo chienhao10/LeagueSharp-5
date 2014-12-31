@@ -18,6 +18,7 @@ namespace xc_TwistedFate
         private static Spell Q, W;
         private static Items.Item Dfg;
         private static Menu Menu;
+        private static SpellSlot SFlash;
 
         static void Main(string[] args)
         {
@@ -28,6 +29,8 @@ namespace xc_TwistedFate
         {
             if (Player.ChampionName != "TwistedFate")
                 return;
+
+            SFlash = Player.GetSpellSlot("SummonerFlash");
 
             Q = new Spell(SpellSlot.Q, 1450);
             Q.SetSkillshot(0.25f, 40f, 1000f, false, SkillshotType.SkillshotLine);
@@ -53,10 +56,11 @@ namespace xc_TwistedFate
             var comboMenu  = new Menu("ComboMode Option", "comboop");
             comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
             comboMenu.AddItem(new MenuItem("usepacket", "Packet casting for Q").SetValue(true));
+            comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target (Not recommended)").SetValue(false));
             Menu.AddSubMenu(comboMenu);
 
             var AdditionalsMenu = new Menu("Additional Option", "additionals");
-            AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold When Using Ultimate").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold when using ultimate(gate)").SetValue(true));
             Menu.AddSubMenu(AdditionalsMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
@@ -72,8 +76,8 @@ namespace xc_TwistedFate
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
             Drawings.AddItem(new MenuItem("AAcircle", "AA Range").SetValue(true));
-            Drawings.AddItem(new MenuItem("FAAcircle", "Flash + AA Range").SetValue(new Circle(true, Color.LightGray)));
-            Drawings.AddItem(new MenuItem("Qcircle", "Q Range").SetValue(new Circle(true, Color.Gold)));
+            Drawings.AddItem(new MenuItem("FAAcircle", "Flash + AA Range").SetValue(true));
+            Drawings.AddItem(new MenuItem("Qcircle", "Q Range").SetValue(new Circle(true, Color.LightSkyBlue)));
             Drawings.AddItem(new MenuItem("Rcircle", "R Range").SetValue(new Circle(true, Color.LightSkyBlue)));
             Drawings.AddItem(new MenuItem("RcircleMap", "R Range (minimap)").SetValue(new Circle(true, Color.White)));
             Drawings.AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, Color.GreenYellow)));
@@ -142,8 +146,9 @@ namespace xc_TwistedFate
             if (Player.IsDead)
                 return;
 
-            if (Q.IsReady() && Menu.Item("Qcircle").GetValue<Circle>().Active)
-                Utility.DrawCircle(Player.Position, Q.Range, Color.Yellow);
+            var Qcircle = Menu.Item("Qcircle").GetValue<Circle>();
+            if (Q.IsReady() && Qcircle.Active)
+                Utility.DrawCircle(Player.Position, Q.Range, Qcircle.Color);
 
             Color temp = Color.Gold;
 
@@ -164,10 +169,27 @@ namespace xc_TwistedFate
                     Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), Color.Gray);
             }
 
-            var FAAcircle = Menu.Item("FAAcircle").GetValue<Circle>();
+            if (Menu.Item("FAAcircle").GetValue<bool>())
+            {
+                Obj_AI_Hero target = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(Player) + 400, TargetSelector.DamageType.Magical, false);
 
-            if (FAAcircle.Active)
-                Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player) + 400, FAAcircle.Color);//AA+Flash Range
+                if (target != null && SFlash != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SFlash) == SpellState.Ready)
+                {
+                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player) + 400, Color.Gold);//AA+Flash Range
+
+                    if (!target.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)))
+                    {
+                        Utility.DrawCircle(target.Position, 50, Color.Gold);
+
+                        var targetpos = Drawing.WorldToScreen(target.Position);
+
+                        Drawing.DrawText(targetpos[0] - 60, targetpos[1] + 20, Color.Gold, "Flash+Stun possible");
+                    }
+
+                }
+                else
+                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player) + 400, Color.Gray);//AA+Flash Range
+            }
 
             var drawMinionLastHit = Menu.Item("drawMinionLastHit").GetValue<Circle>();
             var drawMinionNearKill = Menu.Item("drawMinionNearKill").GetValue<Circle>();
@@ -208,8 +230,8 @@ namespace xc_TwistedFate
 
         static void Combo()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(1450, TargetSelector.DamageType.Magical);
-
+            Obj_AI_Hero target = TargetSelector.GetTarget(1450, TargetSelector.DamageType.Magical, Menu.Item("ignoreshield").GetValue<bool>());
+            
             if (Dfg.IsReady())
             {
                 if (target.IsValidTarget(Dfg.Range))
@@ -248,7 +270,7 @@ namespace xc_TwistedFate
 
         static void Harras()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical, true);
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
             if (Q.IsReady())
             {
