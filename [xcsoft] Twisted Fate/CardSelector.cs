@@ -8,7 +8,7 @@ using LeagueSharp.Common;
 
 namespace xc_TwistedFate
 {
-    //[owner]Esk0r
+    //CardSelector by Esk0r
     public enum Cards
     {
         Red,

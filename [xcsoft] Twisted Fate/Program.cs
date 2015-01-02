@@ -16,9 +16,10 @@ namespace xc_TwistedFate
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         private static Orbwalking.Orbwalker Orbwalker;
         private static Spell Q, W;
-        private static Items.Item Dfg;
+        private static Items.Item Dfg, Bft;
         private static Menu Menu;
         private static SpellSlot SFlash;
+        private static SpellSlot SIgnite;
 
         static void Main(string[] args)
         {
@@ -31,13 +32,15 @@ namespace xc_TwistedFate
                 return;
 
             SFlash = Player.GetSpellSlot("SummonerFlash");
+            SIgnite = Player.GetSpellSlot("SummonerIgnite");
+
+            Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, Orbwalking.GetRealAutoAttackRange(Player));
+            Bft = new Items.Item((int)ItemId.Blackfire_Torch, Orbwalking.GetRealAutoAttackRange(Player));
 
             Q = new Spell(SpellSlot.Q, 1450);
             Q.SetSkillshot(0.25f, 40f, 1000f, false, SkillshotType.SkillshotLine);
 
             W = new Spell(SpellSlot.W, 1000);
-
-            Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, Orbwalking.GetRealAutoAttackRange(Player));
 
             Menu = new Menu("[xcsoft] Twisted Fate", "xcoft_TF", true);
 
@@ -55,8 +58,10 @@ namespace xc_TwistedFate
 
             var comboMenu  = new Menu("ComboMode Option", "comboop");
             comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
-            comboMenu.AddItem(new MenuItem("usepacket", "Packet casting for Q").SetValue(true));
             comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target (Not recommended)").SetValue(false));
+            comboMenu.AddItem(new MenuItem("usepacket", "Packet casting for Q").SetValue(true));
+            comboMenu.AddItem(new MenuItem("usedfg", "Use Deathfire Grasp").SetValue(true));
+            comboMenu.AddItem(new MenuItem("usebft", "Use Blackfire Torch").SetValue(true));
             Menu.AddSubMenu(comboMenu);
 
             var AdditionalsMenu = new Menu("Additional Option", "additionals");
@@ -64,7 +69,7 @@ namespace xc_TwistedFate
             Menu.AddSubMenu(AdditionalsMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
-            lasthitMenu.AddItem(new MenuItem("lasthitUseW", "Use W (Blue only)").SetValue(false));
+            lasthitMenu.AddItem(new MenuItem("lasthitUseW", "Use W (Blue only)").SetValue(true));
             lasthitMenu.AddItem(new MenuItem("lasthitbluemana", "Lasthit with blue if mana % <").SetValue(new Slider(20, 0, 100)));
             Menu.AddSubMenu(lasthitMenu);
 
@@ -82,6 +87,27 @@ namespace xc_TwistedFate
             Drawings.AddItem(new MenuItem("RcircleMap", "R Range (minimap)").SetValue(new Circle(true, Color.White)));
             Drawings.AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, Color.GreenYellow)));
             Drawings.AddItem(new MenuItem("drawMinionNearKill", "Minion Near Kill").SetValue(new Circle(true, Color.Gray)));
+            
+            MenuItem drawComboDamageMenu = new MenuItem("Draw_ComboDamage", "Draw Combo Damage").SetValue(true);
+            MenuItem drawFill = new MenuItem("Draw_Fill", "Draw Combo Damage Fill").SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
+            Drawings.AddItem(drawComboDamageMenu);
+            Drawings.AddItem(drawFill);
+            DamageIndicator.DamageToUnit = GetComboDamage;
+            DamageIndicator.Enabled = drawComboDamageMenu.GetValue<bool>();
+            DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
+            DamageIndicator.FillColor = drawFill.GetValue<Circle>().Color;
+            drawComboDamageMenu.ValueChanged +=
+                delegate(object sender, OnValueChangeEventArgs eventArgs)
+                {
+                    DamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+                };
+            drawFill.ValueChanged +=
+                delegate(object sender, OnValueChangeEventArgs eventArgs)
+                {
+                    DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
+                    DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
+                };
+            
             Menu.AddSubMenu(Drawings);
 
             var predMenu = new Menu("Prediction", "pred");
@@ -102,7 +128,7 @@ namespace xc_TwistedFate
             Game.PrintChat("<font color = \"#33CCCC\">[xcsoft] Twisted Fate -</font> Loaded");
         }
 
-        private static void OrbwalkingOnBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        static void OrbwalkingOnBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             if (args.Target is Obj_AI_Hero || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
                 args.Process = CardSelector.Status != SelectStatus.Selecting && Environment.TickCount - CardSelector.LastWSent > 300;
@@ -138,7 +164,9 @@ namespace xc_TwistedFate
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe && args.SData.Name == "gate" && Menu.Item("goldR").GetValue<bool>())
+            {
                 CardSelector.StartSelecting(Cards.Yellow);
+            }
         }
 
         static void Drawing_OnDraw(EventArgs args)
@@ -225,17 +253,23 @@ namespace xc_TwistedFate
             var Rcirclemap = Menu.Item("RcircleMap").GetValue<Circle>();
 
             if (Rcirclemap.Active) 
-            Utility.DrawCircle(Player.Position, 5500, Rcirclemap.Color, 1, 21, true);
+            Utility.DrawCircle(Player.Position, 5500, Rcirclemap.Color, 1, 30, true);
         }
 
         static void Combo()
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(1450, TargetSelector.DamageType.Magical, Menu.Item("ignoreshield").GetValue<bool>());
-            
-            if (Dfg.IsReady())
+
+            if (Dfg.IsReady() && Menu.Item("usedfg").GetValue<bool>())
             {
                 if (target.IsValidTarget(Dfg.Range))
                     Dfg.Cast(target);
+            }
+
+            if (Bft.IsReady() && Menu.Item("usebft").GetValue<bool>())
+            {
+                if (target.IsValidTarget(Bft.Range))
+                    Bft.Cast(target);
             }
 
             if (W.IsReady())
@@ -291,7 +325,7 @@ namespace xc_TwistedFate
 
                         foreach (var xMinion in xMinions)
                         {
-                            if (Player.GetAutoAttackDamage(xMinion, true) * 3 >= xMinion.Health)
+                            if (Player.GetAutoAttackDamage(xMinion, false) * 3 >= xMinion.Health)
                             {
                                 CardSelector.StartSelecting(Cards.Blue);
                             }
@@ -320,6 +354,76 @@ namespace xc_TwistedFate
                         CardSelector.StartSelecting(Cards.Blue);
                 }
             }
+        }
+
+        static float GetComboDamage(Obj_AI_Base enemy)
+        {
+            var APdmg = 0d;
+            var ADdmg = 0d;
+            bool card = false;
+
+            //AP데미지
+            if(Q.IsReady())
+                APdmg += Player.GetSpellDamage(enemy, SpellSlot.Q);
+
+            if (W.IsReady())//카드 돌리고있을때
+                APdmg += Player.GetSpellDamage(enemy, SpellSlot.W, 2);//골드카드데미지추가
+            else//카드뽑았나?
+            {
+                card = true;//넌 카드를 들고있다고 생각한다.
+                foreach (var buff in Player.Buffs)//패건들지마손모가지날아가붕게
+                {//버프이름 JeonHelperForDev 어셈으로 찾음
+                    if (buff.Name == "bluecardpreattack")//블루카드들고있네
+                        APdmg += Player.GetSpellDamage(enemy, SpellSlot.W);//블루카드데미지추가
+                    else if (buff.Name == "redcardpreattack")//레드카드들고있네
+                        APdmg += Player.GetSpellDamage(enemy, SpellSlot.W, 1);//레드카드데미지추가
+                    else if (buff.Name == "goldcardpreattack")//골드카드들고있네
+                        APdmg += Player.GetSpellDamage(enemy, SpellSlot.W, 2);//골드카드데미지추가
+                    else card = false;//카드없네
+                }
+            }
+
+            bool passive = false;
+            foreach (var buff in Player.Buffs)
+            {
+                if (buff.Name == "cardmasterstackparticle")//E패시브있네
+                {
+                    APdmg += Player.GetSpellDamage(enemy, SpellSlot.E);//패시브딜추가
+                    passive = true;
+                }
+
+                if (buff.Name == "lichbane")//리치베인패시브있네?
+                {
+                    APdmg += Damage.CalcDamage(Player, enemy, Damage.DamageType.Magical, (Player.BaseAttackDamage * 0.75) + ((Player.BaseAbilityDamage + Player.FlatMagicDamageMod) * 0.5));//리치베인딜 추가
+                    passive = true;
+                }
+
+                if (buff.Name == "sheen")//광휘의검(=삼위일체) 패시브있네?
+                {
+                    ADdmg += Player.GetAutoAttackDamage(enemy, false);//광휘의검딜추가
+                    passive = true;
+                }
+            }
+
+            if (!card && passive)//카드없네 평타로 패시브터트릴건가보네
+                ADdmg += Player.GetAutoAttackDamage(enemy, false);//평타딜추가
+
+            if (Dfg.IsReady() && Menu.Item("usedfg").GetValue<bool>())
+            {
+                APdmg += Player.GetItemDamage(enemy, Damage.DamageItems.Dfg);//데파딜추가
+                APdmg = APdmg * 1.2;//20%추가피해
+            }
+            else if (Bft.IsReady() && Menu.Item("usebft").GetValue<bool>())
+            {
+                APdmg += Player.GetItemDamage(enemy, Damage.DamageItems.BlackFireTorch);//어둠불꽃횃불딜추가(뒤틀린숲전용)
+                APdmg = APdmg * 1.2;//20%추가피해
+            }
+
+            //true데미지
+            //if (SIgnite != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SIgnite) == SpellState.Ready)//점화있음?
+            //   dmg += Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);//점화딜추가
+
+            return (float)ADdmg + (float)APdmg;
         }
     }
 }
