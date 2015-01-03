@@ -307,7 +307,7 @@ namespace xc_TwistedFate
 
             if (Q.IsReady())
             {
-                if (target.IsValidTarget(Q.Range) && Q.GetPrediction(target).Hitchance == HitChance.High)
+                if (target.IsValidTarget(Q.Range) && Q.GetPrediction(target).Hitchance >= HitChance.High)
                     Q.Cast(target);
             }
         }
