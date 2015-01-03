@@ -293,15 +293,10 @@ namespace xc_TwistedFate
                                 if (buff.Type == BuffType.Stun || buff.Type == BuffType.Taunt || buff.Type == BuffType.Snare || buff.Type == BuffType.Suppression || buff.Type == BuffType.Charm || buff.Type == BuffType.Fear || buff.Type == BuffType.Flee || buff.Type == BuffType.Slow)
                                     Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
                             }
-                        } 
+                        }
                     }
-<<<<<<< HEAD
                     else if (pred.Hitchance >= HitChance.High)
-=======
-                    else if (pred.Hitchance == HitChance.High || pred.Hitchance == HitChance.Dashing || pred.Hitchance == HitChance.Immobile)
->>>>>>> origin/master
                         Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
-                    
                 }
             }
         }
