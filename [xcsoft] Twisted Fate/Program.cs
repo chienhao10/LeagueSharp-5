@@ -295,7 +295,11 @@ namespace xc_TwistedFate
                             }
                         } 
                     }
+<<<<<<< HEAD
                     else if (pred.Hitchance >= HitChance.High)
+=======
+                    else if (pred.Hitchance == HitChance.High || pred.Hitchance == HitChance.Dashing || pred.Hitchance == HitChance.Immobile)
+>>>>>>> origin/master
                         Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
                     
                 }
