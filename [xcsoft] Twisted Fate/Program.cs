@@ -296,7 +296,7 @@ namespace xc_TwistedFate
                         } 
                     }
                     else if (pred.Hitchance == HitChance.High || pred.Hitchance == HitChance.Dashing || pred.Hitchance == HitChance.Immobile)
-                        Q.Cast(target);
+                        Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
                     
                 }
             }
