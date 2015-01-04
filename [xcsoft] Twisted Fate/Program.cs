@@ -59,6 +59,7 @@ namespace xc_TwistedFate
             var comboMenu  = new Menu("ComboMode Options", "comboop");
             comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
             comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target (Not recommended)").SetValue(false));
+            comboMenu.AddItem(new MenuItem("useblue", "Blue instead of gold if low mana(<20%)").SetValue(false));
             comboMenu.AddItem(new MenuItem("usepacket", "Packet casting for Q").SetValue(true));
             comboMenu.AddItem(new MenuItem("usedfg", "Use Deathfire Grasp").SetValue(true));
             comboMenu.AddItem(new MenuItem("usebft", "Use Blackfire Torch").SetValue(true));
@@ -280,7 +281,19 @@ namespace xc_TwistedFate
             if (W.IsReady())
             {
                 if (target.IsValidTarget(W.Range))
-                    CardSelector.StartSelecting(Cards.Yellow);
+                {
+                    if (Menu.Item("useblue").GetValue<bool>())
+                    {
+                        if (Utility.ManaPercentage(Player) < 20)//Menu.Item("combobluemana").GetValue<Slider>().Value)
+                        {
+                            CardSelector.StartSelecting(Cards.Blue);
+                        }
+                        else
+                            CardSelector.StartSelecting(Cards.Yellow);
+                    }
+                    else
+                        CardSelector.StartSelecting(Cards.Yellow);
+                }
             }
 
             if (Q.IsReady())
