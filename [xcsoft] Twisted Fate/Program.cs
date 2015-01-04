@@ -56,7 +56,7 @@ namespace xc_TwistedFate
             wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind('T', KeyBindType.Press)));
             Menu.AddSubMenu(wMenu);
 
-            var comboMenu  = new Menu("ComboMode Option", "comboop");
+            var comboMenu  = new Menu("ComboMode Options", "comboop");
             comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
             comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target (Not recommended)").SetValue(false));
             comboMenu.AddItem(new MenuItem("usepacket", "Packet casting for Q").SetValue(true));
@@ -66,6 +66,7 @@ namespace xc_TwistedFate
 
             var AdditionalsMenu = new Menu("Additional Option", "additionals");
             AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold when using ultimate(gate)").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("killsteal", "Use Killsteal").SetValue(true));
             Menu.AddSubMenu(AdditionalsMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
@@ -74,9 +75,11 @@ namespace xc_TwistedFate
             Menu.AddSubMenu(lasthitMenu);
 
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
+            laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(true));
+            laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Q Cast if Hit possible Minions count >=").SetValue(new Slider(5, 2, 7)));
             laneclearMenu.AddItem(new MenuItem("laneclearUseW", "Use W").SetValue(true));
+            laneclearMenu.AddItem(new MenuItem("laneclearredmc", "Red instead of blue if Minions count >=").SetValue(new Slider(3, 2, 5)));
             laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(20, 0, 100)));
-            laneclearMenu.AddItem(new MenuItem("laneclearmc", "Red if Minions count >=").SetValue(new Slider(3, 2, 5)));
             Menu.AddSubMenu(laneclearMenu);
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
@@ -159,6 +162,8 @@ namespace xc_TwistedFate
 
             if (Menu.Item("selectred").GetValue<KeyBind>().Active)
                 CardSelector.StartSelecting(Cards.Red);
+
+            killsteal();
         }
 
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -258,7 +263,7 @@ namespace xc_TwistedFate
 
         static void Combo()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(1450, TargetSelector.DamageType.Magical, Menu.Item("ignoreshield").GetValue<bool>());
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical, Menu.Item("ignoreshield").GetValue<bool>());
 
             if (Dfg.IsReady() && Menu.Item("usedfg").GetValue<bool>())
             {
@@ -274,13 +279,13 @@ namespace xc_TwistedFate
 
             if (W.IsReady())
             {
-                if (target.IsValidTarget(W.Range) && target is Obj_AI_Hero)
+                if (target.IsValidTarget(W.Range))
                     CardSelector.StartSelecting(Cards.Yellow);
             }
 
             if (Q.IsReady())
             {
-                if (target.IsValidTarget(Q.Range) && target is Obj_AI_Hero)
+                if (target.IsValidTarget(Q.Range))
                 {
                     var pred = Q.GetPrediction(target);
 
@@ -295,7 +300,7 @@ namespace xc_TwistedFate
                             }
                         }
                     }
-                    else if (pred.Hitchance >= HitChance.High)
+                    else if (pred.Hitchance >= HitChance.VeryHigh)
                         Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
                 }
             }
@@ -336,22 +341,31 @@ namespace xc_TwistedFate
 
         static void LaneClear()
         {
-            if (W.IsReady())
+            if(Q.IsReady() && Menu.Item("laneclearUseQ").GetValue<bool>())
             {
-                int minionsInWRange = MinionManager.GetMinions(Player.Position, W.Range).Count;
+                var hitpossible = 0;
 
-                if (Menu.Item("laneclearUseW").GetValue<bool>())
+                foreach (Obj_AI_Base minions in MinionManager.GetMinions(Player.Position, Q.Range))
                 {
-                    if (Utility.ManaPercentage(Player) > Menu.Item("laneclearbluemana").GetValue<Slider>().Value)
-                    {
-                        if (minionsInWRange >= Menu.Item("laneclearmc").GetValue<Slider>().Value)
-                            CardSelector.StartSelecting(Cards.Red);
-                        else
-                            CardSelector.StartSelecting(Cards.Blue);
-                    }
+                    if (Q.GetPrediction(minions).Hitchance >= HitChance.High)
+                        hitpossible++;
+
+                    if (hitpossible >= Menu.Item("laneclearQmc").GetValue<Slider>().Value)
+                        Q.Cast(minions, Menu.Item("usepacket").GetValue<bool>());
+                }
+            }
+
+            if (W.IsReady() && Menu.Item("laneclearUseW").GetValue<bool>())
+            {
+                if (Utility.ManaPercentage(Player) > Menu.Item("laneclearbluemana").GetValue<Slider>().Value)
+                {
+                    if (MinionManager.GetMinions(Player.Position, W.Range).Count >= Menu.Item("laneclearredmc").GetValue<Slider>().Value)
+                        CardSelector.StartSelecting(Cards.Red);
                     else
                         CardSelector.StartSelecting(Cards.Blue);
                 }
+                else
+                    CardSelector.StartSelecting(Cards.Blue);
             }
         }
 
@@ -359,6 +373,7 @@ namespace xc_TwistedFate
         {
             var APdmg = 0d;
             var ADdmg = 0d;
+            var Truedmg = 0d;
             bool card = false;
 
             //AP데미지
@@ -419,10 +434,28 @@ namespace xc_TwistedFate
             }
 
             //true데미지
-            //if (SIgnite != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SIgnite) == SpellState.Ready)//점화있음?
-            //   dmg += Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);//점화딜추가
+            if (SIgnite != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SIgnite) == SpellState.Ready)//점화있음?
+                Truedmg += Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);//점화딜추가
 
-            return (float)ADdmg + (float)APdmg;
+            return (float)ADdmg + (float)APdmg + (float)Truedmg;
+        }
+
+        static void killsteal()
+        {
+            if (!Menu.Item("killsteal").GetValue<bool>())
+                return;
+
+            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Q.Range) && x.IsEnemy && !x.IsDead && !x.HasBuffOfType(BuffType.Invulnerability)))
+            {
+                if (target != null)
+                {
+                    if (Q.IsReady())
+                    {
+                        if (Q.GetDamage(target) > target.Health & Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+                            Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
+                    }
+                }
+            }
         }
     }
 }
