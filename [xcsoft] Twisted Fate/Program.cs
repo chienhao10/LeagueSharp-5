@@ -64,7 +64,7 @@ namespace xc_TwistedFate
             comboMenu.AddItem(new MenuItem("usebft", "Use Blackfire Torch").SetValue(true));
             Menu.AddSubMenu(comboMenu);
 
-            var AdditionalsMenu = new Menu("Additional Option", "additionals");
+            var AdditionalsMenu = new Menu("Additional Options", "additionals");
             AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold when using ultimate(gate)").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("killsteal", "Use Killsteal").SetValue(true));
             Menu.AddSubMenu(AdditionalsMenu);
