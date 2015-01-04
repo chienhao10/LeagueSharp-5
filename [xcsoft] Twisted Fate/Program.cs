@@ -357,15 +357,20 @@ namespace xc_TwistedFate
 
             if (W.IsReady() && Menu.Item("laneclearUseW").GetValue<bool>())
             {
-                if (Utility.ManaPercentage(Player) > Menu.Item("laneclearbluemana").GetValue<Slider>().Value)
+                var minioncount = MinionManager.GetMinions(Player.Position, W.Range).Count;
+
+                if (minioncount > 0)
                 {
-                    if (MinionManager.GetMinions(Player.Position, W.Range).Count >= Menu.Item("laneclearredmc").GetValue<Slider>().Value)
-                        CardSelector.StartSelecting(Cards.Red);
+                    if (Utility.ManaPercentage(Player) > Menu.Item("laneclearbluemana").GetValue<Slider>().Value)
+                    {
+                        if (minioncount >= Menu.Item("laneclearredmc").GetValue<Slider>().Value)
+                            CardSelector.StartSelecting(Cards.Red);
+                        else
+                            CardSelector.StartSelecting(Cards.Blue);
+                    }
                     else
                         CardSelector.StartSelecting(Cards.Blue);
                 }
-                else
-                    CardSelector.StartSelecting(Cards.Blue);
             }
         }
 
