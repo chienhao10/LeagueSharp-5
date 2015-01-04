@@ -51,9 +51,9 @@ namespace xc_TwistedFate
             TargetSelector.AddToMenu(ts);
 
             var wMenu = new Menu("Pick Card [You maybe not use it (ComboMode OP)]", "pickcard");
-            wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind("W".ToCharArray()[0], KeyBindType.Press)));
-            wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind("E".ToCharArray()[0], KeyBindType.Press)));
-            wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+            wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind('W', KeyBindType.Press)));
+            wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind('E', KeyBindType.Press)));
+            wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind('T', KeyBindType.Press)));
             Menu.AddSubMenu(wMenu);
 
             var comboMenu  = new Menu("ComboMode Option", "comboop");
