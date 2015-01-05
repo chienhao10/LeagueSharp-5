@@ -44,22 +44,27 @@ namespace xc_TwistedFate
 
             Menu = new Menu("[xcsoft] Twisted Fate", "xcoft_TF", true);
 
-            Menu orbwalkerMenu = Menu.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
+            var orbwalkerMenu = new Menu("Orbwalker", "Orbwalker");
             Orbwalker = new Orbwalking.Orbwalker(orbwalkerMenu);
+            Menu.AddSubMenu(orbwalkerMenu);
 
-            Menu ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector"));
+            var ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector"));
             TargetSelector.AddToMenu(ts);
 
             var wMenu = new Menu("Pick a Card", "pickcard");
             wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind('W', KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind('E', KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind('T', KeyBindType.Press)));
+            wMenu.AddItem(new MenuItem("plz1", "Do not use the W key"));
+            wMenu.AddItem(new MenuItem("plz2", "W key is sometimes random selection :("));
             Menu.AddSubMenu(wMenu);
 
             var comboMenu  = new Menu("ComboMode Settings", "comboop");
-            comboMenu.AddItem(new MenuItem("qrange", "Q Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
-            comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
-            comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target (Not recommended because not pick a card)").SetValue(false));
+            comboMenu.AddItem(new MenuItem("useQ", "Use Q").SetValue(true));
+            comboMenu.AddItem(new MenuItem("useW", "Use W").SetValue(true));
+            comboMenu.AddItem(new MenuItem("qrange", "Use Q if target is in selected range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
+            comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only").SetValue(false));
+            comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target").SetValue(false));
             comboMenu.AddItem(new MenuItem("useblue", "Blue instead of gold if low mana(<20%)").SetValue(false));
             comboMenu.AddItem(new MenuItem("usepacket", "Packet casting for Q").SetValue(true));
             comboMenu.AddItem(new MenuItem("usedfg", "Use Deathfire Grasp").SetValue(true));
@@ -100,8 +105,8 @@ namespace xc_TwistedFate
             Drawings.AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, Color.GreenYellow)));
             Drawings.AddItem(new MenuItem("drawMinionNearKill", "Minion Near Kill").SetValue(new Circle(true, Color.Gray)));
             
-            MenuItem drawComboDamageMenu = new MenuItem("Draw_ComboDamage", "Draw Combo Damage").SetValue(true);
-            MenuItem drawFill = new MenuItem("Draw_Fill", "Draw Combo Damage Fill").SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
+            var drawComboDamageMenu = new MenuItem("Draw_ComboDamage", "Draw Combo Damage").SetValue(true);
+            var drawFill = new MenuItem("Draw_Fill", "Draw Combo Damage Fill").SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
             Drawings.AddItem(drawComboDamageMenu);
             Drawings.AddItem(drawFill);
             DamageIndicator.DamageToUnit = GetComboDamage;
@@ -109,16 +114,16 @@ namespace xc_TwistedFate
             DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
             DamageIndicator.FillColor = drawFill.GetValue<Circle>().Color;
             drawComboDamageMenu.ValueChanged +=
-                delegate(object sender, OnValueChangeEventArgs eventArgs)
-                {
-                    DamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
-                };
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
             drawFill.ValueChanged +=
-                delegate(object sender, OnValueChangeEventArgs eventArgs)
-                {
-                    DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
-                    DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
-                };
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
+                DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
+            };
 
             Drawings.AddItem(new MenuItem("jgpos", "JunglePosition").SetValue(true));
 
@@ -363,7 +368,7 @@ namespace xc_TwistedFate
                     Bft.Cast(target);
             }
 
-            if (W.IsReady())
+            if (W.IsReady() && Menu.Item("useW").GetValue<bool>())
             {
                 if (target.IsValidTarget(W.Range))
                 {
@@ -381,7 +386,7 @@ namespace xc_TwistedFate
                 }
             }
 
-            if (Q.IsReady())
+            if (Q.IsReady() && Menu.Item("useQ").GetValue<bool>())
             {
                 if (target.IsValidTarget(Menu.Item("qrange").GetValue<Slider>().Value))
                 {
@@ -541,8 +546,8 @@ namespace xc_TwistedFate
             }
 
             //true데미지
-            if (SIgnite != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SIgnite) == SpellState.Ready)//점화있음?
-                Truedmg += Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);//점화딜추가
+            //if (SIgnite != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SIgnite) == SpellState.Ready)//점화있음?
+            //    Truedmg += Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);//점화딜추가
 
             return (float)ADdmg + (float)APdmg + (float)Truedmg;
         }
