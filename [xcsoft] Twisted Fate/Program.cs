@@ -50,15 +50,16 @@ namespace xc_TwistedFate
             Menu ts = Menu.AddSubMenu(new Menu("Target Selector", "Target Selector"));
             TargetSelector.AddToMenu(ts);
 
-            var wMenu = new Menu("Pick Card [You maybe not use it (ComboMode OP)]", "pickcard");
+            var wMenu = new Menu("Pick a Card", "pickcard");
             wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind('W', KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind('E', KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind('T', KeyBindType.Press)));
             Menu.AddSubMenu(wMenu);
 
-            var comboMenu  = new Menu("ComboMode Options", "comboop");
+            var comboMenu  = new Menu("ComboMode Settings", "comboop");
+            comboMenu.AddItem(new MenuItem("qrange", "Q Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
             comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only (Not recommended)").SetValue(false));
-            comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target (Not recommended)").SetValue(false));
+            comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target (Not recommended because not pick a card)").SetValue(false));
             comboMenu.AddItem(new MenuItem("useblue", "Blue instead of gold if low mana(<20%)").SetValue(false));
             comboMenu.AddItem(new MenuItem("usepacket", "Packet casting for Q").SetValue(true));
             comboMenu.AddItem(new MenuItem("usedfg", "Use Deathfire Grasp").SetValue(true));
@@ -68,7 +69,14 @@ namespace xc_TwistedFate
             var AdditionalsMenu = new Menu("Additional Options", "additionals");
             AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold when using ultimate(gate)").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("killsteal", "Use Killsteal").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("gapcloser", "Use Anti-gapcloser").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("interrupt", "Use Interrupt").SetValue(true));
             Menu.AddSubMenu(AdditionalsMenu);
+
+            var harrasMenu = new Menu("Harras Options", "harassop");
+            harrasMenu.AddItem(new MenuItem("harrasUseQ", "Use Q").SetValue(true));
+            harrasMenu.AddItem(new MenuItem("harrasrange", "Harras Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
+            Menu.AddSubMenu(harrasMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
             lasthitMenu.AddItem(new MenuItem("lasthitUseW", "Use W (Blue only)").SetValue(true));
@@ -111,7 +119,9 @@ namespace xc_TwistedFate
                     DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
                     DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
                 };
-            
+
+            Drawings.AddItem(new MenuItem("jgpos", "JunglePosition").SetValue(true));
+
             Menu.AddSubMenu(Drawings);
 
             var predMenu = new Menu("Prediction", "pred");
@@ -127,12 +137,58 @@ namespace xc_TwistedFate
             Drawing.OnEndScene += Drawing_OnEndScene;
             Game.OnGameUpdate += Game_OnGameUpdate;
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
-            Orbwalking.BeforeAttack += OrbwalkingOnBeforeAttack;
+            Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
 
             Game.PrintChat("<font color = \"#33CCCC\">[xcsoft] Twisted Fate -</font> Loaded");
         }
 
-        static void OrbwalkingOnBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (!Menu.Item("gapcloser").GetValue<bool>())
+                return;
+
+            if(gapcloser.Sender.IsValidTarget(W.Range))
+            {
+                CardSelector.StartSelecting(Cards.Yellow);
+
+                Utility.DrawCircle(gapcloser.Sender.Position, 50, Color.Gold);
+
+                var targetpos = Drawing.WorldToScreen(gapcloser.Sender.Position);
+
+                Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.Gold, "Gapcloser");
+            }
+
+            if (Player.HasBuff("goldcardpreattack" , true) && gapcloser.Sender.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 10) && gapcloser.Sender.IsTargetable)
+                Player.IssueOrder(GameObjectOrder.AttackUnit, gapcloser.Sender);
+        }
+
+        static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
+        {
+            if (!Menu.Item("interrupt").GetValue<bool>())
+                return;
+
+            if (spell.BuffName == "Destiny")
+                return;
+
+            if (unit.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 400))
+            {
+                CardSelector.StartSelecting(Cards.Yellow);
+
+                Utility.DrawCircle(unit.Position, 50, Color.Gold);
+
+                var targetpos = Drawing.WorldToScreen(unit.Position);
+
+                Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.Gold, "Interrupt");
+            }
+                
+            if (Player.HasBuff("goldcardpreattack", true) && unit.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 10) && unit.IsTargetable)
+                Player.IssueOrder(GameObjectOrder.AttackUnit, unit);
+            
+        }
+
+        static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             if (args.Target is Obj_AI_Hero || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
                 args.Process = CardSelector.Status != SelectStatus.Selecting && Environment.TickCount - CardSelector.LastWSent > 300;
@@ -181,15 +237,15 @@ namespace xc_TwistedFate
                 return;
 
             var Qcircle = Menu.Item("Qcircle").GetValue<Circle>();
-            if (Q.IsReady() && Qcircle.Active)
-                Utility.DrawCircle(Player.Position, Q.Range, Qcircle.Color);
 
-            Color temp = Color.Gold;
+            if (Q.IsReady() && Qcircle.Active)
+                Utility.DrawCircle(Player.Position, Menu.Item("qrange").GetValue<Slider>().Value, Qcircle.Color);
 
             if (Menu.Item("AAcircle").GetValue<bool>())
             {
                 if (W.IsReady())
                 {
+                    Color temp = Color.Gold;
                     var wName = Player.Spellbook.GetSpell(SpellSlot.W).Name;
 
                     if (wName == "goldcardlock") temp = Color.Gold;
@@ -200,7 +256,16 @@ namespace xc_TwistedFate
                     Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), temp);
                 }
                 else
-                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), Color.Gray);
+                {
+                    Color temp = Color.Gold;
+
+                    if (Player.HasBuff("goldcardpreattack", true)) temp = Color.Gold;
+                    else if (Player.HasBuff("bluecardpreattack", true)) temp = Color.Blue;
+                    else if (Player.HasBuff("redcardpreattack", true)) temp = Color.Red;
+                    else temp = Color.Gray;
+
+                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), temp);
+                }
             }
 
             if (Menu.Item("FAAcircle").GetValue<bool>())
@@ -217,7 +282,7 @@ namespace xc_TwistedFate
 
                         var targetpos = Drawing.WorldToScreen(target.Position);
 
-                        Drawing.DrawText(targetpos[0] - 60, targetpos[1] + 20, Color.Gold, "Flash+Stun possible");
+                        Drawing.DrawText(targetpos[0] - 70, targetpos[1] + 20, Color.Gold, "Flash+AA possible");
                     }
 
                 }
@@ -230,19 +295,39 @@ namespace xc_TwistedFate
             if (drawMinionLastHit.Active || drawMinionNearKill.Active)
             {
                 var xMinions =
-                    MinionManager.GetMinions(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius + 300, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                    MinionManager.GetMinions(Player.Position, Player.AttackRange + Player.BoundingRadius + 300, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
 
                 foreach (var xMinion in xMinions)
                 {
-                    if (drawMinionLastHit.Active && ObjectManager.Player.GetAutoAttackDamage(xMinion, true) >= xMinion.Health)
+                    if (drawMinionLastHit.Active && Player.GetAutoAttackDamage(xMinion, true) >= xMinion.Health)
                     {
                         Utility.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionLastHit.Color);
                     }
-                    else if (drawMinionNearKill.Active && ObjectManager.Player.GetAutoAttackDamage(xMinion, true) * 2 >= xMinion.Health)
+                    else if (drawMinionNearKill.Active && Player.GetAutoAttackDamage(xMinion, true) * 2 >= xMinion.Health)
                     {
                         Utility.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionNearKill.Color);
                     }
                 }
+            }
+
+            //Drawing JunglePosition part of Marksman# copy
+            if (Game.MapId == (GameMapId)11 && Menu.Item("jgpos").GetValue<bool>())
+            {
+                const float circleRange = 100f;
+
+                Utility.DrawCircle(new Vector3(7461.018f, 3253.575f, 52.57141f), circleRange, Color.Blue); // blue team :red
+                Utility.DrawCircle(new Vector3(3511.601f, 8745.617f, 52.57141f), circleRange, Color.Blue); // blue team :blue
+                Utility.DrawCircle(new Vector3(7462.053f, 2489.813f, 52.57141f), circleRange, Color.Blue); // blue team :golems
+                Utility.DrawCircle(new Vector3(3144.897f, 7106.449f, 51.89026f), circleRange, Color.Blue); // blue team :wolfs
+                Utility.DrawCircle(new Vector3(7770.341f, 5061.238f, 49.26587f), circleRange, Color.Blue); // blue team :wariaths
+
+                Utility.DrawCircle(new Vector3(10930.93f, 5405.83f, -68.72192f), circleRange, Color.Yellow); // Dragon
+
+                Utility.DrawCircle(new Vector3(7326.056f, 11643.01f, 50.21985f), circleRange, Color.Red); // red team :red
+                Utility.DrawCircle(new Vector3(11417.6f, 6216.028f, 51.00244f), circleRange, Color.Red); // red team :blue
+                Utility.DrawCircle(new Vector3(7368.408f, 12488.37f, 56.47668f), circleRange, Color.Red); // red team :golems
+                Utility.DrawCircle(new Vector3(10342.77f, 8896.083f, 51.72742f), circleRange, Color.Red); // red team :wolfs
+                Utility.DrawCircle(new Vector3(7001.741f, 9915.717f, 54.02466f), circleRange, Color.Red); // red team :wariaths                    
             }
         }
 
@@ -284,7 +369,7 @@ namespace xc_TwistedFate
                 {
                     if (Menu.Item("useblue").GetValue<bool>())
                     {
-                        if (Utility.ManaPercentage(Player) < 20)//Menu.Item("combobluemana").GetValue<Slider>().Value)
+                        if (Utility.ManaPercentage(Player) < 20)
                         {
                             CardSelector.StartSelecting(Cards.Blue);
                         }
@@ -298,7 +383,7 @@ namespace xc_TwistedFate
 
             if (Q.IsReady())
             {
-                if (target.IsValidTarget(Q.Range))
+                if (target.IsValidTarget(Menu.Item("qrange").GetValue<Slider>().Value))
                 {
                     var pred = Q.GetPrediction(target);
 
@@ -323,9 +408,9 @@ namespace xc_TwistedFate
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            if (Q.IsReady())
+            if (Q.IsReady() && Menu.Item("harrasUseQ").GetValue<bool>())
             {
-                if (target.IsValidTarget(Q.Range) && Q.GetPrediction(target).Hitchance >= HitChance.High)
+                if (target.IsValidTarget(Menu.Item("harrasrange").GetValue<Slider>().Value) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
                     Q.Cast(target);
             }
         }
@@ -358,14 +443,18 @@ namespace xc_TwistedFate
             {
                 var hitpossible = 0;
 
+                Obj_AI_Base minion = null;
                 foreach (Obj_AI_Base minions in MinionManager.GetMinions(Player.Position, Q.Range))
                 {
                     if (Q.GetPrediction(minions).Hitchance >= HitChance.High)
+                    {
                         hitpossible++;
-
-                    if (hitpossible >= Menu.Item("laneclearQmc").GetValue<Slider>().Value)
-                        Q.Cast(minions, Menu.Item("usepacket").GetValue<bool>());
+                        minion = minions;
+                    }
                 }
+
+                if (hitpossible >= Menu.Item("laneclearQmc").GetValue<Slider>().Value)
+                    Q.Cast(minion, Menu.Item("usepacket").GetValue<bool>());
             }
 
             if (W.IsReady() && Menu.Item("laneclearUseW").GetValue<bool>())
@@ -469,7 +558,7 @@ namespace xc_TwistedFate
                 {
                     if (Q.IsReady())
                     {
-                        if (Q.GetDamage(target) > target.Health & Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+                        if (Q.GetDamage(target) > target.Health + 20 & Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
                             Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
                     }
                 }
