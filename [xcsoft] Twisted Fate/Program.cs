@@ -70,7 +70,7 @@ namespace xc_TwistedFate
             AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold when using ultimate(gate)").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("killsteal", "Use Killsteal").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("gapcloser", "Use Anti-gapcloser").SetValue(true));
-            AdditionalsMenu.AddItem(new MenuItem("interrupt", "Use Interrupt").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("interrupt", "Use Auto-interrupt").SetValue(true));
             Menu.AddSubMenu(AdditionalsMenu);
 
             var harrasMenu = new Menu("Harras Options", "harassop");
