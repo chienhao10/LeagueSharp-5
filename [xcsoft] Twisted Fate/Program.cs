@@ -136,6 +136,15 @@ namespace xc_TwistedFate
             var havefun = new MenuItem("Have fun!", "Have fun!");
             Menu.AddItem(havefun);
 
+            var movement = new MenuItem("movement", "Disable orbwalk movement").SetValue(false);
+            movement.ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Orbwalker.SetMovement(!eventArgs.GetNewValue<bool>());
+            };
+
+            Menu.AddItem(movement);
+
             Menu.AddToMainMenu();
 
             Drawing.OnDraw += Drawing_OnDraw;
