@@ -90,7 +90,8 @@ namespace xc_TwistedFate
 
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
             laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(true));
-            laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Q Cast if Hit possible Minions count >=").SetValue(new Slider(5, 2, 7)));
+            laneclearMenu.AddItem(new MenuItem("laneclearQmana", "Q cast if mana % >").SetValue(new Slider(20, 0, 100)));
+            laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Q cast if Hit possible Minions count >=").SetValue(new Slider(5, 2, 7)));
             laneclearMenu.AddItem(new MenuItem("laneclearUseW", "Use W").SetValue(true));
             laneclearMenu.AddItem(new MenuItem("laneclearredmc", "Red instead of blue if Minions count >=").SetValue(new Slider(3, 2, 5)));
             laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(20, 0, 100)));
@@ -453,7 +454,7 @@ namespace xc_TwistedFate
 
         static void LaneClear()
         {
-            if(Q.IsReady() && Menu.Item("laneclearUseQ").GetValue<bool>())
+            if (Q.IsReady() && Menu.Item("laneclearUseQ").GetValue<bool>() && Utility.ManaPercentage(Player) > Menu.Item("laneclearQmana").GetValue<Slider>().Value)
             {
                 var hitpossible = 0;
 
