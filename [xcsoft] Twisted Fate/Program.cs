@@ -78,7 +78,7 @@ namespace xc_TwistedFate
             AdditionalsMenu.AddItem(new MenuItem("interrupt", "Use Auto-interrupt").SetValue(true));
             Menu.AddSubMenu(AdditionalsMenu);
 
-            var harrasMenu = new Menu("Harras Options", "harassop");
+            var harrasMenu = new Menu("Harras Settings", "harassop");
             harrasMenu.AddItem(new MenuItem("harrasUseQ", "Use Q").SetValue(true));
             harrasMenu.AddItem(new MenuItem("harrasrange", "Harras Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
             Menu.AddSubMenu(harrasMenu);
