@@ -78,14 +78,15 @@ namespace xc_TwistedFate
             AdditionalsMenu.AddItem(new MenuItem("interrupt", "Use Auto-interrupt").SetValue(true));
             Menu.AddSubMenu(AdditionalsMenu);
 
-            var harrasMenu = new Menu("Harras Settings", "harassop");
-            harrasMenu.AddItem(new MenuItem("harrasUseQ", "Use Q").SetValue(true));
-            harrasMenu.AddItem(new MenuItem("harrasrange", "Harras Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450))).ValueChanged +=
+            var harassMenu = new Menu("harass Settings", "harassop");
+            harassMenu.AddItem(new MenuItem("harassUseQ", "Use Q").SetValue(true));
+            harassMenu.AddItem(new MenuItem("harassrange", "harass Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450))).ValueChanged +=
             delegate(object sender, OnValueChangeEventArgs eventArgs)
             {
                 Render.Circle.DrawCircle(Player.Position, eventArgs.GetNewValue<Slider>().Value, Color.Aquamarine, 5);
             };
-            Menu.AddSubMenu(harrasMenu);
+            harassMenu.AddItem(new MenuItem("harassmana", "keep mana %").SetValue(new Slider(35, 0, 100)));
+            Menu.AddSubMenu(harassMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
             lasthitMenu.AddItem(new MenuItem("lasthitUseW", "Use W (Blue only)").SetValue(true));
@@ -224,7 +225,7 @@ namespace xc_TwistedFate
                 Combo();
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
-                Harras();
+                harass();
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
                 Lasthit();
@@ -425,13 +426,13 @@ namespace xc_TwistedFate
             }
         }
 
-        static void Harras()
+        static void harass()
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            if (Q.IsReady() && Menu.Item("harrasUseQ").GetValue<bool>())
+            if (Q.IsReady() && Menu.Item("harassUseQ").GetValue<bool>() && Utility.ManaPercentage(Player) > Menu.Item("harassmana").GetValue<Slider>().Value)
             {
-                if (target.IsValidTarget(Menu.Item("harrasrange").GetValue<Slider>().Value) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+                if (target.IsValidTarget(Menu.Item("harassrange").GetValue<Slider>().Value) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
                     Q.Cast(target);
             }
         }
