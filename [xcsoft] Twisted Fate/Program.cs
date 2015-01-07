@@ -61,8 +61,8 @@ namespace xc_TwistedFate
 
             var comboMenu  = new Menu("ComboMode Settings", "comboop");
             comboMenu.AddItem(new MenuItem("useQ", "Use Q").SetValue(true));
-            comboMenu.AddItem(new MenuItem("useW", "Use W").SetValue(true));
             comboMenu.AddItem(new MenuItem("qrange", "Use Q if target is in selected range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
+            comboMenu.AddItem(new MenuItem("useW", "Use W").SetValue(true));
             comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only").SetValue(false));
             comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target").SetValue(false));
             comboMenu.AddItem(new MenuItem("useblue", "Blue instead of gold if low mana(<20%)").SetValue(false));
@@ -80,7 +80,11 @@ namespace xc_TwistedFate
 
             var harrasMenu = new Menu("Harras Settings", "harassop");
             harrasMenu.AddItem(new MenuItem("harrasUseQ", "Use Q").SetValue(true));
-            harrasMenu.AddItem(new MenuItem("harrasrange", "Harras Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
+            harrasMenu.AddItem(new MenuItem("harrasrange", "Harras Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450))).ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Render.Circle.DrawCircle(Player.Position, eventArgs.GetNewValue<Slider>().Value, Color.Aquamarine, 5);
+            };
             Menu.AddSubMenu(harrasMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
