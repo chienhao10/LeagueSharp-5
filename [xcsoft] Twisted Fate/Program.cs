@@ -32,10 +32,10 @@ namespace xc_TwistedFate
                 return;
 
             SFlash = Player.GetSpellSlot("SummonerFlash");
-            SIgnite = Player.GetSpellSlot("SummonerIgnite");
+            SIgnite = Player.GetSpellSlot("SummonerDot");
 
-            Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, Orbwalking.GetRealAutoAttackRange(Player));
-            Bft = new Items.Item((int)ItemId.Blackfire_Torch, Orbwalking.GetRealAutoAttackRange(Player));
+            Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, Orbwalking.GetRealAutoAttackRange(Player) + 10);
+            Bft = new Items.Item((int)ItemId.Blackfire_Torch, Orbwalking.GetRealAutoAttackRange(Player) + 10);
 
             Q = new Spell(SpellSlot.Q, 1450);
             Q.SetSkillshot(0.25f, 40f, 1000f, false, SkillshotType.SkillshotLine);
@@ -55,18 +55,17 @@ namespace xc_TwistedFate
             wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind('W', KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind('E', KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind('T', KeyBindType.Press)));
-            wMenu.AddItem(new MenuItem("plz1", "Do not use the W key"));
-            wMenu.AddItem(new MenuItem("plz2", "W key is sometimes random selection :("));
+            wMenu.AddItem(new MenuItem("plz1", "-Do not use the W key"));
+            wMenu.AddItem(new MenuItem("plz2", "-W key is sometimes random selection :("));
             Menu.AddSubMenu(wMenu);
 
             var comboMenu  = new Menu("ComboMode Settings", "comboop");
             comboMenu.AddItem(new MenuItem("useQ", "Use Q").SetValue(true));
-            comboMenu.AddItem(new MenuItem("qrange", "Use Q if target is in selected range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
+            comboMenu.AddItem(new MenuItem("qrange", "Cast Q if target is in selected range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
+            comboMenu.AddItem(new MenuItem("cconly", "Cast Q to CC state enemy only").SetValue(false));
             comboMenu.AddItem(new MenuItem("useW", "Use W").SetValue(true));
-            comboMenu.AddItem(new MenuItem("cconly", "Q Cast to CC state enemy only").SetValue(false));
             comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target").SetValue(false));
             comboMenu.AddItem(new MenuItem("useblue", "Blue instead of gold if low mana(<20%)").SetValue(false));
-            comboMenu.AddItem(new MenuItem("usepacket", "Packet casting for Q").SetValue(true));
             comboMenu.AddItem(new MenuItem("usedfg", "Use Deathfire Grasp").SetValue(true));
             comboMenu.AddItem(new MenuItem("usebft", "Use Blackfire Torch").SetValue(true));
             Menu.AddSubMenu(comboMenu);
@@ -76,6 +75,8 @@ namespace xc_TwistedFate
             AdditionalsMenu.AddItem(new MenuItem("killsteal", "Use Killsteal").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("gapcloser", "Use Anti-gapcloser").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("interrupt", "Use Auto-interrupt").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("usepacket", "Use Packet casting").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("autoIgnite", "Use Auto-Ignite (ks)").SetValue(true));
             Menu.AddSubMenu(AdditionalsMenu);
 
             var harassMenu = new Menu("harass Settings", "harassop");
@@ -85,7 +86,7 @@ namespace xc_TwistedFate
             {
                 Render.Circle.DrawCircle(Player.Position, eventArgs.GetNewValue<Slider>().Value, Color.Aquamarine, 5);
             };
-            harassMenu.AddItem(new MenuItem("harassmana", "keep mana %").SetValue(new Slider(35, 0, 100)));
+            harassMenu.AddItem(new MenuItem("harassmana", "harass if mana % >").SetValue(new Slider(35, 0, 100)));
             Menu.AddSubMenu(harassMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
@@ -95,12 +96,20 @@ namespace xc_TwistedFate
 
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
             laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(true));
-            laneclearMenu.AddItem(new MenuItem("laneclearQmana", "Q cast if mana % >").SetValue(new Slider(20, 0, 100)));
-            laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Q cast if Hit possible Minions count >=").SetValue(new Slider(5, 2, 7)));
+            laneclearMenu.AddItem(new MenuItem("laneclearQmana", "Cast Q if mana % >").SetValue(new Slider(30, 0, 100)));
+            laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Cast Q if Hit possible Minions count >=").SetValue(new Slider(5, 2, 7)));
             laneclearMenu.AddItem(new MenuItem("laneclearUseW", "Use W").SetValue(true));
             laneclearMenu.AddItem(new MenuItem("laneclearredmc", "Red instead of blue if Minions count >=").SetValue(new Slider(3, 2, 5)));
-            laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(20, 0, 100)));
+            laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(30, 0, 100)));
             Menu.AddSubMenu(laneclearMenu);
+
+            var jungleclearMenu = new Menu("JungleClear Settings", "jungleclearset");
+            jungleclearMenu.AddItem(new MenuItem("jungleclearUseQ", "Use Q").SetValue(true));
+            jungleclearMenu.AddItem(new MenuItem("jungleclearQmana", "Cast Q if mana % >").SetValue(new Slider(30, 0, 100)));
+            jungleclearMenu.AddItem(new MenuItem("jungleclearUseW", "Use W").SetValue(true));
+            jungleclearMenu.AddItem(new MenuItem("jungleclearbluemana", "Pick blue if mana % <").SetValue(new Slider(30, 0, 100)));
+            jungleclearMenu.AddItem(new MenuItem("jgtxt", "-Card Automatic selection"));
+            Menu.AddSubMenu(jungleclearMenu);
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
             Drawings.AddItem(new MenuItem("AAcircle", "AA Range").SetValue(true));
@@ -132,6 +141,7 @@ namespace xc_TwistedFate
             };
 
             Drawings.AddItem(new MenuItem("jgpos", "JunglePosition").SetValue(true));
+            Drawings.AddItem(new MenuItem("manaper", "ManaPercentage").SetValue(true));
 
             Menu.AddSubMenu(Drawings);
 
@@ -191,7 +201,7 @@ namespace xc_TwistedFate
             if (!Menu.Item("interrupt").GetValue<bool>())
                 return;
 
-            if (spell.BuffName == "Destiny")
+            if (spell.BuffName == "Destiny" && unit.BaseSkinName != "TwistedFate")
                 return;
 
             if (unit.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 400))
@@ -231,7 +241,10 @@ namespace xc_TwistedFate
                 Lasthit();
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+            {
                 LaneClear();
+                JungleClear();
+            }
 
             if (Menu.Item("selectgold").GetValue<KeyBind>().Active)
                 CardSelector.StartSelecting(Cards.Yellow);
@@ -243,6 +256,7 @@ namespace xc_TwistedFate
                 CardSelector.StartSelecting(Cards.Red);
 
             killsteal();
+            autoignite();
         }
 
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -336,7 +350,7 @@ namespace xc_TwistedFate
             if (Game.MapId == (GameMapId)11 && Menu.Item("jgpos").GetValue<bool>())
             {
                 const float circleRange = 100f;
-
+                
                 Render.Circle.DrawCircle(new Vector3(7461.018f, 3253.575f, 52.57141f), circleRange, Color.Blue ,5); // blue team :red
                 Render.Circle.DrawCircle(new Vector3(3511.601f, 8745.617f, 52.57141f), circleRange, Color.Blue, 5); // blue team :blue
                 Render.Circle.DrawCircle(new Vector3(7462.053f, 2489.813f, 52.57141f), circleRange, Color.Blue, 5); // blue team :golems
@@ -350,6 +364,24 @@ namespace xc_TwistedFate
                 Render.Circle.DrawCircle(new Vector3(7368.408f, 12488.37f, 56.47668f), circleRange, Color.Red, 5); // red team :golems
                 Render.Circle.DrawCircle(new Vector3(10342.77f, 8896.083f, 51.72742f), circleRange, Color.Red, 5); // red team :wolfs
                 Render.Circle.DrawCircle(new Vector3(7001.741f, 9915.717f, 54.02466f), circleRange, Color.Red, 5); // red team :wariaths                    
+            }
+
+            if (Menu.Item("manaper").GetValue<bool>())
+            {
+                var targetpos2 = Drawing.WorldToScreen(Player.Position);
+                var color = Color.Green;
+                var manaper = (int)Utility.ManaPercentage(Player);
+
+                if (manaper > 75)
+                    color = Color.LightGreen;
+                else if (manaper > 45)
+                    color = Color.Yellow;
+                else if (manaper > 25)
+                    color = Color.OrangeRed;
+                else if (manaper > -1)
+                    color = Color.Red;
+
+                Drawing.DrawText(targetpos2[0] - 40, targetpos2[1] + 20, color, "Mana:" + manaper + "%");
             }
         }
 
@@ -463,8 +495,7 @@ namespace xc_TwistedFate
         {
             if (Q.IsReady() && Menu.Item("laneclearUseQ").GetValue<bool>() && Utility.ManaPercentage(Player) > Menu.Item("laneclearQmana").GetValue<Slider>().Value)
             {
-                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range,
-               MinionTypes.All);
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range,MinionTypes.All, MinionTeam.Enemy);
                 var locQ = Q.GetLineFarmLocation(allMinionsQ);
 
                 if (locQ.MinionsHit >= Menu.Item("laneclearQmc").GetValue<Slider>().Value)
@@ -487,6 +518,32 @@ namespace xc_TwistedFate
                     else
                         CardSelector.StartSelecting(Cards.Blue);
                 }
+            }
+        }
+
+        static void JungleClear()
+        {
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(Player), MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+
+            if (mobs.Count <= 0)
+                return;
+
+            if (Q.IsReady() && Menu.Item("jungleclearUseQ").GetValue<bool>() && Utility.ManaPercentage(Player) > Menu.Item("jungleclearQmana").GetValue<Slider>().Value)
+            {
+                Q.Cast(mobs[0].Position, Menu.Item("usepacket").GetValue<bool>());
+            }
+
+            if (W.IsReady() && Menu.Item("jungleclearUseW").GetValue<bool>())
+            {
+                if (Utility.ManaPercentage(Player) > Menu.Item("jungleclearbluemana").GetValue<Slider>().Value)
+                {
+                    if (mobs.Count >= 2)
+                        CardSelector.StartSelecting(Cards.Red);
+                    else
+                        CardSelector.StartSelecting(Cards.Yellow);
+                }  
+                else
+                    CardSelector.StartSelecting(Cards.Blue);
             }
         }
 
@@ -570,11 +627,30 @@ namespace xc_TwistedFate
             {
                 if (target != null)
                 {
-                    if (Q.IsReady())
+                    if (Q.GetDamage(target) > target.Health + 20 & Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
                     {
-                        if (Q.GetDamage(target) > target.Health + 20 & Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+                        if (Q.IsReady())
                             Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
+
+                        Render.Circle.DrawCircle(target.Position, 100, Color.Red, 5);
+
+                        var targetpos = Drawing.WorldToScreen(target.Position);
+
+                        Drawing.DrawText(targetpos[0] - 50, targetpos[1] - 20, Color.Red, "Try killsteal");
                     }
+                }
+            }
+        }
+
+        static void autoignite()
+        {
+            if (Menu.Item("autoIgnite").GetValue<bool>() && SIgnite != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SIgnite) == SpellState.Ready)
+            {
+                float ignitedamage = 50 + 20 * Player.Level;
+
+                foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x != null && x.IsValid && !x.IsDead && Player.ServerPosition.Distance(x.ServerPosition) < 600 && !x.IsMe && !x.IsAlly && (x.Health + x.HPRegenRate * 2) <= ignitedamage))
+                {
+                    Player.Spellbook.CastSpell(SIgnite, target);
                 }
             }
         }
