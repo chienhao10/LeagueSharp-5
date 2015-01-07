@@ -156,6 +156,8 @@ namespace xc_TwistedFate
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
 
+            Orbwalker.SetMovement(!Menu.Item("movement").GetValue<bool>());
+
             Game.PrintChat("<font color = \"#33CCCC\">[xcsoft] Twisted Fate -</font> Loaded");
         }
 
@@ -168,7 +170,7 @@ namespace xc_TwistedFate
             {
                 CardSelector.StartSelecting(Cards.Yellow);
 
-                Utility.DrawCircle(gapcloser.Sender.Position, 50, Color.Gold);
+                Render.Circle.DrawCircle(gapcloser.Sender.Position, 50, Color.Gold, 5);
 
                 var targetpos = Drawing.WorldToScreen(gapcloser.Sender.Position);
 
@@ -191,7 +193,7 @@ namespace xc_TwistedFate
             {
                 CardSelector.StartSelecting(Cards.Yellow);
 
-                Utility.DrawCircle(unit.Position, 50, Color.Gold);
+                Render.Circle.DrawCircle(unit.Position, 50, Color.Gold, 5);
 
                 var targetpos = Drawing.WorldToScreen(unit.Position);
 
@@ -254,7 +256,7 @@ namespace xc_TwistedFate
             var Qcircle = Menu.Item("Qcircle").GetValue<Circle>();
 
             if (Q.IsReady() && Qcircle.Active)
-                Utility.DrawCircle(Player.Position, Menu.Item("qrange").GetValue<Slider>().Value, Qcircle.Color);
+                Render.Circle.DrawCircle(Player.Position, Menu.Item("qrange").GetValue<Slider>().Value, Qcircle.Color, 5);
 
             if (Menu.Item("AAcircle").GetValue<bool>())
             {
@@ -268,7 +270,7 @@ namespace xc_TwistedFate
                     else if (wName == "redcardlock") temp = Color.Red;
                     else if (wName == "PickACard") temp = Color.LightGreen;
 
-                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), temp);
+                    Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), temp, 5);
                 }
                 else
                 {
@@ -279,7 +281,7 @@ namespace xc_TwistedFate
                     else if (Player.HasBuff("redcardpreattack", true)) temp = Color.Red;
                     else temp = Color.Gray;
 
-                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), temp);
+                    Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), temp, 5);
                 }
             }
 
@@ -289,11 +291,11 @@ namespace xc_TwistedFate
 
                 if (target != null && SFlash != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SFlash) == SpellState.Ready)
                 {
-                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player) + 400, Color.Gold);//AA+Flash Range
+                    Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player) + 400, Color.Gold, 5);//AA+Flash Range
 
                     if (!target.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)))
                     {
-                        Utility.DrawCircle(target.Position, 50, Color.Gold);
+                        Render.Circle.DrawCircle(target.Position, 50, Color.Gold);
 
                         var targetpos = Drawing.WorldToScreen(target.Position);
 
@@ -302,7 +304,7 @@ namespace xc_TwistedFate
 
                 }
                 else
-                    Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player) + 400, Color.Gray);//AA+Flash Range
+                    Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player) + 400, Color.Gray, 5);//AA+Flash Range
             }
 
             var drawMinionLastHit = Menu.Item("drawMinionLastHit").GetValue<Circle>();
@@ -316,11 +318,11 @@ namespace xc_TwistedFate
                 {
                     if (drawMinionLastHit.Active && Player.GetAutoAttackDamage(xMinion, true) >= xMinion.Health)
                     {
-                        Utility.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionLastHit.Color);
+                        Render.Circle.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionLastHit.Color, 5);
                     }
                     else if (drawMinionNearKill.Active && Player.GetAutoAttackDamage(xMinion, true) * 2 >= xMinion.Health)
                     {
-                        Utility.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionNearKill.Color);
+                        Render.Circle.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionNearKill.Color, 5);
                     }
                 }
             }
@@ -330,19 +332,19 @@ namespace xc_TwistedFate
             {
                 const float circleRange = 100f;
 
-                Utility.DrawCircle(new Vector3(7461.018f, 3253.575f, 52.57141f), circleRange, Color.Blue); // blue team :red
-                Utility.DrawCircle(new Vector3(3511.601f, 8745.617f, 52.57141f), circleRange, Color.Blue); // blue team :blue
-                Utility.DrawCircle(new Vector3(7462.053f, 2489.813f, 52.57141f), circleRange, Color.Blue); // blue team :golems
-                Utility.DrawCircle(new Vector3(3144.897f, 7106.449f, 51.89026f), circleRange, Color.Blue); // blue team :wolfs
-                Utility.DrawCircle(new Vector3(7770.341f, 5061.238f, 49.26587f), circleRange, Color.Blue); // blue team :wariaths
+                Render.Circle.DrawCircle(new Vector3(7461.018f, 3253.575f, 52.57141f), circleRange, Color.Blue ,5); // blue team :red
+                Render.Circle.DrawCircle(new Vector3(3511.601f, 8745.617f, 52.57141f), circleRange, Color.Blue, 5); // blue team :blue
+                Render.Circle.DrawCircle(new Vector3(7462.053f, 2489.813f, 52.57141f), circleRange, Color.Blue, 5); // blue team :golems
+                Render.Circle.DrawCircle(new Vector3(3144.897f, 7106.449f, 51.89026f), circleRange, Color.Blue, 5); // blue team :wolfs
+                Render.Circle.DrawCircle(new Vector3(7770.341f, 5061.238f, 49.26587f), circleRange, Color.Blue, 5); // blue team :wariaths
 
-                Utility.DrawCircle(new Vector3(10930.93f, 5405.83f, -68.72192f), circleRange, Color.Yellow); // Dragon
+                Render.Circle.DrawCircle(new Vector3(10930.93f, 5405.83f, -68.72192f), circleRange, Color.Yellow, 5); // Dragon
 
-                Utility.DrawCircle(new Vector3(7326.056f, 11643.01f, 50.21985f), circleRange, Color.Red); // red team :red
-                Utility.DrawCircle(new Vector3(11417.6f, 6216.028f, 51.00244f), circleRange, Color.Red); // red team :blue
-                Utility.DrawCircle(new Vector3(7368.408f, 12488.37f, 56.47668f), circleRange, Color.Red); // red team :golems
-                Utility.DrawCircle(new Vector3(10342.77f, 8896.083f, 51.72742f), circleRange, Color.Red); // red team :wolfs
-                Utility.DrawCircle(new Vector3(7001.741f, 9915.717f, 54.02466f), circleRange, Color.Red); // red team :wariaths                    
+                Render.Circle.DrawCircle(new Vector3(7326.056f, 11643.01f, 50.21985f), circleRange, Color.Red, 5); // red team :red
+                Render.Circle.DrawCircle(new Vector3(11417.6f, 6216.028f, 51.00244f), circleRange, Color.Red, 5); // red team :blue
+                Render.Circle.DrawCircle(new Vector3(7368.408f, 12488.37f, 56.47668f), circleRange, Color.Red, 5); // red team :golems
+                Render.Circle.DrawCircle(new Vector3(10342.77f, 8896.083f, 51.72742f), circleRange, Color.Red, 5); // red team :wolfs
+                Render.Circle.DrawCircle(new Vector3(7001.741f, 9915.717f, 54.02466f), circleRange, Color.Red, 5); // red team :wariaths                    
             }
         }
 
@@ -353,13 +355,13 @@ namespace xc_TwistedFate
 
             var Rcircle = Menu.Item("Rcircle").GetValue <Circle>();
 
-            if (Rcircle.Active) 
-                Utility.DrawCircle(Player.Position, 5500, Rcircle.Color);
+            if (Rcircle.Active)
+                Render.Circle.DrawCircle(Player.Position, 5500, Rcircle.Color, 5);
 
             var Rcirclemap = Menu.Item("RcircleMap").GetValue<Circle>();
 
-            if (Rcirclemap.Active) 
-            Utility.DrawCircle(Player.Position, 5500, Rcirclemap.Color, 1, 30, true);
+            if (Rcirclemap.Active)
+                Utility.DrawCircle(Player.Position, 5500, Rcirclemap.Color,1 , 30, true);
         }
 
         static void Combo()
@@ -456,20 +458,12 @@ namespace xc_TwistedFate
         {
             if (Q.IsReady() && Menu.Item("laneclearUseQ").GetValue<bool>() && Utility.ManaPercentage(Player) > Menu.Item("laneclearQmana").GetValue<Slider>().Value)
             {
-                var hitpossible = 0;
+                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range,
+               MinionTypes.All);
+                var locQ = Q.GetLineFarmLocation(allMinionsQ);
 
-                Obj_AI_Base minion = null;
-                foreach (Obj_AI_Base minions in MinionManager.GetMinions(Player.Position, Q.Range))
-                {
-                    if (Q.GetPrediction(minions).Hitchance >= HitChance.High)
-                    {
-                        hitpossible++;
-                        minion = minions;
-                    }
-                }
-
-                if (hitpossible >= Menu.Item("laneclearQmc").GetValue<Slider>().Value)
-                    Q.Cast(minion, Menu.Item("usepacket").GetValue<bool>());
+                if (locQ.MinionsHit >= Menu.Item("laneclearQmc").GetValue<Slider>().Value)
+                    Q.Cast(locQ.Position, Menu.Item("usepacket").GetValue<bool>());
             }
 
             if (W.IsReady() && Menu.Item("laneclearUseW").GetValue<bool>())
