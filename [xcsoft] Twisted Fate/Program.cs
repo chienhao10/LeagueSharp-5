@@ -14,12 +14,20 @@ namespace xc_TwistedFate
     internal class Program
     {
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+
         private static Orbwalking.Orbwalker Orbwalker;
+
         private static Spell Q, W;
+
         private static Items.Item Dfg, Bft;
+
         private static Menu Menu;
+
         private static SpellSlot SFlash;
         private static SpellSlot SIgnite;
+
+        private static Vector2 _yasuoWallCastedPos;
+        private static GameObject _yasuoWall;
 
         static void Main(string[] args)
         {
@@ -52,7 +60,7 @@ namespace xc_TwistedFate
             TargetSelector.AddToMenu(ts);
 
             var wMenu = new Menu("Pick a Card", "pickcard");
-            wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind('W', KeyBindType.Press)));
+            wMenu.AddItem(new MenuItem("selectgold", "Select Gold").SetValue(new KeyBind('S', KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectblue", "Select Blue").SetValue(new KeyBind('E', KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("selectred", "Select Red").SetValue(new KeyBind('T', KeyBindType.Press)));
             wMenu.AddItem(new MenuItem("plz1", "-Do not use the W key"));
@@ -170,6 +178,8 @@ namespace xc_TwistedFate
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            GameObject.OnCreate += GameObject_OnCreate;
+            GameObject.OnDelete += GameObject_OnDelete;
 
             Orbwalker.SetMovement(!Menu.Item("movement").GetValue<bool>());
 
@@ -224,6 +234,9 @@ namespace xc_TwistedFate
         {
             if (args.Target is Obj_AI_Hero || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
                 args.Process = CardSelector.Status != SelectStatus.Selecting && Environment.TickCount - CardSelector.LastWSent > 300;
+
+            if (!DetectCollision(args.Target))
+                args.Process = false;
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -264,6 +277,11 @@ namespace xc_TwistedFate
             if (sender.IsMe && args.SData.Name == "gate" && Menu.Item("goldR").GetValue<bool>())
             {
                 CardSelector.StartSelecting(Cards.Yellow);
+            }
+
+            if (sender.IsEnemy && args.SData.Name == "YasuoWMovingWall")
+            {
+                _yasuoWallCastedPos = sender.ServerPosition.To2D();
             }
         }
 
@@ -443,7 +461,7 @@ namespace xc_TwistedFate
 
                     if (Menu.Item("cconly").GetValue<bool>())
                     {
-                        if (pred.Hitchance >= HitChance.VeryHigh)
+                        if (pred.Hitchance >= HitChance.High && DetectCollision(target))
                         {
                             foreach (var buff in target.Buffs)
                             {
@@ -452,7 +470,7 @@ namespace xc_TwistedFate
                             }
                         }
                     }
-                    else if (pred.Hitchance >= HitChance.VeryHigh)
+                    else if (pred.Hitchance >= HitChance.VeryHigh && DetectCollision(target))
                         Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
                 }
             }
@@ -464,7 +482,7 @@ namespace xc_TwistedFate
 
             if (Q.IsReady() && Menu.Item("harassUseQ").GetValue<bool>() && Utility.ManaPercentage(Player) > Menu.Item("harassmana").GetValue<Slider>().Value)
             {
-                if (target.IsValidTarget(Menu.Item("harassrange").GetValue<Slider>().Value) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+                if (target.IsValidTarget(Menu.Item("harassrange").GetValue<Slider>().Value) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh && DetectCollision(target))
                     Q.Cast(target);
             }
         }
@@ -504,7 +522,7 @@ namespace xc_TwistedFate
 
             if (W.IsReady() && Menu.Item("laneclearUseW").GetValue<bool>())
             {
-                var minioncount = MinionManager.GetMinions(Player.Position, W.Range).Count;
+                var minioncount = MinionManager.GetMinions(Player.Position, 1500).Count;
 
                 if (minioncount > 0)
                 {
@@ -523,7 +541,7 @@ namespace xc_TwistedFate
 
         static void JungleClear()
         {
-            var mobs = MinionManager.GetMinions(Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(Player), MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(Player) + 100, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0)
                 return;
@@ -629,7 +647,7 @@ namespace xc_TwistedFate
                 {
                     if (Q.GetDamage(target) > target.Health + 20 & Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
                     {
-                        if (Q.IsReady())
+                        if (Q.IsReady() && DetectCollision(target))
                             Q.Cast(target, Menu.Item("usepacket").GetValue<bool>());
 
                         Render.Circle.DrawCircle(target.Position, 100, Color.Red, 5);
@@ -648,11 +666,46 @@ namespace xc_TwistedFate
             {
                 float ignitedamage = 50 + 20 * Player.Level;
 
-                foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x != null && x.IsValid && !x.IsDead && Player.ServerPosition.Distance(x.ServerPosition) < 600 && !x.IsMe && !x.IsAlly && (x.Health + x.HPRegenRate * 2) <= ignitedamage))
+                foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x != null && x.IsValid && !x.IsDead && Player.ServerPosition.Distance(x.ServerPosition) < 600 && !x.IsMe && !x.IsAlly && (x.Health + x.HPRegenRate * 1) <= ignitedamage))
                 {
                     Player.Spellbook.CastSpell(SIgnite, target);
                 }
             }
+        }
+
+        //detect windwall part of gagongsyndra
+        private static void GameObject_OnCreate(GameObject obj, EventArgs args)
+        {
+            if (Player.Distance(obj.Position) > 1500 || !ObjectManager.Get<Obj_AI_Hero>().Any(h => h.ChampionName == "Yasuo" && h.IsEnemy && h.IsVisible && !h.IsDead)) return;
+
+            //Yasuo Wall
+            if (obj.IsValid &&System.Text.RegularExpressions.Regex.IsMatch(obj.Name, "_w_windwall.\\.troy",System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                _yasuoWall = obj;
+        }
+
+        private static void GameObject_OnDelete(GameObject obj, EventArgs args)
+        {
+            if (Player.Distance(obj.Position) > 1500 || !ObjectManager.Get<Obj_AI_Hero>().Any(h => h.ChampionName == "Yasuo" && h.IsEnemy && h.IsVisible && !h.IsDead)) return;
+
+            //Yasuo Wall
+            if (obj.IsValid && System.Text.RegularExpressions.Regex.IsMatch(obj.Name, "_w_windwall.\\.troy",System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                _yasuoWall = null;
+        }
+
+        private static bool DetectCollision(GameObject target)
+        {
+            if (_yasuoWall == null || !ObjectManager.Get<Obj_AI_Hero>().Any(h => h.ChampionName == "Yasuo" && h.IsEnemy && h.IsVisible && !h.IsDead)) return true;
+
+            var level = _yasuoWall.Name.Substring(_yasuoWall.Name.Length - 6, 1);
+            var wallWidth = (300 + 50 * Convert.ToInt32(level));
+            var wallDirection = (_yasuoWall.Position.To2D() - _yasuoWallCastedPos).Normalized().Perpendicular();
+            var wallStart = _yasuoWall.Position.To2D() + ((int)(wallWidth / 2)) * wallDirection;
+            var wallEnd = wallStart - wallWidth * wallDirection;
+
+            var intersection = wallStart.Intersection(wallEnd, Player.Position.To2D(), target.Position.To2D());
+
+            return !intersection.Point.IsValid();
+
         }
     }
 }
