@@ -48,7 +48,7 @@ namespace xc_TwistedFate
             Q = new Spell(SpellSlot.Q, 1450);
             Q.SetSkillshot(0.25f, 40f, 1000f, false, SkillshotType.SkillshotLine);
 
-            W = new Spell(SpellSlot.W, 1000);
+            W = new Spell(SpellSlot.W, 1200);
 
             Menu = new Menu("[xcsoft] Twisted Fate", "xcoft_TF", true);
 
@@ -105,9 +105,9 @@ namespace xc_TwistedFate
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
             laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(true));
             laneclearMenu.AddItem(new MenuItem("laneclearQmana", "Cast Q if mana % >").SetValue(new Slider(30, 0, 100)));
-            laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Cast Q if Hit possible Minions count >=").SetValue(new Slider(5, 2, 7)));
+            laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Cast Q if Hit minions number >=").SetValue(new Slider(5, 2, 7)));
             laneclearMenu.AddItem(new MenuItem("laneclearUseW", "Use W").SetValue(true));
-            laneclearMenu.AddItem(new MenuItem("laneclearredmc", "Red instead of blue if Minions count >=").SetValue(new Slider(3, 2, 5)));
+            laneclearMenu.AddItem(new MenuItem("laneclearredmc", "Red instead of blue if minions number >=").SetValue(new Slider(3, 2, 5)));
             laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(30, 0, 100)));
             Menu.AddSubMenu(laneclearMenu);
 
@@ -363,8 +363,6 @@ namespace xc_TwistedFate
                     }
                 }
             }
-
-            //Drawing JunglePosition part of Marksman# copy
             if (Game.MapId == (GameMapId)11 && Menu.Item("jgpos").GetValue<bool>())
             {
                 const float circleRange = 100f;
@@ -513,7 +511,7 @@ namespace xc_TwistedFate
         {
             if (Q.IsReady() && Menu.Item("laneclearUseQ").GetValue<bool>() && Utility.ManaPercentage(Player) > Menu.Item("laneclearQmana").GetValue<Slider>().Value)
             {
-                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range,MinionTypes.All, MinionTeam.Enemy);
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy);
                 var locQ = Q.GetLineFarmLocation(allMinionsQ);
 
                 if (locQ.MinionsHit >= Menu.Item("laneclearQmc").GetValue<Slider>().Value)
@@ -572,66 +570,61 @@ namespace xc_TwistedFate
             var Truedmg = 0d;
             bool card = false;
 
-            //AP데미지
             if(Q.IsReady())
                 APdmg += Player.GetSpellDamage(enemy, SpellSlot.Q);
 
-            if (W.IsReady())//카드 돌리고있을때
-                APdmg += Player.GetSpellDamage(enemy, SpellSlot.W, 2);//골드카드데미지추가
-            else//카드뽑았나?
+            if (W.IsReady())
+                APdmg += Player.GetSpellDamage(enemy, SpellSlot.W, 2);
+            else
             {
-                card = true;//넌 카드를 들고있다고 생각한다.
-                foreach (var buff in Player.Buffs)//패건들지마손모가지날아가붕게
-                {//버프이름 JeonHelperForDev 어셈으로 찾음
-                    if (buff.Name == "bluecardpreattack")//블루카드들고있네
-                        APdmg += Player.GetSpellDamage(enemy, SpellSlot.W);//블루카드데미지추가
-                    else if (buff.Name == "redcardpreattack")//레드카드들고있네
-                        APdmg += Player.GetSpellDamage(enemy, SpellSlot.W, 1);//레드카드데미지추가
-                    else if (buff.Name == "goldcardpreattack")//골드카드들고있네
-                        APdmg += Player.GetSpellDamage(enemy, SpellSlot.W, 2);//골드카드데미지추가
-                    else card = false;//카드없네
+                card = true;
+                foreach (var buff in Player.Buffs)
+                {
+                    if (buff.Name == "bluecardpreattack")
+                        APdmg += Player.GetSpellDamage(enemy, SpellSlot.W);
+                    else if (buff.Name == "redcardpreattack")
+                        APdmg += Player.GetSpellDamage(enemy, SpellSlot.W, 1);
+                    else if (buff.Name == "goldcardpreattack")
+                        APdmg += Player.GetSpellDamage(enemy, SpellSlot.W, 2);
+                    else card = false;
                 }
             }
 
             bool passive = false;
             foreach (var buff in Player.Buffs)
             {
-                if (buff.Name == "cardmasterstackparticle")//E패시브있네
+                if (buff.Name == "cardmasterstackparticle")
                 {
-                    APdmg += Player.GetSpellDamage(enemy, SpellSlot.E);//패시브딜추가
+                    APdmg += Player.GetSpellDamage(enemy, SpellSlot.E);
                     passive = true;
                 }
 
-                if (buff.Name == "lichbane")//리치베인패시브있네?
+                if (buff.Name == "lichbane")
                 {
                     APdmg += Damage.CalcDamage(Player, enemy, Damage.DamageType.Magical, (Player.BaseAttackDamage * 0.75) + ((Player.BaseAbilityDamage + Player.FlatMagicDamageMod) * 0.5));//리치베인딜 추가
                     passive = true;
                 }
 
-                if (buff.Name == "sheen")//광휘의검(=삼위일체) 패시브있네?
+                if (buff.Name == "sheen")
                 {
-                    ADdmg += Player.GetAutoAttackDamage(enemy, false);//광휘의검딜추가
+                    ADdmg += Player.GetAutoAttackDamage(enemy, false);
                     passive = true;
                 }
             }
 
-            if (!card && passive)//카드없네 평타로 패시브터트릴건가보네
-                ADdmg += Player.GetAutoAttackDamage(enemy, false);//평타딜추가
+            if (!card && passive)
+                ADdmg += Player.GetAutoAttackDamage(enemy, false);
 
             if (Dfg.IsReady() && Menu.Item("usedfg").GetValue<bool>())
             {
-                APdmg += Player.GetItemDamage(enemy, Damage.DamageItems.Dfg);//데파딜추가
-                APdmg = APdmg * 1.2;//20%추가피해
+                APdmg += Player.GetItemDamage(enemy, Damage.DamageItems.Dfg);
+                APdmg = APdmg * 1.2;
             }
             else if (Bft.IsReady() && Menu.Item("usebft").GetValue<bool>())
             {
-                APdmg += Player.GetItemDamage(enemy, Damage.DamageItems.BlackFireTorch);//어둠불꽃횃불딜추가(뒤틀린숲전용)
-                APdmg = APdmg * 1.2;//20%추가피해
+                APdmg += Player.GetItemDamage(enemy, Damage.DamageItems.BlackFireTorch);
+                APdmg = APdmg * 1.2;
             }
-
-            //true데미지
-            //if (SIgnite != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SIgnite) == SpellState.Ready)//점화있음?
-            //    Truedmg += Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);//점화딜추가
 
             return (float)ADdmg + (float)APdmg + (float)Truedmg;
         }
@@ -673,12 +666,10 @@ namespace xc_TwistedFate
             }
         }
 
-        //detect windwall part of gagongsyndra
         private static void GameObject_OnCreate(GameObject obj, EventArgs args)
         {
             if (Player.Distance(obj.Position) > 1500 || !ObjectManager.Get<Obj_AI_Hero>().Any(h => h.ChampionName == "Yasuo" && h.IsEnemy && h.IsVisible && !h.IsDead)) return;
 
-            //Yasuo Wall
             if (obj.IsValid &&System.Text.RegularExpressions.Regex.IsMatch(obj.Name, "_w_windwall.\\.troy",System.Text.RegularExpressions.RegexOptions.IgnoreCase))
                 _yasuoWall = obj;
         }
@@ -687,7 +678,6 @@ namespace xc_TwistedFate
         {
             if (Player.Distance(obj.Position) > 1500 || !ObjectManager.Get<Obj_AI_Hero>().Any(h => h.ChampionName == "Yasuo" && h.IsEnemy && h.IsVisible && !h.IsDead)) return;
 
-            //Yasuo Wall
             if (obj.IsValid && System.Text.RegularExpressions.Regex.IsMatch(obj.Name, "_w_windwall.\\.troy",System.Text.RegularExpressions.RegexOptions.IgnoreCase))
                 _yasuoWall = null;
         }
