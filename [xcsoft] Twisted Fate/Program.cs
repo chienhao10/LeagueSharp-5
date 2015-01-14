@@ -409,7 +409,7 @@ namespace xc_TwistedFate
 
             if (Menu.Item("kill").GetValue<bool>())
             {
-                foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x != null && x.IsValid && !x.IsDead && x.IsEnemy && x.Health <= GetComboDamage(x)))
+                foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x != null && x.IsValid && !x.IsDead && x.IsEnemy && x.Health <= GetComboDamage(x) && x.IsVisible))
                 {
                     var targetpos = Drawing.WorldToScreen(target.Position);
                     Render.Circle.DrawCircle(target.Position, target.BoundingRadius, Color.Tomato);
@@ -663,7 +663,7 @@ namespace xc_TwistedFate
             {
                 float ignitedamage = 50 + 20 * Player.Level;
 
-                foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x != null && x.IsValid && !x.IsDead && Player.ServerPosition.Distance(x.ServerPosition) < 600 && !x.IsMe && !x.IsAlly && (x.Health + x.HPRegenRate * 1) <= ignitedamage))
+                foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x != null && x.IsValid && !x.IsDead && Player.ServerPosition.Distance(x.ServerPosition) < 600 && !x.IsEnemy && (x.Health + x.HPRegenRate * 1) <= ignitedamage))
                 {
                     Player.Spellbook.CastSpell(SIgnite, target);
                 }
