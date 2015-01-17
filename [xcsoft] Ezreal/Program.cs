@@ -34,7 +34,7 @@ namespace xcsoft_Ezreal
             Q = new Spell(SpellSlot.Q, 1200);
             Q.SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
 
-            W = new Spell(SpellSlot.W, 1000);
+            W = new Spell(SpellSlot.W, 800);
             W.SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
 
             E = new Spell(SpellSlot.E, 1225);
@@ -64,6 +64,7 @@ namespace xcsoft_Ezreal
 
             var harassMenu = new Menu("Harass Settings", "harassop");
             harassMenu.AddItem(new MenuItem("harassUseQ", "Use Q").SetValue(true));
+            harassMenu.AddItem(new MenuItem("harassAutoQ", "Use Auto Q").SetValue(true));
             Menu.AddSubMenu(harassMenu);
 
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
@@ -218,7 +219,21 @@ namespace xcsoft_Ezreal
                     E.Cast(vec);
             }
 
+            if(Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
+                AutoQ();
+
             killsteal();
+        }
+
+        static void AutoQ()
+        {
+            if (!Menu.Item("harassAutoQ").GetValue<bool>())
+                return;
+
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
+
+            if (Q.CanCast(target) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+                Q.Cast(target);
         }
 
         static void Combo()
