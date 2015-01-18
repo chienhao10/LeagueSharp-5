@@ -58,7 +58,7 @@ namespace xcsoft_Ezreal
             Menu.AddSubMenu(comboMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
-            //lasthitMenu.AddItem(new MenuItem("lasthitUseQ", "Use Q").SetValue(true));
+            lasthitMenu.AddItem(new MenuItem("lasthitUseQ", "Use with Q").SetValue(true));
             Menu.AddSubMenu(lasthitMenu);
 
             var harassMenu = new Menu("Harass Settings", "harassop");
@@ -77,7 +77,7 @@ namespace xcsoft_Ezreal
             var additionalMenu = new Menu("Additional Options", "additionalop");
             additionalMenu.AddItem(new MenuItem("killsteal", "Try Killsteal (with safe E)").SetValue(true));
             additionalMenu.AddItem(new MenuItem("packet", "Use Packet casting").SetValue(false));
-            additionalMenu.AddItem(new MenuItem("arcane", "Arcane Shift").SetValue(new KeyBind('G', KeyBindType.Press)));
+            additionalMenu.AddItem(new MenuItem("arcane", "Fast E Jump").SetValue(new KeyBind('G', KeyBindType.Press)));
             Menu.AddSubMenu(additionalMenu);
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
@@ -172,7 +172,7 @@ namespace xcsoft_Ezreal
                 var cursorpos = Game.CursorPos;
                 Render.Circle.DrawCircle(cursorpos, 50, Color.Gold, 5);
                 var targetpos = Drawing.WorldToScreen(cursorpos);
-                Drawing.DrawText(targetpos[0] - 60, targetpos[1] + 40, Color.Gold, "Arcane Shift");
+                Drawing.DrawText(targetpos[0] - 20, targetpos[1] + 40, Color.Gold, "Jump");
             }
         }
 
@@ -215,7 +215,7 @@ namespace xcsoft_Ezreal
                 var vec = Player.ServerPosition.Extend(Game.CursorPos, 475);
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 if(E.IsReady())
-                    E.Cast(vec);
+                    E.Cast(vec, true);
             }
 
             if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo || !Menu.Item("arcane").GetValue<KeyBind>().Active)
@@ -231,7 +231,7 @@ namespace xcsoft_Ezreal
 
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-            if (Q.CanCast(target) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+            if (Q.CanCast(target) && Q.GetPrediction(target).Hitchance >= HitChance.High)
                 Q.Cast(target);
         }
 
@@ -246,16 +246,16 @@ namespace xcsoft_Ezreal
             {
                 var pred = Q.GetPrediction(target);
 
-                if (pred.Hitchance >= HitChance.VeryHigh)
+                if (pred.Hitchance >= HitChance.High)
                     Q.Cast(target, Menu.Item("packet").GetValue<bool>());
             }
 
             if (W.CanCast(target) && Menu.Item("comboUseW").GetValue<bool>())
             {
                 var pred = W.GetPrediction(target);
-                
-                if (pred.Hitchance >= HitChance.VeryHigh)
-                    W.Cast(target, Menu.Item("packet").GetValue<bool>());
+
+                if (pred.Hitchance >= HitChance.High)
+                    W.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
             }
         }
 
@@ -270,14 +270,22 @@ namespace xcsoft_Ezreal
             {
                 var pred = Q.GetPrediction(target);
 
-                if (pred.Hitchance >= HitChance.VeryHigh)
+                if (pred.Hitchance >= HitChance.High)
                     Q.Cast(target, Menu.Item("packet").GetValue<bool>());
             }
         }
 
         static void Lasthit()
         {
-           
+            if (!Orbwalking.CanMove(50))
+                return;
+
+            if (Q.IsReady() && Menu.Item("lasthitUseQ").GetValue<bool>())
+            {
+                var vMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
+                foreach (Obj_AI_Base minions in vMinions.Where(minions => minions.Health <= Q.GetDamage(minions)))
+                    Q.Cast(minions, Menu.Item("packet").GetValue<bool>(), false);
+            }
         }
 
         static void LaneClear()
@@ -287,12 +295,9 @@ namespace xcsoft_Ezreal
 
             if (Q.IsReady() && Menu.Item("laneclearUseQ").GetValue<bool>())
             {
-                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy);
-
-                var locQ = Q.GetLineFarmLocation(allMinionsQ);
-
-                if (locQ.MinionsHit >= 1)
-                    Q.Cast(locQ.Position, Menu.Item("packet").GetValue<bool>());
+                var vMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
+                foreach (Obj_AI_Base minions in vMinions.Where(minions => minions.Health <= Q.GetDamage(minions)))
+                    Q.Cast(minions, Menu.Item("packet").GetValue<bool>(), false);
             }
         }
 
@@ -321,11 +326,11 @@ namespace xcsoft_Ezreal
             {
                 if (target != null)
                 {
-                    if (Q.CanCast(target) && Q.GetDamage(target) >= target.Health + target.HPRegenRate && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+                    if (Q.CanCast(target) && Q.GetDamage(target) >= target.Health + target.HPRegenRate && Q.GetPrediction(target).Hitchance >= HitChance.High)
                         Q.Cast(target, Menu.Item("packet").GetValue<bool>());
                     else
-                    if (W.CanCast(target) && W.GetDamage(target) >= target.Health + target.HPRegenRate && W.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
-                        W.Cast(target, Menu.Item("packet").GetValue<bool>());
+                        if (W.CanCast(target) && W.GetDamage(target) >= target.Health + target.HPRegenRate && W.GetPrediction(target).Hitchance >= HitChance.High)
+                        W.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
                     else
                     if (E.CanCast(target) && E.GetDamage(target) >= target.Health + target.HPRegenRate)
                     {
@@ -334,8 +339,8 @@ namespace xcsoft_Ezreal
                             E.Cast(vec, Menu.Item("packet").GetValue<bool>());
                     }
                     else
-                    if (R.CanCast(target) && !target.IsValidTarget(800) && R.GetDamage(target) >= (target.Health + (target.HPRegenRate * 2)) && R.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
-                        R.Cast(target, Menu.Item("packet").GetValue<bool>());
+                    if (R.CanCast(target) && !target.IsValidTarget(800) && R.GetDamage(target) >= (target.Health + (target.HPRegenRate * 2)) && R.GetPrediction(target).Hitchance >= HitChance.High)
+                        R.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
                 }
             }
         }
