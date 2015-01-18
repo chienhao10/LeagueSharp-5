@@ -58,21 +58,21 @@ namespace xcsoft_Ezreal
             comboMenu.AddItem(new MenuItem("comboUseR", "Use R").SetValue(true));
             Menu.AddSubMenu(comboMenu);
 
-            var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
-            lasthitMenu.AddItem(new MenuItem("lasthitUseQ", "Use Q").SetValue(true));
-            Menu.AddSubMenu(lasthitMenu);
-
             var harassMenu = new Menu("Harass Settings", "harassop");
             harassMenu.AddItem(new MenuItem("harassUseQ", "Use Q").SetValue(true));
             Menu.AddSubMenu(harassMenu);
 
-            var AutoMenu = new Menu("Auto", "automenu");
-            AutoMenu.AddItem(new MenuItem("AutoQ", "Auto Q if hitchance >= VeryHigh").SetValue(true));
-            AutoMenu.AddItem(new MenuItem("AutoR", "Auto R if target immobile").SetValue(true));
+            var AutoMenu = new Menu("Auto Harass", "automenu");
+            AutoMenu.AddItem(new MenuItem("AutoQ", "Auto Q").SetValue(true));
+            AutoMenu.AddItem(new MenuItem("AutoR", "Auto R on immobile target").SetValue(true));
             Menu.AddSubMenu(AutoMenu);
 
+            var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
+            lasthitMenu.AddItem(new MenuItem("lasthitUseQ", "Use Q").SetValue(false));
+            Menu.AddSubMenu(lasthitMenu);
+
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
-            laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(true));
+            laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(false));
             Menu.AddSubMenu(laneclearMenu);
 
             var jungleclearMenu = new Menu("JungleClear Settings", "jungleclearset");
@@ -88,17 +88,13 @@ namespace xcsoft_Ezreal
             var Drawings = new Menu("Drawings Settings", "Drawings");
             Drawings.AddItem(new MenuItem("AAcircle", "Real AA Range").SetValue(new Circle(true, Color.LightSkyBlue)));
             Drawings.AddItem(new MenuItem("Qcircle", "Q Range").SetValue(new Circle(true, Color.LightGoldenrodYellow)));
-            Drawings.AddItem(new MenuItem("Wcircle", "W Range").SetValue(new Circle(true, Color.LightGoldenrodYellow)));
+            Drawings.AddItem(new MenuItem("Wcircle", "W Range").SetValue(new Circle(false, Color.LightGoldenrodYellow)));
             Drawings.AddItem(new MenuItem("Ecircle", "E Range").SetValue(new Circle(false, Color.LightGoldenrodYellow)));
-            Drawings.AddItem(new MenuItem("Rcircle", "R Range").SetValue(new Circle(false, Color.LightGoldenrodYellow)));
+            Drawings.AddItem(new MenuItem("Rcircle", "R Range").SetValue(new Circle(true, Color.LightGoldenrodYellow)));
             Drawings.AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, Color.GreenYellow)));
             Drawings.AddItem(new MenuItem("drawMinionNearKill", "Minion Near Kill").SetValue(new Circle(true, Color.Gray)));
             Drawings.AddItem(new MenuItem("jgpos", "JunglePosition").SetValue(true));
             Menu.AddSubMenu(Drawings);
-
-            var predMenu = new Menu("Prediction", "pred");
-            predMenu.AddItem(new MenuItem("kappa", "Maybe Best"));
-            Menu.AddSubMenu(predMenu);
 
             var havefun = new MenuItem("Have Fun!", "Have Fun!");
             Menu.AddItem(havefun);
@@ -109,7 +105,7 @@ namespace xcsoft_Ezreal
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
             Drawing.OnDraw += Drawing_OnDraw;
 
-            Game.PrintChat("<font color = \"#33CCCC\">[xcsoft] Ezreal (Work In Progress) -</font> Loaded");
+            Game.PrintChat("<font color = \"#33CCCC\">[xcsoft] Ezreal -</font> Loaded");
         }
 
         static void Drawing_OnDraw(EventArgs args)
