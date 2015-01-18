@@ -34,7 +34,7 @@ namespace xcsoft_Ezreal
             Q = new Spell(SpellSlot.Q, 1200);
             Q.SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
 
-            W = new Spell(SpellSlot.W, 800);
+            W = new Spell(SpellSlot.W, 900);
             W.SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
 
             E = new Spell(SpellSlot.E, 1225);
@@ -55,16 +55,15 @@ namespace xcsoft_Ezreal
             var comboMenu = new Menu("ComboMode Settings", "comboset");
             comboMenu.AddItem(new MenuItem("comboUseQ", "Use Q").SetValue(true));
             comboMenu.AddItem(new MenuItem("comboUseW", "Use W").SetValue(true));
-            comboMenu.AddItem(new MenuItem("comboUseR", "Use R").SetValue(true));
             Menu.AddSubMenu(comboMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
-            lasthitMenu.AddItem(new MenuItem("lasthitUseQ", "Use Q").SetValue(true));
+            //lasthitMenu.AddItem(new MenuItem("lasthitUseQ", "Use Q").SetValue(true));
             Menu.AddSubMenu(lasthitMenu);
 
             var harassMenu = new Menu("Harass Settings", "harassop");
             harassMenu.AddItem(new MenuItem("harassUseQ", "Use Q").SetValue(true));
-            harassMenu.AddItem(new MenuItem("harassAutoQ", "Use Auto Q").SetValue(true));
+            harassMenu.AddItem(new MenuItem("harassAutoQ", "Auto Q").SetValue(true));
             Menu.AddSubMenu(harassMenu);
 
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
@@ -78,7 +77,7 @@ namespace xcsoft_Ezreal
             var additionalMenu = new Menu("Additional Options", "additionalop");
             additionalMenu.AddItem(new MenuItem("killsteal", "Try Killsteal (with safe E)").SetValue(true));
             additionalMenu.AddItem(new MenuItem("packet", "Use Packet casting").SetValue(false));
-            additionalMenu.AddItem(new MenuItem("arcane", "Arcane Shift").SetValue(new KeyBind('E', KeyBindType.Press)));
+            additionalMenu.AddItem(new MenuItem("arcane", "Arcane Shift").SetValue(new KeyBind('G', KeyBindType.Press)));
             Menu.AddSubMenu(additionalMenu);
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
@@ -173,7 +172,7 @@ namespace xcsoft_Ezreal
                 var cursorpos = Game.CursorPos;
                 Render.Circle.DrawCircle(cursorpos, 50, Color.Gold, 5);
                 var targetpos = Drawing.WorldToScreen(cursorpos);
-                Drawing.DrawText(targetpos[0] - 60, targetpos[1] + 20, Color.Gold, "Arcane Shift");
+                Drawing.DrawText(targetpos[0] - 60, targetpos[1] + 40, Color.Gold, "Arcane Shift");
             }
         }
 
@@ -181,7 +180,7 @@ namespace xcsoft_Ezreal
         {
             if(target is Obj_AI_Hero)
             {
-                if(Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
+                if(Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
                     if (Q.CanCast((Obj_AI_Base)target))
                         Q.Cast((Obj_AI_Base)target);
@@ -219,7 +218,7 @@ namespace xcsoft_Ezreal
                     E.Cast(vec);
             }
 
-            if(Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
+            if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo || !Menu.Item("arcane").GetValue<KeyBind>().Active)
                 AutoQ();
 
             killsteal();
@@ -227,7 +226,7 @@ namespace xcsoft_Ezreal
 
         static void AutoQ()
         {
-            if (!Menu.Item("harassAutoQ").GetValue<bool>())
+            if (!Menu.Item("harassAutoQ").GetValue<bool>() || Player.HasBuff("Recall"))
                 return;
 
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
@@ -330,8 +329,8 @@ namespace xcsoft_Ezreal
                     else
                     if (E.CanCast(target) && E.GetDamage(target) >= target.Health + target.HPRegenRate)
                     {
-                        var vec = Player.ServerPosition.Extend(target.ServerPosition, 475);//Towards the enemy
-                        if (vec.CountEnemysInRange(750) == 1 && !vec.IsWall() && !vec.UnderTurret(true))//Safe and valid check (E Missile range = 1225)
+                        var vec = Player.ServerPosition.Extend(target.ServerPosition, 475);
+                        if (vec.CountEnemysInRange(750) == 1 && !vec.IsWall() && !vec.UnderTurret(true))
                             E.Cast(vec, Menu.Item("packet").GetValue<bool>());
                     }
                     else
