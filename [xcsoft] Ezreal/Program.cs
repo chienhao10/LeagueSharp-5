@@ -31,7 +31,7 @@ namespace xcsoft_Ezreal
             if (Player.ChampionName != "Ezreal")
                 return;
 
-            Q = new Spell(SpellSlot.Q, 1200);
+            Q = new Spell(SpellSlot.Q, 1100);
             Q.SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
 
             W = new Spell(SpellSlot.W, 900);
@@ -39,11 +39,11 @@ namespace xcsoft_Ezreal
 
             E = new Spell(SpellSlot.E, 1225);
 
-            R = new Spell(SpellSlot.R, 3000);
+            R = new Spell(SpellSlot.R, 2500);
             R.SetSkillshot(1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
 
 
-            Menu = new Menu("[xcsoft] Ezreal (Work in progress)", "xcoft_ezreal", true);
+            Menu = new Menu("[xcsoft] Ezreal", "xcoft_ezreal", true);
 
             var orbwalkerMenu = new Menu("Orbwalker", "Orbwalker");
             Orbwalker = new Orbwalking.Orbwalker(orbwalkerMenu);
@@ -55,16 +55,21 @@ namespace xcsoft_Ezreal
             var comboMenu = new Menu("ComboMode Settings", "comboset");
             comboMenu.AddItem(new MenuItem("comboUseQ", "Use Q").SetValue(true));
             comboMenu.AddItem(new MenuItem("comboUseW", "Use W").SetValue(true));
+            comboMenu.AddItem(new MenuItem("comboUseR", "Use R").SetValue(true));
             Menu.AddSubMenu(comboMenu);
 
             var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
-            lasthitMenu.AddItem(new MenuItem("lasthitUseQ", "Use with Q").SetValue(true));
+            lasthitMenu.AddItem(new MenuItem("lasthitUseQ", "Use Q").SetValue(true));
             Menu.AddSubMenu(lasthitMenu);
 
             var harassMenu = new Menu("Harass Settings", "harassop");
             harassMenu.AddItem(new MenuItem("harassUseQ", "Use Q").SetValue(true));
-            harassMenu.AddItem(new MenuItem("harassAutoQ", "Auto Q").SetValue(true));
             Menu.AddSubMenu(harassMenu);
+
+            var AutoMenu = new Menu("Auto", "automenu");
+            AutoMenu.AddItem(new MenuItem("AutoQ", "Auto Q if hitchance >= VeryHigh").SetValue(true));
+            AutoMenu.AddItem(new MenuItem("AutoR", "Auto R if target immobile").SetValue(true));
+            Menu.AddSubMenu(AutoMenu);
 
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
             laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(true));
@@ -77,7 +82,7 @@ namespace xcsoft_Ezreal
             var additionalMenu = new Menu("Additional Options", "additionalop");
             additionalMenu.AddItem(new MenuItem("killsteal", "Try Killsteal (with safe E)").SetValue(true));
             additionalMenu.AddItem(new MenuItem("packet", "Use Packet casting").SetValue(false));
-            additionalMenu.AddItem(new MenuItem("arcane", "Fast E Jump").SetValue(new KeyBind('G', KeyBindType.Press)));
+            additionalMenu.AddItem(new MenuItem("arcane", "Smooth E Jump").SetValue(new KeyBind('G', KeyBindType.Press)));
             Menu.AddSubMenu(additionalMenu);
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
@@ -103,7 +108,7 @@ namespace xcsoft_Ezreal
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
             Drawing.OnDraw += Drawing_OnDraw;
 
-            Game.PrintChat("<font color = \"#33CCCC\">[xcsoft] Ezreal -</font> Loaded");
+            Game.PrintChat("<font color = \"#33CCCC\">[xcsoft] Ezreal (Work In Progress) -</font> Loaded");
         }
 
         static void Drawing_OnDraw(EventArgs args)
@@ -178,15 +183,13 @@ namespace xcsoft_Ezreal
 
         static void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if(target is Obj_AI_Hero)
+            if(target is Obj_AI_Hero && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
-                if(Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-                {
-                    if (Q.CanCast((Obj_AI_Base)target))
-                        Q.Cast((Obj_AI_Base)target);
-                    else if (W.CanCast((Obj_AI_Base)target))
-                            W.Cast((Obj_AI_Base)target);
-                }
+                if (Q.CanCast((Obj_AI_Base)target))
+                    Q.Cast((Obj_AI_Base)target);
+                else 
+                if (W.CanCast((Obj_AI_Base)target))
+                    W.Cast((Obj_AI_Base)target);
             }
         }
 
@@ -211,42 +214,51 @@ namespace xcsoft_Ezreal
             }
 
             if(Menu.Item("arcane").GetValue<KeyBind>().Active)
-            {
-                var vec = Player.ServerPosition.Extend(Game.CursorPos, 475);
-                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-                if(E.IsReady())
-                    E.Cast(vec, true);
-            }
+                FastEJump();
 
-            if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo || !Menu.Item("arcane").GetValue<KeyBind>().Active)
-                AutoQ();
-
+            Auto();
             killsteal();
         }
 
-        static void AutoQ()
+        static void FastEJump()
         {
-            if (!Menu.Item("harassAutoQ").GetValue<bool>() || Player.HasBuff("Recall"))
+            if (!E.IsReady())
                 return;
 
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
+            var vec = Player.ServerPosition.Extend(Game.CursorPos, 475);
+            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            E.Cast(vec, true);
+        }
 
-            if (Q.CanCast(target) && Q.GetPrediction(target).Hitchance >= HitChance.High)
+        static void Auto()
+        {
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Menu.Item("arcane").GetValue<KeyBind>().Active || Player.HasBuff("Recall"))
+                return;
+
+            Obj_AI_Hero target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
+
+            if (target.UnderTurret(true) && Player.UnderTurret(true))
+                return;
+
+            if (Q.CanCast(target) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh && Menu.Item("AutoQ").GetValue<bool>())
                 Q.Cast(target);
+
+            if (R.CanCast(target) && R.GetPrediction(target).Hitchance == HitChance.Immobile && Menu.Item("AutoR").GetValue<bool>())
+                R.Cast(target);
         }
 
         static void Combo()
         {
-            if (!Orbwalking.CanMove(50))
+            if (!Orbwalking.CanMove(1))
                 return;
 
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
+            Obj_AI_Hero target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
 
             if (Q.CanCast(target) && Menu.Item("comboUseQ").GetValue<bool>())
             {
                 var pred = Q.GetPrediction(target);
 
-                if (pred.Hitchance >= HitChance.High)
+                if (pred.Hitchance >= HitChance.VeryHigh)
                     Q.Cast(target, Menu.Item("packet").GetValue<bool>());
             }
 
@@ -254,14 +266,28 @@ namespace xcsoft_Ezreal
             {
                 var pred = W.GetPrediction(target);
 
-                if (pred.Hitchance >= HitChance.High)
+                if (pred.Hitchance >= HitChance.VeryHigh)
                     W.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
+            }
+
+            if (R.CanCast(target) && Menu.Item("comboUseR").GetValue<bool>())
+            {
+                var pred = R.GetPrediction(target);
+
+                foreach (var hittarget in pred.AoeTargetsHit)
+                {
+                    Render.Circle.DrawCircle(hittarget.Position, hittarget.BoundingRadius, Color.Gold);
+                    Render.Circle.DrawCircle(hittarget.Position, hittarget.BoundingRadius + 20, Color.Gold);
+                }
+
+                if (pred.Hitchance >= HitChance.Medium && pred.AoeTargetsHitCount >= 3)
+                    R.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
             }
         }
 
         static void harass()
         {
-            if (!Orbwalking.CanMove(50))
+            if (!Orbwalking.CanMove(1))
                 return;
 
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
@@ -270,14 +296,14 @@ namespace xcsoft_Ezreal
             {
                 var pred = Q.GetPrediction(target);
 
-                if (pred.Hitchance >= HitChance.High)
+                if (pred.Hitchance >= HitChance.VeryHigh)
                     Q.Cast(target, Menu.Item("packet").GetValue<bool>());
             }
         }
 
         static void Lasthit()
         {
-            if (!Orbwalking.CanMove(50))
+            if (!Orbwalking.CanMove(1))
                 return;
 
             if (Q.IsReady() && Menu.Item("lasthitUseQ").GetValue<bool>())
@@ -290,7 +316,7 @@ namespace xcsoft_Ezreal
 
         static void LaneClear()
         {
-            if (!Orbwalking.CanMove(50))
+            if (!Orbwalking.CanMove(1))
                 return;
 
             if (Q.IsReady() && Menu.Item("laneclearUseQ").GetValue<bool>())
@@ -303,7 +329,7 @@ namespace xcsoft_Ezreal
 
         static void JungleClear()
         {
-            if (!Orbwalking.CanMove(50))
+            if (!Orbwalking.CanMove(1))
                 return;
 
             var mobs = MinionManager.GetMinions(Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(Player) + 100, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -312,9 +338,7 @@ namespace xcsoft_Ezreal
                 return;
 
             if (Q.CanCast(mobs[0]) && Menu.Item("jungleclearUseQ").GetValue<bool>())
-            {
                 Q.Cast(Q.GetPrediction(mobs[0]).CastPosition, Menu.Item("packet").GetValue<bool>());
-            }
         }
 
         static void killsteal()
@@ -326,24 +350,23 @@ namespace xcsoft_Ezreal
             {
                 if (target != null)
                 {
-                    if (Q.CanCast(target) && Q.GetDamage(target) >= target.Health + target.HPRegenRate && Q.GetPrediction(target).Hitchance >= HitChance.High)
+                    if (Q.CanCast(target) && Q.GetDamage(target) >= target.Health + target.HPRegenRate)
                         Q.Cast(target, Menu.Item("packet").GetValue<bool>());
                     else
-                        if (W.CanCast(target) && W.GetDamage(target) >= target.Health + target.HPRegenRate && W.GetPrediction(target).Hitchance >= HitChance.High)
+                        if (W.CanCast(target) && W.GetDamage(target) >= target.Health + target.HPRegenRate)
                         W.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
                     else
                     if (E.CanCast(target) && E.GetDamage(target) >= target.Health + target.HPRegenRate)
                     {
                         var vec = Player.ServerPosition.Extend(target.ServerPosition, 475);
-                        if (vec.CountEnemysInRange(750) == 1 && !vec.IsWall() && !vec.UnderTurret(true))
+                        if (vec.CountEnemysInRange(751) == 1 && !vec.IsWall() && !vec.UnderTurret(true) && vec.IsValid())
                             E.Cast(vec, Menu.Item("packet").GetValue<bool>());
                     }
                     else
-                    if (R.CanCast(target) && !target.IsValidTarget(800) && R.GetDamage(target) >= (target.Health + (target.HPRegenRate * 2)) && R.GetPrediction(target).Hitchance >= HitChance.High)
+                    if (R.CanCast(target) && R.GetPrediction(target).Hitchance >= HitChance.High && !target.IsValidTarget(800) && R.GetDamage(target) >= (target.Health + (target.HPRegenRate * 2)))
                         R.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
                 }
             }
         }
-
     }
 }
