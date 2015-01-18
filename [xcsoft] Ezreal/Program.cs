@@ -31,10 +31,10 @@ namespace xcsoft_Ezreal
             if (Player.ChampionName != "Ezreal")
                 return;
 
-            Q = new Spell(SpellSlot.Q, 1100);
+            Q = new Spell(SpellSlot.Q, 1150);
             Q.SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
 
-            W = new Spell(SpellSlot.W, 900);
+            W = new Spell(SpellSlot.W, 1000);
             W.SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
 
             E = new Spell(SpellSlot.E, 1225);
@@ -90,6 +90,7 @@ namespace xcsoft_Ezreal
             Drawings.AddItem(new MenuItem("Qcircle", "Q Range").SetValue(new Circle(true, Color.LightGoldenrodYellow)));
             Drawings.AddItem(new MenuItem("Wcircle", "W Range").SetValue(new Circle(true, Color.LightGoldenrodYellow)));
             Drawings.AddItem(new MenuItem("Ecircle", "E Range").SetValue(new Circle(false, Color.LightGoldenrodYellow)));
+            Drawings.AddItem(new MenuItem("Rcircle", "R Range").SetValue(new Circle(false, Color.LightGoldenrodYellow)));
             Drawings.AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, Color.GreenYellow)));
             Drawings.AddItem(new MenuItem("drawMinionNearKill", "Minion Near Kill").SetValue(new Circle(true, Color.Gray)));
             Drawings.AddItem(new MenuItem("jgpos", "JunglePosition").SetValue(true));
@@ -120,6 +121,7 @@ namespace xcsoft_Ezreal
             var Qcircle = Menu.Item("Qcircle").GetValue<Circle>();
             var Wcircle = Menu.Item("Wcircle").GetValue<Circle>();
             var Ecircle = Menu.Item("Ecircle").GetValue<Circle>();
+            var Rcircle = Menu.Item("Rcircle").GetValue<Circle>();
 
             if (AAcircle.Active)
                 Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), AAcircle.Color, 5);
@@ -132,6 +134,9 @@ namespace xcsoft_Ezreal
 
             if (E.IsReady() && Ecircle.Active)
                 Render.Circle.DrawCircle(Player.Position, 475, Ecircle.Color, 5);
+
+            if (R.IsReady() && Rcircle.Active)
+                Render.Circle.DrawCircle(Player.Position, R.Range, Ecircle.Color, 5);
 
             var drawMinionLastHit = Menu.Item("drawMinionLastHit").GetValue<Circle>();
             var drawMinionNearKill = Menu.Item("drawMinionNearKill").GetValue<Circle>();
@@ -226,8 +231,8 @@ namespace xcsoft_Ezreal
                 return;
 
             var vec = Player.ServerPosition.Extend(Game.CursorPos, 475);
-            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             E.Cast(vec, true);
+            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
         }
 
         static void Auto()
@@ -235,16 +240,18 @@ namespace xcsoft_Ezreal
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Menu.Item("arcane").GetValue<KeyBind>().Active || Player.HasBuff("Recall"))
                 return;
 
-            Obj_AI_Hero target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
+            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Q.Range) && x.IsEnemy && !x.IsDead && x.IsTargetable && !x.HasBuffOfType(BuffType.Invulnerability)))
+            {
+                if (target.UnderTurret(true) && Player.UnderTurret(true))
+                    return;
 
-            if (target.UnderTurret(true) && Player.UnderTurret(true))
-                return;
+                if (Q.CanCast(target) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh && Menu.Item("AutoQ").GetValue<bool>())
+                    Q.Cast(target);
 
-            if (Q.CanCast(target) && Q.GetPrediction(target).Hitchance >= HitChance.VeryHigh && Menu.Item("AutoQ").GetValue<bool>())
-                Q.Cast(target);
-
-            if (R.CanCast(target) && R.GetPrediction(target).Hitchance == HitChance.Immobile && Menu.Item("AutoR").GetValue<bool>())
-                R.Cast(target);
+                if (R.CanCast(target) && R.GetPrediction(target).Hitchance == HitChance.Immobile && Menu.Item("AutoR").GetValue<bool>())
+                    R.Cast(target);
+            }
+            
         }
 
         static void Combo()
@@ -267,21 +274,13 @@ namespace xcsoft_Ezreal
                 var pred = W.GetPrediction(target);
 
                 if (pred.Hitchance >= HitChance.VeryHigh)
-                    W.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
+                    W.Cast(target, Menu.Item("packet").GetValue<bool>());
             }
 
-            if (R.CanCast(target) && Menu.Item("comboUseR").GetValue<bool>())
+            if (Menu.Item("comboUseR").GetValue<bool>())
             {
-                var pred = R.GetPrediction(target);
-
-                foreach (var hittarget in pred.AoeTargetsHit)
-                {
-                    Render.Circle.DrawCircle(hittarget.Position, hittarget.BoundingRadius, Color.Gold);
-                    Render.Circle.DrawCircle(hittarget.Position, hittarget.BoundingRadius + 20, Color.Gold);
-                }
-
-                if (pred.Hitchance >= HitChance.Medium && pred.AoeTargetsHitCount >= 3)
-                    R.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
+                foreach (Obj_AI_Hero target1 in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range) && x.IsEnemy && !x.IsDead && x.IsTargetable && !x.HasBuffOfType(BuffType.Invulnerability)))
+                    R.CastIfWillHit(target1, 2, Menu.Item("packet").GetValue<bool>());
             }
         }
 
@@ -310,7 +309,7 @@ namespace xcsoft_Ezreal
             {
                 var vMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 foreach (Obj_AI_Base minions in vMinions.Where(minions => minions.Health <= Q.GetDamage(minions)))
-                    Q.Cast(minions, Menu.Item("packet").GetValue<bool>(), false);
+                    Q.Cast(minions, Menu.Item("packet").GetValue<bool>());
             }
         }
 
@@ -323,7 +322,7 @@ namespace xcsoft_Ezreal
             {
                 var vMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 foreach (Obj_AI_Base minions in vMinions.Where(minions => minions.Health <= Q.GetDamage(minions)))
-                    Q.Cast(minions, Menu.Item("packet").GetValue<bool>(), false);
+                    Q.Cast(minions, Menu.Item("packet").GetValue<bool>());
             }
         }
 
@@ -346,7 +345,7 @@ namespace xcsoft_Ezreal
             if (!Menu.Item("killsteal").GetValue<bool>())
                 return;
 
-            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Q.Range) && x.IsEnemy && !x.IsDead && x.IsTargetable && !x.HasBuffOfType(BuffType.Invulnerability)))
+            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range) && x.IsEnemy && !x.IsDead && x.IsTargetable && !x.HasBuffOfType(BuffType.Invulnerability)))
             {
                 if (target != null)
                 {
@@ -354,7 +353,7 @@ namespace xcsoft_Ezreal
                         Q.Cast(target, Menu.Item("packet").GetValue<bool>());
                     else
                         if (W.CanCast(target) && W.GetDamage(target) >= target.Health + target.HPRegenRate)
-                        W.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
+                        W.Cast(target, Menu.Item("packet").GetValue<bool>());
                     else
                     if (E.CanCast(target) && E.GetDamage(target) >= target.Health + target.HPRegenRate)
                     {
@@ -364,7 +363,7 @@ namespace xcsoft_Ezreal
                     }
                     else
                     if (R.CanCast(target) && R.GetPrediction(target).Hitchance >= HitChance.High && !target.IsValidTarget(800) && R.GetDamage(target) >= (target.Health + (target.HPRegenRate * 2)))
-                        R.Cast(target, Menu.Item("packet").GetValue<bool>(), true);
+                        R.Cast(target, Menu.Item("packet").GetValue<bool>());
                 }
             }
         }
