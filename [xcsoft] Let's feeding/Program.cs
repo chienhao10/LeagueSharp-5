@@ -20,6 +20,7 @@ namespace _xcsoft__Let_s_feeding
 
         private static SpellSlot Revive;
         private static SpellSlot Ghost;
+        private static SpellSlot Flash;
 
         private static Menu Menu;
 
@@ -37,6 +38,7 @@ namespace _xcsoft__Let_s_feeding
 
             Revive = Player.GetSpellSlot("SummonerRevive");
             Ghost = Player.GetSpellSlot("SummonerHaste");
+            Flash = Player.GetSpellSlot("SummonerFlash");
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -63,7 +65,7 @@ namespace _xcsoft__Let_s_feeding
         {
             if (!Menu.Item("switch").GetValue<bool>()) return;
 
-            if((Player.InShop() || Player.IsDead) && Player.InventoryItems.Length < 6)
+            if( (Player.InShop() || Player.IsDead) && Player.InventoryItems.Length < 6)
             {
                 if (Player.Gold >= 475 && Player.InventoryItems.Any(i => i.Id == ItemId.Boots_of_Mobility))
                     Player.BuyItem(ItemId.Boots_of_Mobility_Enchantment_Homeguard);
@@ -71,15 +73,16 @@ namespace _xcsoft__Let_s_feeding
                 if (Player.Gold >= 475 && Player.InventoryItems.Any(i => i.Id == ItemId.Boots_of_Speed))
                     Player.BuyItem(ItemId.Boots_of_Mobility);
 
-                if (Player.Gold >= 325 && Game.ClockTime < 10)
+                if (Player.Gold >= 325 && Game.Time < 30)
                     Player.BuyItem(ItemId.Boots_of_Speed);
             }
 
+            var enemyfountainpos = Player.Team == GameObjectTeam.Chaos ? SummonersRift_BlueFountain : SummonersRift_PurpleFountain;
+            var castpos = Player.ServerPosition.Extend(enemyfountainpos, 10);
+
             if (Player.Spellbook.CanUseSpell(Revive) == SpellState.Ready) Player.Spellbook.CastSpell(Revive);
             if (Player.Spellbook.CanUseSpell(Ghost) == SpellState.Ready) Player.Spellbook.CastSpell(Ghost);
-
-            var enemyfountainpos = Player.Team == GameObjectTeam.Chaos ? SummonersRift_BlueFountain : SummonersRift_PurpleFountain;
-            var castpos = Player.Position.Extend(enemyfountainpos, 1);
+            if (Player.Spellbook.CanUseSpell(Flash) == SpellState.Ready) Player.Spellbook.CastSpell(Flash, castpos);
 
             if (Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.Q, castpos);
             if (Player.Spellbook.CanUseSpell(SpellSlot.W) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.W, castpos);
@@ -89,7 +92,6 @@ namespace _xcsoft__Let_s_feeding
             if (Player.IsDead || Game.ClockTime <= lasttime + 0.5) return;
 
             lasttime = Game.ClockTime;
-
             Player.IssueOrder(GameObjectOrder.MoveTo, enemyfountainpos);
         }
 
