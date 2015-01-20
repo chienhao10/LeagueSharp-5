@@ -73,7 +73,7 @@ namespace _xcsoft__Let_s_feeding
                 if (Player.Gold >= 475 && Player.InventoryItems.Any(i => i.Id == ItemId.Boots_of_Speed))
                     Player.BuyItem(ItemId.Boots_of_Mobility);
 
-                if (Player.Gold >= 325 && Game.Time < 30)
+                if (Player.Gold >= 325)
                     Player.BuyItem(ItemId.Boots_of_Speed);
             }
 
