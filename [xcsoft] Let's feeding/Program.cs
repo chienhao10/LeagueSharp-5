@@ -59,7 +59,7 @@ namespace _xcsoft__Let_s_feeding
                 if (Player.Gold >= 475 && Player.InventoryItems.Any(i => i.Id == ItemId.Boots_of_Speed))
                     Player.BuyItem(ItemId.Boots_of_Mobility);
 
-                if (Player.Gold >= 325 && !Player.InventoryItems.Any(i => i.Id == ItemId.Boots_of_Mobility))
+                if (Player.Gold >= 325 && !Player.InventoryItems.Any(i => i.Id == ItemId.Boots_of_Mobility_Enchantment_Homeguard))
                     Player.BuyItem(ItemId.Boots_of_Speed);
             }
 
@@ -72,6 +72,11 @@ namespace _xcsoft__Let_s_feeding
             lasttime = Game.Time;
 
             Player.IssueOrder(GameObjectOrder.MoveTo, Player.Team == GameObjectTeam.Chaos ? SummonersRift_BlueFountain : SummonersRift_PurpleFountain);
+
+            if (Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.Q);
+            if (Player.Spellbook.CanUseSpell(SpellSlot.W) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.W);
+            if (Player.Spellbook.CanUseSpell(SpellSlot.E) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.E);
+            if (Player.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.R);
         }
 
         static void Drawing_OnDraw(EventArgs args)
