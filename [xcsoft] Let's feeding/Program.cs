@@ -63,7 +63,7 @@ namespace _xcsoft__Let_s_feeding
 
         static void Game_OnGameUpdate(EventArgs args)
         {
-            if (!Menu.Item("switch").GetValue<bool>()) return;
+            if (!Menu.Item("switch").GetValue<bool>() || Game.ClockTime < 36) return;
 
             if( (Player.InShop() || Player.IsDead) && Player.InventoryItems.Length < 6)
             {
@@ -78,17 +78,36 @@ namespace _xcsoft__Let_s_feeding
             }
 
             var enemyfountainpos = Player.Team == GameObjectTeam.Chaos ? SummonersRift_BlueFountain : SummonersRift_PurpleFountain;
-            var castpos = Player.ServerPosition.Extend(enemyfountainpos, 400);
+            var castpos = Player.ServerPosition.Extend(enemyfountainpos, 1000);
+            var castpos2 = Player.ServerPosition.Extend(enemyfountainpos, 300);
 
             if (Player.Spellbook.CanUseSpell(Revive) == SpellState.Ready) Player.Spellbook.CastSpell(Revive);
-            if (Player.Spellbook.CanUseSpell(Ghost) == SpellState.Ready && !Player.InFountain()) Player.Spellbook.CastSpell(Ghost);
-            if (Player.Spellbook.CanUseSpell(Flash) == SpellState.Ready && !Player.InFountain()) Player.Spellbook.CastSpell(Flash, castpos);
+            if (Player.Spellbook.CanUseSpell(Ghost) == SpellState.Ready) Player.Spellbook.CastSpell(Ghost);
+            if (Player.Spellbook.CanUseSpell(Flash) == SpellState.Ready) Player.Spellbook.CastSpell(Flash, castpos);
 
-            if (Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.Q, castpos);
-            if (Player.Spellbook.CanUseSpell(SpellSlot.W) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.W, castpos);
-            if (Player.Spellbook.CanUseSpell(SpellSlot.E) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.E, castpos);
-            if (Player.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.R, castpos);
+            if (Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Ready)
+            {
+                Player.Spellbook.CastSpell(SpellSlot.Q, castpos);
+                if (Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.Q, castpos2);
+            }
 
+            if (Player.Spellbook.CanUseSpell(SpellSlot.W) == SpellState.Ready)
+            {
+                Player.Spellbook.CastSpell(SpellSlot.W, castpos);
+                if (Player.Spellbook.CanUseSpell(SpellSlot.W) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.W, castpos2);
+            }
+
+            if (Player.Spellbook.CanUseSpell(SpellSlot.E) == SpellState.Ready)
+            {
+                Player.Spellbook.CastSpell(SpellSlot.E, castpos);
+                if (Player.Spellbook.CanUseSpell(SpellSlot.E) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.E, castpos2);
+            }
+
+            if (Player.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready)
+            {
+                Player.Spellbook.CastSpell(SpellSlot.R, castpos);
+                if (Player.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.R, castpos2);
+            }
 
             if (Player.IsDead) return;
 
