@@ -78,7 +78,7 @@ namespace _xcsoft__Let_s_feeding
             }
 
             var enemyfountainpos = Player.Team == GameObjectTeam.Chaos ? SummonersRift_BlueFountain : SummonersRift_PurpleFountain;
-            var castpos = Player.ServerPosition.Extend(enemyfountainpos, 10);
+            var castpos = Player.ServerPosition.Extend(enemyfountainpos, 400);
 
             if (Player.Spellbook.CanUseSpell(Revive) == SpellState.Ready) Player.Spellbook.CastSpell(Revive);
             if (Player.Spellbook.CanUseSpell(Ghost) == SpellState.Ready) Player.Spellbook.CastSpell(Ghost);
