@@ -24,7 +24,7 @@ namespace _xcsoft__Let_s_feeding
 
         private static Menu Menu;
 
-        static float lasttime; 
+        static float lastmove;
 
         static void Main(string[] args)
         {
@@ -81,18 +81,23 @@ namespace _xcsoft__Let_s_feeding
             var castpos = Player.ServerPosition.Extend(enemyfountainpos, 400);
 
             if (Player.Spellbook.CanUseSpell(Revive) == SpellState.Ready) Player.Spellbook.CastSpell(Revive);
-            if (Player.Spellbook.CanUseSpell(Ghost) == SpellState.Ready) Player.Spellbook.CastSpell(Ghost);
-            if (Player.Spellbook.CanUseSpell(Flash) == SpellState.Ready) Player.Spellbook.CastSpell(Flash, castpos);
+            if (Player.Spellbook.CanUseSpell(Ghost) == SpellState.Ready && !Player.InFountain()) Player.Spellbook.CastSpell(Ghost);
+            if (Player.Spellbook.CanUseSpell(Flash) == SpellState.Ready && !Player.InFountain()) Player.Spellbook.CastSpell(Flash, castpos);
 
             if (Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.Q, castpos);
             if (Player.Spellbook.CanUseSpell(SpellSlot.W) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.W, castpos);
             if (Player.Spellbook.CanUseSpell(SpellSlot.E) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.E, castpos);
             if (Player.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.R, castpos);
 
-            if (Player.IsDead || Game.ClockTime <= lasttime + 0.5) return;
 
-            lasttime = Game.ClockTime;
-            Player.IssueOrder(GameObjectOrder.MoveTo, enemyfountainpos);
+            if (Player.IsDead) return;
+
+            if (Game.ClockTime >= lastmove + 1)//lag free
+            {
+                Game.Say("/laugh");
+                Player.IssueOrder(GameObjectOrder.MoveTo, enemyfountainpos);//laugh motion cancel and move
+                lastmove = Game.ClockTime;
+            }
         }
 
         static void Drawing_OnDraw(EventArgs args)
