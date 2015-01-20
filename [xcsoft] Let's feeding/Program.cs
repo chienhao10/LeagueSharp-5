@@ -51,7 +51,7 @@ namespace _xcsoft__Let_s_feeding
 
             if (Menu.Item("switch").GetValue<bool>())
             {
-                var level = new AutoLevel(new[] { 2, 1, 3, 2, 2, 4, 2, 3, 2, 3, 4, 3, 3, 1, 1, 4, 1, 1 });
+                var level = new AutoLevel(new[] { 1, 2, 3, 1, 2, 4, 3, 1, 2, 3, 4, 1, 2, 3, 1, 4, 1, 2 });
             }
 
             Game.PrintChat("<font color = \"#33CCCC\">[xcsoft] Let's feeding -</font> Loaded");
@@ -63,7 +63,7 @@ namespace _xcsoft__Let_s_feeding
 
         static void Game_OnGameUpdate(EventArgs args)
         {
-            if (!Menu.Item("switch").GetValue<bool>() || Game.ClockTime < 36) return;
+            if (!Menu.Item("switch").GetValue<bool>() || Game.ClockTime < 40) return;
 
             if( (Player.InShop() || Player.IsDead) && Player.InventoryItems.Length < 6)
             {
@@ -73,49 +73,55 @@ namespace _xcsoft__Let_s_feeding
                 if (Player.Gold >= 475 && Player.InventoryItems.Any(i => i.Id == ItemId.Boots_of_Speed))
                     Player.BuyItem(ItemId.Boots_of_Mobility);
 
-                if (Player.Gold >= 325)
+                if (Player.Gold >= 325 && !Player.InventoryItems.Any(i => i.Id == ItemId.Boots_of_Speed))
                     Player.BuyItem(ItemId.Boots_of_Speed);
             }
 
-            var enemyfountainpos = Player.Team == GameObjectTeam.Chaos ? SummonersRift_BlueFountain : SummonersRift_PurpleFountain;
-            var castpos = Player.ServerPosition.Extend(enemyfountainpos, 1000);
-            var castpos2 = Player.ServerPosition.Extend(enemyfountainpos, 300);
+            UnconditionalCastSpell(Revive);
+            UnconditionalCastSpell(Ghost);
+            UnconditionalCastSpell(Flash);
 
-            if (Player.Spellbook.CanUseSpell(Revive) == SpellState.Ready) Player.Spellbook.CastSpell(Revive);
-            if (Player.Spellbook.CanUseSpell(Ghost) == SpellState.Ready) Player.Spellbook.CastSpell(Ghost);
-            if (Player.Spellbook.CanUseSpell(Flash) == SpellState.Ready) Player.Spellbook.CastSpell(Flash, castpos);
+            if (Player.ChampionName != "Xerath" && Player.ChampionName != "Vi" && Player.ChampionName != "Varus")
+                UnconditionalCastSpell(SpellSlot.Q);
 
-            if (Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Ready)
-            {
-                Player.Spellbook.CastSpell(SpellSlot.Q, castpos);
-                if (Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.Q, castpos2);
-            }
-
-            if (Player.Spellbook.CanUseSpell(SpellSlot.W) == SpellState.Ready)
-            {
-                Player.Spellbook.CastSpell(SpellSlot.W, castpos);
-                if (Player.Spellbook.CanUseSpell(SpellSlot.W) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.W, castpos2);
-            }
-
-            if (Player.Spellbook.CanUseSpell(SpellSlot.E) == SpellState.Ready)
-            {
-                Player.Spellbook.CastSpell(SpellSlot.E, castpos);
-                if (Player.Spellbook.CanUseSpell(SpellSlot.E) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.E, castpos2);
-            }
-
-            if (Player.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready)
-            {
-                Player.Spellbook.CastSpell(SpellSlot.R, castpos);
-                if (Player.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready) Player.Spellbook.CastSpell(SpellSlot.R, castpos2);
-            }
+            UnconditionalCastSpell(SpellSlot.W);
+            UnconditionalCastSpell(SpellSlot.E);
+            UnconditionalCastSpell(SpellSlot.R);
 
             if (Player.IsDead) return;
 
             if (Game.ClockTime >= lastmove + 1)//lag free
             {
                 Game.Say("/laugh");
-                Player.IssueOrder(GameObjectOrder.MoveTo, enemyfountainpos);//laugh motion cancel and move
+                Player.IssueOrder(GameObjectOrder.MoveTo, Player.Team == GameObjectTeam.Chaos ? SummonersRift_BlueFountain : SummonersRift_PurpleFountain);//laugh motion cancel and move
                 lastmove = Game.ClockTime;
+            }
+        }
+
+        static void UnconditionalCastSpell(SpellSlot spell)
+        {
+            if (Player.Spellbook.CanUseSpell(spell) != SpellState.Ready)
+                return;
+
+            var enemyfountainpos = Player.Team == GameObjectTeam.Chaos ? SummonersRift_BlueFountain : SummonersRift_PurpleFountain;
+
+            var castpos = Player.ServerPosition.Extend(enemyfountainpos, 1000);
+            var castpos2 = Player.ServerPosition.Extend(enemyfountainpos, 300);
+
+            Player.Spellbook.CastSpell(spell, castpos);
+
+            if (Player.Spellbook.CanUseSpell(spell) == SpellState.Ready)
+                Player.Spellbook.CastSpell(spell, castpos2);
+
+            if (Player.Spellbook.CanUseSpell(spell) == SpellState.Ready)
+                Player.Spellbook.CastSpell(spell, Player);
+            
+            if (Player.Spellbook.CanUseSpell(spell) == SpellState.Ready)
+            {
+                foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(1000) && x.IsEnemy && !x.IsDead && x.IsTargetable))
+                {
+                    Player.Spellbook.CastSpell(spell, target);
+                }
             }
         }
 
