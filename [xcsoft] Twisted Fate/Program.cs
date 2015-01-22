@@ -76,20 +76,11 @@ namespace xc_TwistedFate
             comboMenu.AddItem(new MenuItem("useblue", "Blue instead of gold if low mana(<20%)").SetValue(false));
             comboMenu.AddItem(new MenuItem("usedfg", "Use Deathfire Grasp").SetValue(true));
             comboMenu.AddItem(new MenuItem("usebft", "Use Blackfire Torch").SetValue(true));
-            Menu.AddSubMenu(comboMenu);
+            Menu.AddSubMenu(comboMenu); 
 
-            var AdditionalsMenu = new Menu("Additional Options", "additionals");
-            AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold when using ultimate(gate)").SetValue(true));
-            AdditionalsMenu.AddItem(new MenuItem("killsteal", "Use Killsteal").SetValue(true));
-            AdditionalsMenu.AddItem(new MenuItem("gapcloser", "Use Anti-gapcloser").SetValue(true));
-            AdditionalsMenu.AddItem(new MenuItem("interrupt", "Use Auto-interrupt").SetValue(true));
-            AdditionalsMenu.AddItem(new MenuItem("usepacket", "Use Packet casting").SetValue(true));
-            AdditionalsMenu.AddItem(new MenuItem("autoIgnite", "Use Auto-Ignite (ks)").SetValue(true));
-            Menu.AddSubMenu(AdditionalsMenu);
-
-            var harassMenu = new Menu("harass Settings", "harassop");
+            var harassMenu = new Menu("Harass Settings", "harassop");
             harassMenu.AddItem(new MenuItem("harassUseQ", "Use Q").SetValue(true));
-            harassMenu.AddItem(new MenuItem("harassrange", "harass Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450))).ValueChanged +=
+            harassMenu.AddItem(new MenuItem("harassrange", "Harass range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450))).ValueChanged +=
             delegate(object sender, OnValueChangeEventArgs eventArgs)
             {
                 Render.Circle.DrawCircle(Player.Position, eventArgs.GetNewValue<Slider>().Value, Color.Aquamarine, 5);
@@ -104,7 +95,7 @@ namespace xc_TwistedFate
 
             var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
             laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(true));
-            laneclearMenu.AddItem(new MenuItem("laneclearQmana", "Cast Q if mana % >").SetValue(new Slider(30, 0, 100)));
+            laneclearMenu.AddItem(new MenuItem("laneclearQmana", "Cast Q if mana % >").SetValue(new Slider(50, 0, 100)));
             laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Cast Q if Hit minions number >=").SetValue(new Slider(5, 2, 7)));
             laneclearMenu.AddItem(new MenuItem("laneclearUseW", "Use W").SetValue(true));
             laneclearMenu.AddItem(new MenuItem("laneclearredmc", "Red instead of blue if minions number >=").SetValue(new Slider(3, 2, 5)));
@@ -118,6 +109,15 @@ namespace xc_TwistedFate
             jungleclearMenu.AddItem(new MenuItem("jungleclearbluemana", "Pick blue if mana % <").SetValue(new Slider(30, 0, 100)));
             jungleclearMenu.AddItem(new MenuItem("jgtxt", "-Card Automatic selection"));
             Menu.AddSubMenu(jungleclearMenu);
+
+            var AdditionalsMenu = new Menu("Additional Options", "additionals");
+            AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold when using ultimate(gate)").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("killsteal", "Use Killsteal").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("gapcloser", "Use Anti-gapcloser").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("interrupt", "Use Auto-interrupt").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("usepacket", "Use Packet casting").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("autoIgnite", "Use Auto-Ignite (ks)").SetValue(true));
+            Menu.AddSubMenu(AdditionalsMenu);
 
             var Drawings = new Menu("Drawings Settings", "Drawings");
             Drawings.AddItem(new MenuItem("AAcircle", "AA Range").SetValue(true));
