@@ -105,7 +105,7 @@ namespace Xerath_edit
             SpellList.Add(R);
 
             //Create the menu
-            Config = new Menu(ChampionName, ChampionName, true);
+            Config = new Menu("[Esk0r]" + ChampionName + "(edited by xcsoft)", ChampionName + "editedbyxcsoft", true);
 
             //Orbwalker submenu
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
@@ -131,7 +131,7 @@ namespace Xerath_edit
             //Misc
             Config.AddSubMenu(new Menu("R", "R"));
             Config.SubMenu("R").AddItem(new MenuItem("EnableRUsage", "Auto use charges").SetValue(true));
-            Config.SubMenu("R").AddItem(new MenuItem("rMode", "Mode").SetValue(new StringList(new[] { "Normal", "Custom delays", "OnTap"})));
+            Config.SubMenu("R").AddItem(new MenuItem("rMode", "Mode").SetValue(new StringList(new[] { "Normal", "Custom delays", "OnTap", "Hitchance Veryhigh"})));
             Config.SubMenu("R").AddItem(new MenuItem("rModeKey", "OnTap key").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
             Config.SubMenu("R").AddSubMenu(new Menu("Custom delays", "Custom delays"));
             for (int i = 1; i <= 3; i++)
@@ -249,7 +249,7 @@ namespace Xerath_edit
         {
             if (!Config.Item("AutoEGC").GetValue<bool>()) return;
 
-            if (Player.Distance(gapcloser.Sender) < E.Range)
+            if (Player.Distance(gapcloser.Sender, false) < E.Range)
             {
                 E.Cast(gapcloser.Sender);
             }
@@ -286,7 +286,7 @@ namespace Xerath_edit
         {
             if (!Config.Item("InterruptSpells").GetValue<bool>()) return;
 
-            if (Player.Distance(unit) < E.Range)
+            if (Player.Distance(unit, false) < E.Range)
             {
                 E.Cast(unit);
             }
@@ -313,7 +313,7 @@ namespace Xerath_edit
 
             if (eTarget != null && useE && E.IsReady())
             {
-                if (Player.Distance(eTarget) < E.Range * 0.4f)
+                if (Player.Distance(eTarget, false) < E.Range * 0.4f)
                     E.Cast(eTarget);
                 else if ((!useW || !W.IsReady()))
                     E.Cast(eTarget);
@@ -323,15 +323,15 @@ namespace Xerath_edit
             {
                 if (Q.IsCharging)
                 {
-                    float distance = Player.Distance(qTarget) + 30;
+                    float distance = Player.Distance(qTarget, false) + 20;
 
                     if (distance > Q.ChargedMaxRange)
                         distance = Q.ChargedMaxRange;
 
-                    if (Q.Range >= distance && Q.GetPrediction(qTarget).Hitchance >= HitChance.High)
+                    if (Q.Range >= distance && Q.GetPrediction(qTarget).Hitchance >= HitChance.VeryHigh)
                         Q.Cast(qTarget, false, false);
                 }
-                else if (qTarget != null && (!useW || !W.IsReady() || Player.Distance(qTarget) > W.Range))
+                else if (qTarget != null && (!useW || !W.IsReady() || Player.Distance(qTarget, false) > W.Range))
                 {
                     Q.StartCharging();
                 }
@@ -347,7 +347,7 @@ namespace Xerath_edit
             var bestRatio = 0f;
 
             if (TargetSelector.SelectedTarget.IsValidTarget() && !TargetSelector.IsInvulnerable(TargetSelector.SelectedTarget, TargetSelector.DamageType.Magical, true) &&
-                (Game.CursorPos.Distance(TargetSelector.SelectedTarget.ServerPosition) < distance && ObjectManager.Player.Distance(TargetSelector.SelectedTarget) < R.Range))
+                (Game.CursorPos.Distance(TargetSelector.SelectedTarget.ServerPosition) < distance && ObjectManager.Player.Distance(TargetSelector.SelectedTarget,false) < R.Range))
             {
                 return TargetSelector.SelectedTarget;
             }
@@ -391,7 +391,7 @@ namespace Xerath_edit
                 switch (rMode)
                 {
                     case 0://Normal
-                        R.Cast(rTarget, true);
+                            R.Cast(rTarget, true);
                         break;
 
                     case 1://Selected delays.
@@ -402,6 +402,11 @@ namespace Xerath_edit
 
                     case 2://On tap
                         if (RCharge.TapKeyPressed)
+                            R.Cast(rTarget, true);
+                        break;
+
+                    case 4://Hitchance Veryhigh[added by xcsoft]
+                        if(R.GetPrediction(rTarget).Hitchance >= HitChance.VeryHigh)
                             R.Cast(rTarget, true);
                         break;
                 }
