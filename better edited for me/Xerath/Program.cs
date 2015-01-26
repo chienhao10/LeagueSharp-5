@@ -314,9 +314,15 @@ namespace Xerath_edit
             if (eTarget != null && useE && E.IsReady())
             {
                 if (Player.Distance(eTarget, false) < E.Range * 0.4f)
-                    E.Cast(eTarget);
+                {
+                    if(E.GetPrediction(eTarget).Hitchance >= HitChance.VeryHigh)
+                        E.Cast(eTarget);
+                }
                 else if ((!useW || !W.IsReady()))
-                    E.Cast(eTarget);
+                {
+                    if (E.GetPrediction(eTarget).Hitchance >= HitChance.VeryHigh)
+                        E.Cast(eTarget);
+                }
             }
 
             if (useQ && Q.IsReady())
@@ -337,7 +343,7 @@ namespace Xerath_edit
                 }
             }
 
-            if (wTarget != null && useW && W.IsReady())
+            if (wTarget != null && useW && W.IsReady() && W.GetPrediction(wTarget).Hitchance >= HitChance.VeryHigh)
                 W.Cast(wTarget, false, true);
         }
 
