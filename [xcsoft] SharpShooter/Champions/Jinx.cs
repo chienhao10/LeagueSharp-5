@@ -57,7 +57,6 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingPTimer", "Passive Timer", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingTarget", "AA Target", true).SetValue(true));
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -119,7 +118,7 @@ namespace Sharpshooter.Champions
                 }
             }
 
-            if (SharpShooter.Menu.Item("drawingTarget", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("drawingTarget").GetValue<Boolean>())
             {
                 var target = TargetSelector.GetTarget(GetQActiveRange, TargetSelector.DamageType.Physical, true);
 
@@ -127,8 +126,6 @@ namespace Sharpshooter.Champions
                 {
                     if(QisActive)
                         Render.Circle.DrawCircle(target.Position, 150, Color.Red);
-
-                    Render.Circle.DrawCircle(target.Position, target.BoundingRadius, Color.Red);
                 }
             }
 
@@ -164,6 +161,9 @@ namespace Sharpshooter.Champions
         static void QSwitch(Boolean activate)
         {
             if (!Q.IsReady())
+                return;
+
+            if (QisActive && Player.IsWindingUp)
                 return;
 
             if (activate && !QisActive)

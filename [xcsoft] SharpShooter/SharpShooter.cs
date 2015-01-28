@@ -42,6 +42,7 @@ namespace Sharpshooter
             Type.GetType("Sharpshooter.Champions." + Player.ChampionName).GetMethod("Load").Invoke(null, null);
 
             Menu.SubMenu("Drawings").AddItem(new MenuItem("brank", " "));
+            Menu.SubMenu("Drawings").AddItem(new MenuItem("pptxt", "--public options--"));
 
             Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingTarget", "AA Target").SetValue(true));
             Menu.SubMenu("Drawings").AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, Color.GreenYellow)));
