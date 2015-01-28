@@ -208,14 +208,22 @@ namespace Sharpshooter.Champions
             if (!Orbwalking.CanMove(1))
                 return;
 
-            var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
-            var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
+            if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
+            {
+                var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
 
-            if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.High && !Wtarget.HasBuffOfType(BuffType.SpellShield) && SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
-                W.Cast(Wtarget);
+                if(W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
+                    W.Cast(Wtarget);
+            }
+                
+            if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>())
+            {
+                var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
 
-            if (R.IsReady() && Rtarget.IsValidTarget(1000) && !Rtarget.HasBuffOfType(BuffType.SpellShield) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh && SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>())
-                R.Cast(Rtarget);
+                if(R.IsReady() && Rtarget.IsValidTarget(1000) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
+                    R.Cast(Rtarget);
+            }
+                
         }
 
         static void Harass()
@@ -223,10 +231,13 @@ namespace Sharpshooter.Champions
             if (!Orbwalking.CanMove(1) || !(Player.ManaPercentage() > SharpShooter.Menu.Item("harassMana", true).GetValue<Slider>().Value))
                 return;
 
-            var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
+            if (SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>())
+            {
+                var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
 
-            if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh && !Wtarget.HasBuffOfType(BuffType.SpellShield)  && SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>())
-                W.Cast(Wtarget);
+                if(W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
+                    W.Cast(Wtarget);
+            }
         }
 
         static void Laneclear()

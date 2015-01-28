@@ -43,7 +43,7 @@ namespace Sharpshooter.Champions
 
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("antigapcloser", "Use Anti-Gapcloser", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("AutoW", "Autocast W on immobile targets", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("dash", "Dash to Mouse", true).SetValue(new KeyBind('T', KeyBindType.Press)));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("dash", "Dash to Mouse", true).SetValue(new KeyBind('G', KeyBindType.Press)));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.FromArgb(255, 94, 0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQ", "Q Range", true).SetValue(new Circle(true, Color.FromArgb(255,94,0))));
@@ -161,8 +161,8 @@ namespace Sharpshooter.Champions
             return (result - Game.Time);
         }
 
-        static bool IsCollidingWithChamps(Obj_AI_Hero source, Vector3 targetpos, float width)
-        {//part of baseult3
+        static bool CollisionCheck(Obj_AI_Hero source, Vector3 targetpos, float width)
+        {
             var input = new PredictionInput
             {
                 Radius = width,
@@ -171,7 +171,7 @@ namespace Sharpshooter.Champions
 
             input.CollisionObjects[0] = CollisionableObjects.Heroes;
 
-            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Any();
+            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count() == 1;
         }
 
         static void Combo()
@@ -187,19 +187,19 @@ namespace Sharpshooter.Champions
                     Q.Cast(Qtarget);
             }
 
-            if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
             {
-                var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
+                var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
 
-                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
-                    Q.Cast(Qtarget);
+                if (W.CanCast(Wtarget)  && !Wtarget.HasBuffOfType(BuffType.SpellImmunity) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
+                    W.Cast(Wtarget);
             }
                 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>())
             {
                 var Rtarget = TargetSelector.GetTarget(1500 + (500 * R.Level), TargetSelector.DamageType.Physical, true);
 
-               if(R.IsReady() && Rtarget.IsValidTarget(1500 + (500 * R.Level)) && Rtarget.Health + Rtarget.HPRegenRate * 2 <= R.GetDamage(Rtarget) && IsCollidingWithChamps(Player, Rtarget.ServerPosition ,100))
+                if (R.IsReady() && Rtarget.IsValidTarget(1500 + (500 * R.Level)) && Rtarget.Health + Rtarget.HPRegenRate * 2 <= R.GetDamage(Rtarget) && CollisionCheck(Player, Rtarget.ServerPosition, 150))
                    R.Cast(Rtarget);
             }
         }
@@ -209,10 +209,14 @@ namespace Sharpshooter.Champions
             if (!Orbwalking.CanMove(1) || !(Player.ManaPercentage() > SharpShooter.Menu.Item("harassMana", true).GetValue<Slider>().Value))
                 return;
 
-            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
+            if (SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
+            {
+                var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-            if (Q.CanCast(target) && SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>() && Q.GetPrediction(target).Hitchance >= HitChance.High)
-                Q.Cast(target);
+                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
+                    Q.Cast(Qtarget);
+            }
+                
         }
 
         static void Laneclear()

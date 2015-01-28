@@ -99,6 +99,7 @@ namespace Sharpshooter.Champions
                     {
                         var targetpos = Drawing.WorldToScreen(Player.Position);
                         Drawing.DrawText(targetpos[0] - 10, targetpos[1], Color.Gold, "" + (buff.EndTime - Game.ClockTime));
+                        break;
                     }
                 }
             }

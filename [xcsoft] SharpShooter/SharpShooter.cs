@@ -43,6 +43,7 @@ namespace Sharpshooter
 
             Menu.SubMenu("Drawings").AddItem(new MenuItem("brank", " "));
 
+            Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingTarget", "AA Target").SetValue(true));
             Menu.SubMenu("Drawings").AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, Color.GreenYellow)));
             Menu.SubMenu("Drawings").AddItem(new MenuItem("drawMinionNearKill", "Minion Near Kill").SetValue(new Circle(true, Color.Gray)));
             Menu.SubMenu("Drawings").AddItem(new MenuItem("JunglePosition", "JunglePosition").SetValue(true));
@@ -53,9 +54,12 @@ namespace Sharpshooter
         }
 
         static void Drawing_OnDraw(EventArgs args)
-        {//part of marksman
+        {
+            //part of marksman
+
             var drawMinionLastHit = SharpShooter.Menu.Item("drawMinionLastHit").GetValue<Circle>();
             var drawMinionNearKill = SharpShooter.Menu.Item("drawMinionNearKill").GetValue<Circle>();
+
             if (drawMinionLastHit.Active || drawMinionNearKill.Active)
             {
                 var xMinions =
@@ -92,6 +96,15 @@ namespace Sharpshooter
                 Render.Circle.DrawCircle(new Vector3(10342.77f, 8896.083f, 51.72742f), circleRange, Color.Red, 5); // red team :wolfs
                 Render.Circle.DrawCircle(new Vector3(7001.741f, 9915.717f, 54.02466f), circleRange, Color.Red, 5); // red team :wariaths                    
             }
+
+            if (SharpShooter.Menu.Item("drawingTarget").GetValue<Boolean>())
+            {
+                var target = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(Player), TargetSelector.DamageType.Physical, true);
+
+                if (target != null)
+                    Render.Circle.DrawCircle(target.Position, target.BoundingRadius, Color.Red);
+            }
+
         }
     }
 }

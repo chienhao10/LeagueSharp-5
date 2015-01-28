@@ -20,7 +20,7 @@ namespace Sharpshooter.Champions
             Q = new Spell(SpellSlot.Q, 900f);
             E = new Spell(SpellSlot.E, 700f);
 
-            E.SetTargetted(0.35f, 1200f);
+            E.SetTargetted(0.35f, 2000f);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
@@ -46,7 +46,6 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(false, Color.FromArgb(183, 0, 0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingRtimer", "R Timer", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingCond", "E Crash Prediction", true).SetValue(new Circle(true, Color.Red)));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingTarget", "AA Target", true).SetValue(true));
             
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -122,17 +121,8 @@ namespace Sharpshooter.Champions
                     {
                         var targetpos = Drawing.WorldToScreen(Player.Position);
                         Drawing.DrawText(targetpos[0] - 10, targetpos[1], Color.Gold, "" + (buff.EndTime - Game.ClockTime));
+                        break;
                     }
-                }
-            }
-
-            if (SharpShooter.Menu.Item("drawingTarget", true).GetValue<Boolean>())
-            {
-                var target = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(Player), TargetSelector.DamageType.Physical, true);
-
-                if (target != null)
-                {
-                    Render.Circle.DrawCircle(target.Position, target.BoundingRadius, Color.Red);
                 }
             }
         }
@@ -174,8 +164,11 @@ namespace Sharpshooter.Champions
 
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsMe && args.SData.Name == "vayneinquisition" && SharpShooter.Menu.Item("AutoRQ", true).GetValue<Boolean>() && Q.IsReady())
-                Q.Cast(Game.CursorPos);
+            if (SharpShooter.Menu.Item("AutoRQ", true).GetValue<Boolean>())
+            {
+                if(sender.IsMe && args.SData.Name == "vayneinquisition" && Q.IsReady())
+                    Q.Cast(Game.CursorPos);
+            }
         }
 
         static bool isUnderAllyTurret(Vector3 Position)
@@ -204,15 +197,20 @@ namespace Sharpshooter.Champions
             if (!Orbwalking.CanMove(1))
                 return;
 
-            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
+            if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
+            {
+                var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-            if (Q.CanCast(target) && SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
-                Q.Cast(Game.CursorPos);
-
+                if(Q.CanCast(Qtarget))
+                    Q.Cast(Game.CursorPos);
+            }
+                
             if (E.IsReady() && SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
             {
                 foreach (var En in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy && hero.IsValidTarget(E.Range) && !hero.HasBuffOfType(BuffType.SpellShield) && !hero.HasBuffOfType(BuffType.SpellImmunity)))
-                {//Part of VayneHunterRework
+                {
+                    //Part of VayneHunterRework
+
                     var EPred = E.GetPrediction(En);
                     int pushDist = 460;
                     var FinalPosition = EPred.UnitPosition.To2D().Extend(Player.ServerPosition.To2D(), -pushDist).To3D();

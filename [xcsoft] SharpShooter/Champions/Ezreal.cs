@@ -8,7 +8,7 @@ using Color = System.Drawing.Color;
 
 namespace Sharpshooter.Champions
 {
-    public static class Kalista
+    public static class Ezreal
     {
         static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         static Orbwalking.Orbwalker Orbwalker { get { return SharpShooter.Orbwalker; } }
@@ -18,38 +18,39 @@ namespace Sharpshooter.Champions
         public static void Load()
         {
             Q = new Spell(SpellSlot.Q, 1150f);
-            W = new Spell(SpellSlot.W, 5500f);
-            E = new Spell(SpellSlot.E, 1000f);
-            R = new Spell(SpellSlot.R, 1200);
+            W = new Spell(SpellSlot.W, 1000f);
+            E = new Spell(SpellSlot.E, 475f);
+            R = new Spell(SpellSlot.R, 2500f);
 
             Q.SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
+            R.SetSkillshot(1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseR", "Use R", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseE", "Use E", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseW", "Use W", true).SetValue(false));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseQ", "Use Q", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearMana", "if Mana % >", true).SetValue(new Slider(20, 0, 100)));
 
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal", true).SetValue(new KeyBind('G', KeyBindType.Press)));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("jump", "Jump to mouse", true).SetValue(new KeyBind('G', KeyBindType.Press)));
 
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQ", "Q Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingW", "W Range", true).SetValue(new Circle(false, Color.FromArgb(0, 230, 255))));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(false, Color.FromArgb(0, 230, 255))));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.Gold)));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQ", "Q Range", true).SetValue(new Circle(true, Color.Gold)));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingW", "W Range", true).SetValue(new Circle(false, Color.Gold)));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(false, Color.Gold)));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(true, Color.Gold)));
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -67,6 +68,13 @@ namespace Sharpshooter.Champions
             {
                 Laneclear();
                 Jungleclear();
+            }
+
+            if(SharpShooter.Menu.Item("jump").GetValue<KeyBind>().Active)
+            {
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                if (E.IsReady())
+                    E.Cast(Game.CursorPos);
             }
 
             Killsteal();
@@ -99,23 +107,17 @@ namespace Sharpshooter.Champions
                 Render.Circle.DrawCircle(Player.Position, R.Range, drawingR.Color);
         }
 
-        static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
-                Orbwalking.ResetAutoAttackTimer();
-        }
-
         static void Killsteal()
         {
             if (!SharpShooter.Menu.Item("killsteal", true).GetValue<Boolean>())
                 return;
 
-            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(E.Range) && x.IsEnemy && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)))
+            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range) && x.IsEnemy && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)))
             {
                 if (target != null)
                 {
-                    if (E.CanCast(target) && (target.Health + target.HPRegenRate) <= E.GetDamage(target))
-                        E.Cast();
+                    if (R.CanCast(target) && (target.Health + target.HPRegenRate * 2) <= R.GetDamage(target))
+                        R.Cast(target);
                 }
             }
         }
@@ -128,20 +130,26 @@ namespace Sharpshooter.Champions
             if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
-                var Qpred = Q.GetPrediction(Qtarget);
 
-                if(Q.CanCast(Qtarget) && !Player.IsDashing() && Qpred.Hitchance >= HitChance.VeryHigh)
+                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
                     Q.Cast(Qtarget);
             }
-                
-            if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
-            {
-                var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
 
-                if (E.CanCast(Etarget) && (Etarget.Health + Etarget.HPRegenRate) <= E.GetDamage(Etarget))
-                    E.Cast();
+            if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
+            {
+                var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
+
+                if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
+                    W.Cast(Wtarget);
             }
 
+            if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>())
+            {
+                var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical, true);
+
+                if (R.CanCast(Rtarget) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
+                    R.CastIfWillHit(Rtarget, 2);
+            }
         }
 
         static void Harass()
@@ -152,18 +160,17 @@ namespace Sharpshooter.Champions
             if (SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
-                var Qpred = Q.GetPrediction(Qtarget);
-                
-                if (Q.CanCast(Qtarget) && !Player.IsDashing() && Qpred.Hitchance >= HitChance.VeryHigh)
+
+                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
                     Q.Cast(Qtarget);
             }
 
-            if (SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>())
             {
-                var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
+                var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
 
-                if (E.CanCast(Etarget) && (Etarget.Health + Etarget.HPRegenRate) <= E.GetDamage(Etarget))
-                    E.Cast();
+                if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
+                    W.Cast(Wtarget);
             }
         }
 
@@ -181,20 +188,8 @@ namespace Sharpshooter.Champions
             {
                 var Farmloc = Q.GetLineFarmLocation(Minions);
 
-                if (Farmloc.MinionsHit >= 3)
+                if (Farmloc.MinionsHit >= 1)
                     Q.Cast(Farmloc.Position);
-            }
-
-            if (E.IsReady() && SharpShooter.Menu.Item("laneclearUseE", true).GetValue<Boolean>())
-            {
-                foreach (var Minion in Minions)
-                {
-                    if (Minion.Health <= E.GetDamage(Minion))
-                    {
-                        E.Cast();
-                        break;
-                    }
-                }
             }
         }
 
@@ -205,17 +200,11 @@ namespace Sharpshooter.Champions
 
             var Mobs = MinionManager.GetMinions(Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(Player) + 100, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
-            if (Mobs.Count < 1)
+            if (Mobs.Count <= 0)
                 return;
 
             if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
                 Q.Cast(Mobs[0].Position);
-
-            if (E.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseE", true).GetValue<Boolean>())
-            {
-                if ((Mobs[0].Health + Mobs[0].HPRegenRate) <= E.GetDamage(Mobs[0]))
-                    E.Cast();
-            }
         }
     }
 }

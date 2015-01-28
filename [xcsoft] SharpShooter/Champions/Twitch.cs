@@ -50,7 +50,6 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQTimer", "Stealth Timer", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingRTimer", "R Timer", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingRLine", "R Pierce Line", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingTarget", "AA Target", true).SetValue(true));
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -129,24 +128,21 @@ namespace Sharpshooter.Champions
                     Drawing.DrawText(targetpos[0] - 60, targetpos[1] - 50, Color.Gold, "Q is not ready");
             }
 
-            var aatarget = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(Player), TargetSelector.DamageType.Physical);
-
-            if(SharpShooter.Menu.Item("drawingTarget", true).GetValue<Boolean>())
-            {
-                if(aatarget != null)
-                    Render.Circle.DrawCircle(aatarget.Position, aatarget.BoundingRadius, Color.Red);
-            }
-
             if (SharpShooter.Menu.Item("drawingRLine", true).GetValue<Boolean>())
             {
-                if (Player.HasBuff("TwitchFullAutomatic", true) && aatarget != null)
+                if (Player.HasBuff("TwitchFullAutomatic", true))
                 {
-                    var from = Drawing.WorldToScreen(Player.Position);
+                    var aatarget = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(Player), TargetSelector.DamageType.Physical);
 
-                    var dis = (Orbwalking.GetRealAutoAttackRange(Player) + 300) - Player.Distance(aatarget, false);
+                    if(aatarget != null)
+                    {
+                        var from = Drawing.WorldToScreen(Player.Position);
 
-                    var to = Drawing.WorldToScreen(dis > 0 ? aatarget.ServerPosition.Extend(Player.Position, -dis) : aatarget.ServerPosition);
-                    Drawing.DrawLine(from[0], from[1], to[0], to[1], 10, Color.FromArgb(100, 71, 200, 62));
+                        var dis = (Orbwalking.GetRealAutoAttackRange(Player) + 300) - Player.Distance(aatarget, false);
+
+                        var to = Drawing.WorldToScreen(dis > 0 ? aatarget.ServerPosition.Extend(Player.Position, -dis) : aatarget.ServerPosition);
+                        Drawing.DrawLine(from[0], from[1], to[0], to[1], 10, Color.FromArgb(100, 71, 200, 62));
+                    }
                 }
             }
 
@@ -158,6 +154,7 @@ namespace Sharpshooter.Champions
                     {
                         var targetpos = Drawing.WorldToScreen(Player.Position);
                         Drawing.DrawText(targetpos[0] - 10, targetpos[1], Color.Gold, "" + (buff.EndTime - Game.ClockTime));
+                        break;
                     }
                 }
             }
@@ -184,22 +181,29 @@ namespace Sharpshooter.Champions
             if (!Orbwalking.CanMove(1))
                 return;
 
-            var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.True, false);
-            var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
-
-            if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.High && SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
-                W.Cast(Wtarget);
-
-            if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellShield) && SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
             {
-                foreach (var buff in Etarget.Buffs)
+                var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.True, false);
+
+                if(W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
+                    W.Cast(Wtarget);
+            }
+               
+            if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
+            {
+                var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
+
+                if(E.CanCast(Etarget))
                 {
-                    if(buff.Name == "twitchdeadlyvenom")
+                    foreach (var buff in Etarget.Buffs)
                     {
-                        if (buff.Count >= SharpShooter.Menu.Item("comboUseEStack", true).GetValue<Slider>().Value)
+                        if (buff.Name == "twitchdeadlyvenom")
                         {
-                            E.Cast();
-                            break;
+                            if (buff.Count >= SharpShooter.Menu.Item("comboUseEStack", true).GetValue<Slider>().Value)
+                            {
+                                E.Cast();
+                                break;
+                            }
                         }
                     }
                 }
@@ -212,22 +216,29 @@ namespace Sharpshooter.Champions
             if (!Orbwalking.CanMove(1) || !(Player.ManaPercentage() > SharpShooter.Menu.Item("harassMana", true).GetValue<Slider>().Value))
                 return;
 
-            var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.True, false);
-            var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
-
-            if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.High && SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>())
-                W.Cast(Wtarget);
-
-            if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellShield) && SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>())
             {
-                foreach (var buff in Etarget.Buffs)
+                var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.True, false);
+
+                if(W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
+                    W.Cast(Wtarget);
+            }
+
+            if (SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
+            {
+                var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
+
+                if (E.CanCast(Etarget))
                 {
-                    if (buff.Name == "twitchdeadlyvenom")
+                    foreach (var buff in Etarget.Buffs)
                     {
-                        if (buff.Count >= SharpShooter.Menu.Item("harassUseEStack", true).GetValue<Slider>().Value)
+                        if (buff.Name == "twitchdeadlyvenom")
                         {
-                            E.Cast();
-                            break;
+                            if (buff.Count >= SharpShooter.Menu.Item("harassUseEStack", true).GetValue<Slider>().Value)
+                            {
+                                E.Cast();
+                                break;
+                            }
                         }
                     }
                 }

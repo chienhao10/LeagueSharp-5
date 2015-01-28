@@ -114,6 +114,7 @@ namespace Sharpshooter.Champions
                     {
                         var targetpos = Drawing.WorldToScreen(Player.Position);
                         Drawing.DrawText(targetpos[0] - 10, targetpos[1], Color.Gold, "" + (buff.EndTime - Game.ClockTime));
+                        break;
                     }
                 }
             }
@@ -145,8 +146,8 @@ namespace Sharpshooter.Champions
                 Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.Gold, "Gapcloser");
             }
 
-            if (E.CanCast(gapcloser.Sender))
-                E.Cast(Player);
+            if (E.CanCast(gapcloser.Sender) && E.GetPrediction(gapcloser.Sender).Hitchance >= HitChance.VeryHigh)
+                E.Cast(gapcloser.Sender);
         }
 
         static void QSwitchForHero(Obj_AI_Hero hero)
@@ -195,8 +196,8 @@ namespace Sharpshooter.Champions
             return (result - Game.Time);
         }
 
-        static bool IsCollidingWithChamps(Obj_AI_Hero source, Vector3 targetpos, float width)
-        {//part of baseult3
+        static bool CollisionCheck(Obj_AI_Hero source, Vector3 targetpos, float width)
+        {
             var input = new PredictionInput
             {
                 Radius = width,
@@ -205,7 +206,7 @@ namespace Sharpshooter.Champions
 
             input.CollisionObjects[0] = CollisionableObjects.Heroes;
 
-            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Any();
+            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count() == 1;
         }
 
         static void Combo()
@@ -220,7 +221,7 @@ namespace Sharpshooter.Champions
             {
                 var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
 
-                if (W.CanCast(Wtarget) && !Wtarget.IsValidTarget(DefaultRange/3) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
+                if (W.CanCast(Wtarget) && !Wtarget.IsValidTarget(DefaultRange / 3) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
                     W.Cast(Wtarget);
             }
 
@@ -228,7 +229,7 @@ namespace Sharpshooter.Champions
             {
                 var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, false);
 
-                if (E.CanCast(Etarget) && E.GetPrediction(Etarget).Hitchance >= HitChance.VeryHigh && Etarget.IsMoving)
+                if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellImmunity) && E.GetPrediction(Etarget).Hitchance >= HitChance.VeryHigh && Etarget.IsMoving)
                     E.Cast(Etarget);
             }
 
@@ -247,6 +248,7 @@ namespace Sharpshooter.Champions
                     double RMaxDamage = RMinDamage * 2;
 
                     double RrangeDamage = RMaxDamage * ((dis / 1200) * 100);
+
                     if (RrangeDamage < RMinDamage) RrangeDamage = RMinDamage; else if (RrangeDamage > RMaxDamage) RrangeDamage = RMaxDamage;
 
                     double RbonusDamage = ((20 + (5 * R.Level)) / 100) * (Rtarget.MaxHealth - Rtarget.Health);
@@ -254,7 +256,7 @@ namespace Sharpshooter.Champions
                     var RDamage = RrangeDamage + RbonusDamage;
                     var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
 
-                    if (predhealth <= RCalcDamage && IsCollidingWithChamps(Player, Rpred.CastPosition, R.Width))
+                    if (predhealth <= RCalcDamage && CollisionCheck(Player, Rpred.CastPosition, R.Width))
                         R.Cast(Rtarget);
                 }
             }
