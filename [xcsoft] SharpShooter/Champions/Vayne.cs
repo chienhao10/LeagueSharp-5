@@ -20,7 +20,7 @@ namespace Sharpshooter.Champions
             Q = new Spell(SpellSlot.Q, 900f);
             E = new Spell(SpellSlot.E, 700f);
 
-            E.SetTargetted(0.35f, 2000f);
+            E.SetTargetted(0.25f, 2200f);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
