@@ -19,13 +19,13 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
-            Q = new Spell(SpellSlot.Q, 1250f);
+            Q = new Spell(SpellSlot.Q, 1300f);
             W = new Spell(SpellSlot.W, 800f);
             E = new Spell(SpellSlot.E, 950f);
             R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.7f, 60f, 2200f, false, SkillshotType.SkillshotLine);
-            W.SetSkillshot(1.1f, 100f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(1.2f, 100f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 80f, 1600f, true, SkillshotType.SkillshotLine);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
@@ -48,7 +48,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.FromArgb(255, 94, 0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQ", "Q Range", true).SetValue(new Circle(true, Color.FromArgb(255,94,0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingW", "W Range", true).SetValue(new Circle(false, Color.FromArgb(255, 94, 0))));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(true, Color.FromArgb(255, 94, 0))));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(false, Color.FromArgb(255, 94, 0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(true, Color.FromArgb(255, 94, 0))));
 
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -77,6 +77,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("dash", true).GetValue<KeyBind>().Active)
             {
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 if(E.IsReady())
                     E.Cast(Game.CursorPos.Extend(Player.Position, 5000));
             }
@@ -110,7 +111,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("dash", true).GetValue<KeyBind>().Active)
             {
-                Render.Circle.DrawCircle(Game.CursorPos, 100, Color.Gold);
+                Render.Circle.DrawCircle(Game.CursorPos, 50, Color.Gold);
                 var targetpos = Drawing.WorldToScreen(Game.CursorPos);
                 Drawing.DrawText(targetpos[0] - 30, targetpos[1] + 40, Color.Gold, "E Dash");
             }
@@ -129,7 +130,7 @@ namespace Sharpshooter.Champions
             }
 
             if (E.CanCast(gapcloser.Sender))
-                E.Cast(gapcloser.Sender.Position);
+                E.Cast(gapcloser.Sender);
             else if (W.CanCast(gapcloser.Sender))
                 W.Cast(gapcloser.End);
         }
@@ -199,7 +200,7 @@ namespace Sharpshooter.Champions
             {
                 var Rtarget = TargetSelector.GetTarget(1500 + (500 * R.Level), TargetSelector.DamageType.Physical, true);
 
-                if (R.IsReady() && Rtarget.IsValidTarget(1500 + (500 * R.Level)) && Rtarget.Health + Rtarget.HPRegenRate * 2 <= R.GetDamage(Rtarget) && CollisionCheck(Player, Rtarget.ServerPosition, 150))
+                if (R.IsReady() && !Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && Rtarget.IsValidTarget(1500 + (500 * R.Level)) && Rtarget.Health + Rtarget.HPRegenRate * 2 <= R.GetDamage(Rtarget) && CollisionCheck(Player, Rtarget.ServerPosition, 150))
                    R.Cast(Rtarget);
             }
         }
