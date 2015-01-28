@@ -57,7 +57,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingPTimer", "Passive Timer", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingTarget", "Target", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingTarget", "AA Target", true).SetValue(true));
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;

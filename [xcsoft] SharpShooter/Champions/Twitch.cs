@@ -100,7 +100,7 @@ namespace Sharpshooter.Champions
             if (W.IsReady() && drawingW.Active)
                 Render.Circle.DrawCircle(Player.Position, W.Range, drawingW.Color);
 
-            if (drawingE.Active)
+            if (E.IsReady() && drawingE.Active)
                 Render.Circle.DrawCircle(Player.Position, E.Range, drawingE.Color);
 
             if(SharpShooter.Menu.Item("drawingQTimer", true).GetValue<Boolean>())
@@ -169,7 +169,7 @@ namespace Sharpshooter.Champions
             if (!SharpShooter.Menu.Item("killsteal", true).GetValue<Boolean>())
                 return;
 
-            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(E.Range) && x.IsEnemy && !x.IsDead && !x.HasBuffOfType(BuffType.Invulnerability)))
+            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(E.Range) && x.IsEnemy && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)))
             {
                 if (target != null)
                 {
@@ -190,7 +190,7 @@ namespace Sharpshooter.Champions
             if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.High && SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
                 W.Cast(Wtarget);
 
-            if (E.CanCast(Etarget) && SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
+            if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellShield) && SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
             {
                 foreach (var buff in Etarget.Buffs)
                 {
@@ -218,7 +218,7 @@ namespace Sharpshooter.Champions
             if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.High && SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>())
                 W.Cast(Wtarget);
 
-            if (E.CanCast(Etarget) && SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
+            if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellShield) && SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
             {
                 foreach (var buff in Etarget.Buffs)
                 {
@@ -254,6 +254,7 @@ namespace Sharpshooter.Champions
 
             if (E.IsReady() && SharpShooter.Menu.Item("laneclearUseE", true).GetValue<Boolean>())
             {
+                var killcount = 0;
                 foreach (var Minion in Minions)
                 {
                     foreach (var buff in Minion.Buffs)
@@ -269,8 +270,11 @@ namespace Sharpshooter.Champions
                     }
 
                     if (Minion.Health <= E.GetDamage(Minion))
-                        E.Cast();
+                        killcount++;
                 }
+
+                if(killcount >= 2)
+                    E.Cast();
             }
         }
 

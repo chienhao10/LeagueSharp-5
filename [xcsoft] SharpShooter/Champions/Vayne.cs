@@ -46,6 +46,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(false, Color.FromArgb(183, 0, 0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingRtimer", "R Timer", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingCond", "E Crash Prediction", true).SetValue(new Circle(true, Color.Red)));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingTarget", "AA Target", true).SetValue(true));
             
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -124,6 +125,16 @@ namespace Sharpshooter.Champions
                     }
                 }
             }
+
+            if (SharpShooter.Menu.Item("drawingTarget", true).GetValue<Boolean>())
+            {
+                var target = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(Player), TargetSelector.DamageType.Physical, true);
+
+                if (target != null)
+                {
+                    Render.Circle.DrawCircle(target.Position, target.BoundingRadius, Color.Red);
+                }
+            }
         }
 
 
@@ -142,7 +153,7 @@ namespace Sharpshooter.Champions
             if (E.CanCast(gapcloser.Sender))
                 E.Cast(gapcloser.Sender);
             else
-                Q.Cast(Game.CursorPos);
+                Q.Cast(Player.ServerPosition.Extend(gapcloser.Sender.ServerPosition, - 300));
         }
 
         static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)

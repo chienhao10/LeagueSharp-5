@@ -136,7 +136,7 @@ namespace Sharpshooter.Champions
             if (!SharpShooter.Menu.Item("AutoQ", true).GetValue<Boolean>())
                 return;
 
-            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Q.Range) && x.IsEnemy && !x.IsDead && !x.HasBuffOfType(BuffType.Invulnerability)))
+            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Q.Range) && x.IsEnemy && !x.HasBuffOfType(BuffType.Invulnerability)))
             {
                 if (target != null)
                 {
