@@ -19,8 +19,6 @@ namespace xc_TwistedFate
 
         private static Spell Q, W;
 
-        private static Items.Item Dfg, Bft;
-
         private static Menu Menu;
 
         private static SpellSlot SFlash;
@@ -41,9 +39,6 @@ namespace xc_TwistedFate
 
             SFlash = Player.GetSpellSlot("SummonerFlash");
             SIgnite = Player.GetSpellSlot("SummonerDot");
-
-            Dfg = new Items.Item((int)ItemId.Deathfire_Grasp, Orbwalking.GetRealAutoAttackRange(Player) + 10);
-            Bft = new Items.Item((int)ItemId.Blackfire_Torch, Orbwalking.GetRealAutoAttackRange(Player) + 10);
 
             Q = new Spell(SpellSlot.Q, 1450);
             Q.SetSkillshot(0.25f, 40f, 1000f, false, SkillshotType.SkillshotLine);
@@ -67,18 +62,16 @@ namespace xc_TwistedFate
             wMenu.AddItem(new MenuItem("plz2", "-W key is sometimes random selection :("));
             Menu.AddSubMenu(wMenu);
 
-            var comboMenu  = new Menu("ComboMode Settings", "comboop");
+            var comboMenu  = new Menu("Combo", "comboop");
             comboMenu.AddItem(new MenuItem("useQ", "Use Q").SetValue(true));
             comboMenu.AddItem(new MenuItem("qrange", "Cast Q if target is in selected range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450)));
             comboMenu.AddItem(new MenuItem("cconly", "Cast Q to CC state enemy only").SetValue(false));
             comboMenu.AddItem(new MenuItem("useW", "Use W").SetValue(true));
             comboMenu.AddItem(new MenuItem("ignoreshield", "Ignore shield target").SetValue(false));
             comboMenu.AddItem(new MenuItem("useblue", "Blue instead of gold if low mana(<20%)").SetValue(false));
-            comboMenu.AddItem(new MenuItem("usedfg", "Use Deathfire Grasp").SetValue(true));
-            comboMenu.AddItem(new MenuItem("usebft", "Use Blackfire Torch").SetValue(true));
             Menu.AddSubMenu(comboMenu); 
 
-            var harassMenu = new Menu("Harass Settings", "harassop");
+            var harassMenu = new Menu("Harass", "harassop");
             harassMenu.AddItem(new MenuItem("harassUseQ", "Use Q").SetValue(true));
             harassMenu.AddItem(new MenuItem("harassrange", "Harass range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450))).ValueChanged +=
             delegate(object sender, OnValueChangeEventArgs eventArgs)
@@ -88,12 +81,12 @@ namespace xc_TwistedFate
             harassMenu.AddItem(new MenuItem("harassmana", "harass if mana % >").SetValue(new Slider(35, 0, 100)));
             Menu.AddSubMenu(harassMenu);
 
-            var lasthitMenu = new Menu("Lasthit Settings", "lasthitset");
+            var lasthitMenu = new Menu("Lasthit", "lasthitset");
             lasthitMenu.AddItem(new MenuItem("lasthitUseW", "Use W (Blue only)").SetValue(true));
             lasthitMenu.AddItem(new MenuItem("lasthitbluemana", "Lasthit with blue if mana % <").SetValue(new Slider(20, 0, 100)));
             Menu.AddSubMenu(lasthitMenu);
 
-            var laneclearMenu = new Menu("LaneClear Settings", "laneclearset");
+            var laneclearMenu = new Menu("Laneclear", "laneclearset");
             laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(true));
             laneclearMenu.AddItem(new MenuItem("laneclearQmana", "Cast Q if mana % >").SetValue(new Slider(50, 0, 100)));
             laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Cast Q if Hit minions number >=").SetValue(new Slider(5, 2, 7)));
@@ -102,7 +95,7 @@ namespace xc_TwistedFate
             laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(30, 0, 100)));
             Menu.AddSubMenu(laneclearMenu);
 
-            var jungleclearMenu = new Menu("JungleClear Settings", "jungleclearset");
+            var jungleclearMenu = new Menu("Jungleclear", "jungleclearset");
             jungleclearMenu.AddItem(new MenuItem("jungleclearUseQ", "Use Q").SetValue(true));
             jungleclearMenu.AddItem(new MenuItem("jungleclearQmana", "Cast Q if mana % >").SetValue(new Slider(30, 0, 100)));
             jungleclearMenu.AddItem(new MenuItem("jungleclearUseW", "Use W").SetValue(true));
@@ -110,7 +103,7 @@ namespace xc_TwistedFate
             jungleclearMenu.AddItem(new MenuItem("jgtxt", "-Card Automatic selection"));
             Menu.AddSubMenu(jungleclearMenu);
 
-            var AdditionalsMenu = new Menu("Additional Options", "additionals");
+            var AdditionalsMenu = new Menu("Misc", "additionals");
             AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold when using ultimate(gate)").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("killsteal", "Use Killsteal").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("gapcloser", "Use Anti-gapcloser").SetValue(true));
@@ -119,7 +112,7 @@ namespace xc_TwistedFate
             AdditionalsMenu.AddItem(new MenuItem("autoIgnite", "Use Auto-Ignite (ks)").SetValue(true));
             Menu.AddSubMenu(AdditionalsMenu);
 
-            var Drawings = new Menu("Drawings Settings", "Drawings");
+            var Drawings = new Menu("Drawings", "Drawings");
             Drawings.AddItem(new MenuItem("AAcircle", "AA Range").SetValue(true));
             Drawings.AddItem(new MenuItem("FAAcircle", "Flash + AA Range").SetValue(true));
             Drawings.AddItem(new MenuItem("Qcircle", "Q Range").SetValue(new Circle(true, Color.LightSkyBlue)));
@@ -153,13 +146,6 @@ namespace xc_TwistedFate
             Drawings.AddItem(new MenuItem("kill", "Killable").SetValue(true));
 
             Menu.AddSubMenu(Drawings);
-
-            var predMenu = new Menu("Prediction", "pred");
-            predMenu.AddItem(new MenuItem("kappa", "Maybe Best"));
-            Menu.AddSubMenu(predMenu);
-
-            var havefun = new MenuItem("Have fun!", "Have fun!");
-            Menu.AddItem(havefun);
 
             var movement = new MenuItem("movement", "Disable orbwalk movement").SetValue(false);
             movement.ValueChanged +=
@@ -433,18 +419,6 @@ namespace xc_TwistedFate
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical, Menu.Item("ignoreshield").GetValue<bool>());
 
-            if (Dfg.IsReady() && Menu.Item("usedfg").GetValue<bool>())
-            {
-                if (target.IsValidTarget(Dfg.Range))
-                    Dfg.Cast(target);
-            }
-
-            if (Bft.IsReady() && Menu.Item("usebft").GetValue<bool>())
-            {
-                if (target.IsValidTarget(Bft.Range))
-                    Bft.Cast(target);
-            }
-
             if (W.IsReady() && Menu.Item("useW").GetValue<bool>())
             {
                 if (target.IsValidTarget(W.Range))
@@ -624,17 +598,6 @@ namespace xc_TwistedFate
 
             if (!card && passive)
                 ADdmg += Player.GetAutoAttackDamage(enemy, false);
-
-            if (Dfg.IsReady() && Menu.Item("usedfg").GetValue<bool>())
-            {
-                APdmg += Player.GetItemDamage(enemy, Damage.DamageItems.Dfg);
-                APdmg = APdmg * 1.2;
-            }
-            else if (Bft.IsReady() && Menu.Item("usebft").GetValue<bool>())
-            {
-                APdmg += Player.GetItemDamage(enemy, Damage.DamageItems.BlackFireTorch);
-                APdmg = APdmg * 1.2;
-            }
 
             return (float)ADdmg + (float)APdmg + (float)Truedmg;
         }
