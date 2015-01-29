@@ -271,7 +271,7 @@ namespace Sharpshooter.Champions
                     var RDamage = RrangeDamage + RbonusDamage;
                     var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
 
-                    if (predhealth <= RCalcDamage)
+                    if (predhealth <= RCalcDamage && !Player.IsWindingUp)
                     {
                         if (CollisionCheck(Player, Rpred.CastPosition, 50))
                             R.Cast(Rtarget);

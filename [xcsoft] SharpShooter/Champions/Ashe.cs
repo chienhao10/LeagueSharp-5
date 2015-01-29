@@ -24,7 +24,7 @@ namespace Sharpshooter.Champions
             Q = new Spell(SpellSlot.Q);
             W = new Spell(SpellSlot.W, 1200f);
             E = new Spell(SpellSlot.E);
-            R = new Spell(SpellSlot.R, 20000f);
+            R = new Spell(SpellSlot.R, 2500f);
 
             W.SetSkillshot(0.25f, (float)(24.32f * Math.PI / 180), 1600f, true, SkillshotType.SkillshotCone);
             R.SetSkillshot(0.25f, 130f, 1600f, false, SkillshotType.SkillshotLine);
@@ -45,7 +45,7 @@ namespace Sharpshooter.Champions
 
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("antigapcloser", "Use Anti-Gapcloser", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("autointerrupt", "Use Auto-Interrupt", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("CastR", "R Manually Cast", true).SetValue(new KeyBind('T', KeyBindType.Press)));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("AutoR", "Autocast R On Immobile Targets", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.DodgerBlue)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingW", "W Range", true).SetValue(new Circle(true, Color.DodgerBlue)));
@@ -76,28 +76,7 @@ namespace Sharpshooter.Champions
                 Jungleclear();
             }
 
-            if (SharpShooter.Menu.Item("CastR", true).GetValue<KeyBind>().Active)
-            {
-                Vector3 searchPos;
-
-                if (Player.Distance(Game.CursorPos) < R.Range - 300)
-                    searchPos = Game.CursorPos;
-                else
-                    searchPos = Player.Position +
-                                Vector3.Normalize(Game.CursorPos - Player.Position) * (R.Range - 300);
-
-                var rTargettemp = ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValidTarget(R.Range) && hero.Distance(searchPos) < 300).OrderByDescending(TargetSelector.GetPriority);
-
-                if (rTargettemp.Count<Obj_AI_Hero>() > 0)
-                {
-                    rTarget = rTargettemp.First<Obj_AI_Hero>();
-
-                    if (R.IsReady() && R.GetPrediction(rTarget).Hitchance >= HitChance.VeryHigh)
-                        R.Cast(rTarget);
-                }
-                else
-                    rTarget = null;
-            }
+            AutoR();
         }
 
         static void Drawing_OnDraw(EventArgs args)
@@ -123,36 +102,6 @@ namespace Sharpshooter.Champions
                 
             if (R.IsReady() && drawingR.Active)
                 Render.Circle.DrawCircle(Player.Position, 1500, drawingR.Color);
-
-            if (SharpShooter.Menu.Item("CastR", true).GetValue<KeyBind>().Active)
-            {
-                Vector3 DrawPosition;
-
-                if (Player.Distance(Game.CursorPos) < R.Range - 300)
-                    DrawPosition = Game.CursorPos;
-                else
-                    DrawPosition = ObjectManager.Player.Position +
-                                   Vector3.Normalize(Game.CursorPos - Player.Position) * (R.Range - 300);
-
-                Render.Circle.DrawCircle(DrawPosition, 300, Color.White);
-
-                if (rTarget != null)
-                {
-                    var pred = R.GetPrediction(rTarget);
-
-                    var colortemp = Color.WhiteSmoke;
-
-                    if (pred.Hitchance >= HitChance.VeryHigh)
-                        colortemp = Color.Gold;
-
-                    Render.Circle.DrawCircle(rTarget.Position, rTarget.BoundingRadius, colortemp);
-                    Render.Circle.DrawCircle(pred.CastPosition, R.Width, Color.LightSkyBlue);
-
-                    var targetpos = Drawing.WorldToScreen(rTarget.Position);
-                    Drawing.DrawText(targetpos[0] - 30, targetpos[1] + 20, colortemp, "Target: " + rTarget.ChampionName);
-                    Drawing.DrawText(targetpos[0] - 30, targetpos[1] + 40, colortemp, "Hitchance: " + pred.Hitchance);
-                }
-            }
         }
 
         static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -203,6 +152,30 @@ namespace Sharpshooter.Champions
             }
         }
 
+        static void AutoR()
+        {
+            if (!SharpShooter.Menu.Item("AutoR", true).GetValue<Boolean>())
+                return;
+
+            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range)))
+            {
+                if (R.CanCast(target) && UnitIsImmobileUntil(target) >= R.Delay + (Player.Distance(target, false) / R.Speed))
+                    R.Cast(target);
+            }
+        }
+
+        static double UnitIsImmobileUntil(Obj_AI_Base unit)
+        {
+            var result =
+                unit.Buffs.Where(
+                    buff =>
+                        buff.IsActive && Game.Time <= buff.EndTime &&
+                        (buff.Type == BuffType.Charm || buff.Type == BuffType.Knockup || buff.Type == BuffType.Stun ||
+                         buff.Type == BuffType.Suppression || buff.Type == BuffType.Snare))
+                    .Aggregate(0d, (current, buff) => Math.Max(current, buff.EndTime));
+            return (result - Game.Time);
+        }
+
         static void Combo()
         {
             if (!Orbwalking.CanMove(1))
@@ -220,7 +193,7 @@ namespace Sharpshooter.Champions
             {
                 var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
 
-                if(R.IsReady() && Rtarget.IsValidTarget(1000) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
+                if(R.IsReady() && Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
                     R.Cast(Rtarget);
             }
                 
@@ -270,9 +243,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (W.IsReady() && SharpShooter.Menu.Item("jungleclearUseW", true).GetValue<Boolean>())
-            {
                 W.Cast(Mobs[0].Position);
-            }
         }
     }
 }

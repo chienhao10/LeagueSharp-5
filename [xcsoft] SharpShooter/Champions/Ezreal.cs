@@ -70,7 +70,7 @@ namespace Sharpshooter.Champions
                 Jungleclear();
             }
 
-            if(SharpShooter.Menu.Item("jump").GetValue<KeyBind>().Active)
+            if(SharpShooter.Menu.Item("jump", true).GetValue<KeyBind>().Active)
             {
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 if (E.IsReady())
@@ -105,6 +105,13 @@ namespace Sharpshooter.Champions
 
             if (R.IsReady() && drawingR.Active)
                 Render.Circle.DrawCircle(Player.Position, R.Range, drawingR.Color);
+
+            if (SharpShooter.Menu.Item("jump", true).GetValue<KeyBind>().Active)
+            {
+                Render.Circle.DrawCircle(Game.CursorPos, 50, Color.Gold);
+                var targetpos = Drawing.WorldToScreen(Game.CursorPos);
+                Drawing.DrawText(targetpos[0] - 30, targetpos[1] + 40, Color.Gold, "E Jump");
+            }
         }
 
         static void Killsteal()
@@ -188,7 +195,7 @@ namespace Sharpshooter.Champions
             {
                 var Farmloc = Q.GetLineFarmLocation(Minions);
 
-                if (Farmloc.MinionsHit >= 1)
+                if (Farmloc.MinionsHit >= 1 && !Player.IsWindingUp)
                     Q.Cast(Farmloc.Position);
             }
         }

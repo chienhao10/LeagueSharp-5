@@ -77,9 +77,11 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("dash", true).GetValue<KeyBind>().Active)
             {
-                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 if(E.IsReady())
+                {
+                    Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                     E.Cast(Game.CursorPos.Extend(Player.Position, 5000));
+                }
             }
         }
 
