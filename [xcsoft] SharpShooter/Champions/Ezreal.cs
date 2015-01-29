@@ -72,9 +72,11 @@ namespace Sharpshooter.Champions
 
             if(SharpShooter.Menu.Item("jump", true).GetValue<KeyBind>().Active)
             {
-                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 if (E.IsReady())
+                {
+                    Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                     E.Cast(Game.CursorPos);
+                }
             }
 
             Killsteal();
