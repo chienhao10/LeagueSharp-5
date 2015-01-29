@@ -273,8 +273,13 @@ namespace Sharpshooter.Champions
                     var RDamage = RrangeDamage + RbonusDamage;
                     var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
 
-                    if (predhealth <= RCalcDamage && CollisionCheck(Player, Rpred.CastPosition, 50))
-                        R.Cast(Rtarget);
+                    if (predhealth <= RCalcDamage)
+                    {
+                        if (CollisionCheck(Player, Rpred.CastPosition, 50))
+                            R.Cast(Rtarget);
+                        else
+                            R.CastIfWillHit(Rtarget, 2);
+                    }
                 }
             }
         }
@@ -323,7 +328,8 @@ namespace Sharpshooter.Champions
             {
                 var target = Orbwalker.GetTarget();
 
-                QSwitch((CountEnemyMinionsInRange(target.Position, 160) >= 2));
+                if(target != null)
+                    QSwitch((CountEnemyMinionsInRange(target.Position, 160) >= 2));
             }
                 
         }

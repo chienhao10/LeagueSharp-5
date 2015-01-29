@@ -18,7 +18,7 @@ namespace Sharpshooter.Champions
         public static void Load()
         {
             Q = new Spell(SpellSlot.Q, 900f);
-            E = new Spell(SpellSlot.E, 700f);
+            E = new Spell(SpellSlot.E, Orbwalking.GetRealAutoAttackRange(Player));
 
             E.SetTargetted(0.25f, 2200f);
 
