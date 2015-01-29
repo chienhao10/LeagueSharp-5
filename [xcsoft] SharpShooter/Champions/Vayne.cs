@@ -125,6 +125,12 @@ namespace Sharpshooter.Champions
                     }
                 }
             }
+
+            if(Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LastHit)
+            {
+                if(Q.IsReady())
+                    Render.Circle.DrawCircle(Game.CursorPos, 50, Color.Red);
+            }
         }
 
 
