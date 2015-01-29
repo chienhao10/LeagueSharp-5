@@ -25,7 +25,7 @@ namespace Sharpshooter.Champions
             R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.7f, 60f, 2200f, false, SkillshotType.SkillshotLine);
-            W.SetSkillshot(1.2f, 100f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(1.3f, 100f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 80f, 1600f, true, SkillshotType.SkillshotLine);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
