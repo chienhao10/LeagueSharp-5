@@ -147,22 +147,21 @@ namespace Sharpshooter.Champions
                 E.Cast(Player);
         }
 
-        static void QSwitchForHero(AttackableUnit hero)
+        static void QSwitchForUnit(AttackableUnit Unit)
         {
-            if (hero == null)
+            if (Unit == null)
             {
                 QSwitch(false);
                 return;
             }
-                
 
-            if(Utility.CountEnemiesInRange(hero.Position, 160) >= 2)
+            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= 2)
             {
                 QSwitch(true);
                 return;
             }
 
-            if (hero.IsValidTarget(DefaultRange))
+            if (Unit.IsValidTarget(DefaultRange))
                 QSwitch(false);
             else
                 QSwitch(true);
@@ -217,7 +216,7 @@ namespace Sharpshooter.Champions
 
             input.CollisionObjects[0] = CollisionableObjects.Heroes;
 
-            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count() == 1;
+            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count() <= 1;
         }
 
         public static int CountEnemyMinionsInRange(this Vector3 point, float range)
@@ -231,7 +230,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
-                QSwitchForHero(Orbwalker.GetTarget());
+                QSwitchForUnit(TargetSelector.GetTarget(GetQActiveRange+30, TargetSelector.DamageType.Physical, true));
 
             if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
             {
@@ -297,7 +296,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>() && Q.IsReady())
-                QSwitchForHero(Orbwalker.GetTarget());
+                QSwitchForUnit(TargetSelector.GetTarget(GetQActiveRange + 30, TargetSelector.DamageType.Physical, true));
 
             if (SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>() && W.IsReady())
             {
