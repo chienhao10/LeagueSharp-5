@@ -57,6 +57,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingPTimer", "Passive Timer", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("killable", "Killable", true).SetValue(true));
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -120,12 +121,12 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("drawingTarget").GetValue<Boolean>())
             {
-                var target = TargetSelector.GetTarget(GetQActiveRange, TargetSelector.DamageType.Physical, true);
+                var target = Orbwalker.GetTarget();
 
                 if(target != null)
                 {
                     if(QisActive)
-                        Render.Circle.DrawCircle(target.Position, 150, Color.Red);
+                        Render.Circle.DrawCircle(target.Position, 160, Color.Red);
                 }
             }
 
@@ -144,16 +145,27 @@ namespace Sharpshooter.Champions
             }
 
             if (E.CanCast(gapcloser.Sender) && E.GetPrediction(gapcloser.Sender).Hitchance >= HitChance.VeryHigh)
-                E.Cast(gapcloser.Sender);
+                E.Cast(Player);
         }
 
-        static void QSwitchForHero(Obj_AI_Hero hero)
+        static void QSwitchForHero(AttackableUnit hero)
         {
-            if (!hero.IsValidTarget(GetQActiveRange + 30))
+            if (hero == null)
+            {
                 QSwitch(false);
-            else if (hero.IsValidTarget(DefaultRange))
+                return;
+            }
+                
+
+            if(Utility.CountEnemiesInRange(hero.Position, 160) >= 2)
+            {
+                QSwitch(true);
+                return;
+            }
+
+            if (hero.IsValidTarget(DefaultRange))
                 QSwitch(false);
-            else if (hero.IsValidTarget(GetQActiveRange + 30))
+            else
                 QSwitch(true);
 
         }
@@ -209,13 +221,18 @@ namespace Sharpshooter.Champions
             return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count() == 1;
         }
 
+        public static int CountEnemyMinionsInRange(this Vector3 point, float range)
+        {
+            return ObjectManager.Get<Obj_AI_Minion>().Count(h => h.IsValidTarget(range, true, point));
+        }
+
         static void Combo()
         {
             if (!Orbwalking.CanMove(1))
                 return;
 
             if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
-                QSwitchForHero(TargetSelector.GetTarget(GetQActiveRange + 30, TargetSelector.DamageType.Physical, true));
+                QSwitchForHero(Orbwalker.GetTarget());
 
             if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
             {
@@ -256,7 +273,7 @@ namespace Sharpshooter.Champions
                     var RDamage = RrangeDamage + RbonusDamage;
                     var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
 
-                    if (predhealth <= RCalcDamage && CollisionCheck(Player, Rpred.CastPosition, R.Width))
+                    if (predhealth <= RCalcDamage && CollisionCheck(Player, Rpred.CastPosition, 50))
                         R.Cast(Rtarget);
                 }
             }
@@ -276,7 +293,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>() && Q.IsReady())
-                QSwitchForHero(TargetSelector.GetTarget(GetQActiveRange + 30, TargetSelector.DamageType.Physical, true));
+                QSwitchForHero(Orbwalker.GetTarget());
 
             if (SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>() && W.IsReady())
             {
@@ -303,7 +320,12 @@ namespace Sharpshooter.Champions
                 return;
 
             if (SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
-                QSwitch((Minions.Count >= 3));
+            {
+                var target = Orbwalker.GetTarget();
+
+                QSwitch((CountEnemyMinionsInRange(target.Position, 160) >= 2));
+            }
+                
         }
 
         static void Jungleclear()

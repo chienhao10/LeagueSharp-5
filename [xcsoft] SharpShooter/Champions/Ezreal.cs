@@ -40,7 +40,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearMana", "if Mana % >", true).SetValue(new Slider(20, 0, 100)));
 
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal", true).SetValue(new KeyBind('G', KeyBindType.Press)));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("jump", "Jump to mouse", true).SetValue(new KeyBind('G', KeyBindType.Press)));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.Gold)));

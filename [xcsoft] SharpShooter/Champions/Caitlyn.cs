@@ -200,7 +200,7 @@ namespace Sharpshooter.Champions
             {
                 var Rtarget = TargetSelector.GetTarget(1500 + (500 * R.Level), TargetSelector.DamageType.Physical, true);
 
-                if (R.IsReady() && !Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && Rtarget.IsValidTarget(1500 + (500 * R.Level)) && Rtarget.Health + Rtarget.HPRegenRate * 2 <= R.GetDamage(Rtarget) && CollisionCheck(Player, Rtarget.ServerPosition, 150))
+                if (R.IsReady() && Orbwalker.GetTarget() == null && Rtarget.IsValidTarget(1500 + (500 * R.Level)) && Rtarget.Health + Rtarget.HPRegenRate * 2 <= R.GetDamage(Rtarget) && CollisionCheck(Player, Rtarget.ServerPosition, 150))
                    R.Cast(Rtarget);
             }
         }

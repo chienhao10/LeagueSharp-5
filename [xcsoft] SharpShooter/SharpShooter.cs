@@ -56,6 +56,9 @@ namespace Sharpshooter
 
         static void Drawing_OnDraw(EventArgs args)
         {
+            if (Player.IsDead)
+                return;
+
             //part of marksman
 
             var drawMinionLastHit = SharpShooter.Menu.Item("drawMinionLastHit").GetValue<Circle>();
@@ -100,7 +103,7 @@ namespace Sharpshooter
 
             if (SharpShooter.Menu.Item("drawingTarget").GetValue<Boolean>())
             {
-                var target = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(Player), TargetSelector.DamageType.Physical, true);
+                var target = Orbwalker.GetTarget();
 
                 if (target != null)
                     Render.Circle.DrawCircle(target.Position, target.BoundingRadius, Color.Red);
