@@ -37,6 +37,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseR", "Use R", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboROver", "R OverKill Check", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseW", "Use W", true).SetValue(true));
@@ -230,7 +231,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
-                QSwitchForUnit(TargetSelector.GetTarget(GetQActiveRange+30, TargetSelector.DamageType.Physical, true));
+                QSwitchForUnit(TargetSelector.GetTarget(GetQActiveRange, TargetSelector.DamageType.Physical, true));
 
             if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
             {
@@ -254,10 +255,10 @@ namespace Sharpshooter.Champions
 
                 var Rpred = R.GetPrediction(Rtarget);
 
-                if (R.CanCast(Rtarget) && Rpred.Hitchance >= HitChance.VeryHigh)
+                if (R.CanCast(Rtarget) && !Rtarget.IsValidTarget(DefaultRange) && Rpred.Hitchance >= HitChance.VeryHigh)
                 {
-                    var dis = Player.Distance(Rpred.CastPosition);
-                    var predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000);
+                    var dis = Player.Distance(Rtarget.ServerPosition);
+                    double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000);
 
                     double RMinDamage = 75 + (50 * R.Level) + (Player.FlatPhysicalDamageMod * 0.5);
                     double RMaxDamage = RMinDamage * 2;
@@ -270,6 +271,9 @@ namespace Sharpshooter.Champions
 
                     var RDamage = RrangeDamage + RbonusDamage;
                     var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
+
+                    if(Rtarget.IsValidTarget(GetQActiveRange))
+                        predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 2;
 
                     if (predhealth <= RCalcDamage && !Player.IsWindingUp)
                     {
@@ -296,7 +300,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>() && Q.IsReady())
-                QSwitchForUnit(TargetSelector.GetTarget(GetQActiveRange + 30, TargetSelector.DamageType.Physical, true));
+                QSwitchForUnit(TargetSelector.GetTarget(GetQActiveRange, TargetSelector.DamageType.Physical, true));
 
             if (SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>() && W.IsReady())
             {
