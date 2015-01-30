@@ -101,7 +101,7 @@ namespace Sharpshooter.Champions
             }
                 
             if (R.IsReady() && drawingR.Active)
-                Render.Circle.DrawCircle(Player.Position, 1500, drawingR.Color);
+                Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player)+10, drawingR.Color);
         }
 
         static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -193,7 +193,7 @@ namespace Sharpshooter.Champions
             {
                 var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
 
-                if(R.IsReady() && Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
+                if(R.IsReady() && Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 10) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
                     R.Cast(Rtarget);
             }
                 
