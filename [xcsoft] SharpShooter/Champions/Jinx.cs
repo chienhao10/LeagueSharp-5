@@ -251,36 +251,35 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>())
             {
-                var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
-
-                var Rpred = R.GetPrediction(Rtarget);
-
-                if (R.CanCast(Rtarget) && Rpred.Hitchance >= HitChance.VeryHigh)
+                foreach (Obj_AI_Hero Rtarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
                 {
-                    var dis = Player.Distance(Rtarget.ServerPosition);
-                    double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000);
+                    var Rpred = R.GetPrediction(Rtarget);
 
-                    double RMinDamage = 75 + (50 * R.Level) + (Player.FlatPhysicalDamageMod * 0.5);
-                    double RMaxDamage = RMinDamage * 2;
-
-                    double RrangeDamage = RMaxDamage * ((dis / 1200) * 100);
-
-                    if (RrangeDamage < RMinDamage) RrangeDamage = RMinDamage; else if (RrangeDamage > RMaxDamage) RrangeDamage = RMaxDamage;
-
-                    double RbonusDamage = ((20 + (5 * R.Level)) / 100) * (Rtarget.MaxHealth - Rtarget.Health);
-
-                    var RDamage = RrangeDamage + RbonusDamage;
-                    var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
-
-                    if(Rtarget.IsValidTarget(GetQActiveRange))
-                        predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 2;
-
-                    if (predhealth <= RCalcDamage && !Player.IsWindingUp)
+                    if (R.CanCast(Rtarget) && Rpred.Hitchance >= HitChance.VeryHigh)
                     {
-                        if (CollisionCheck(Player, Rpred.CastPosition, 50))
-                            R.Cast(Rtarget);
-                        else
-                            R.CastIfWillHit(Rtarget, 2);
+                        var dis = Player.Distance(Rpred.CastPosition);
+                        double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000);
+
+                        double RMinDamage = 75 + (50 * R.Level) + (Player.FlatPhysicalDamageMod * 0.5);
+                        double RMaxDamage = RMinDamage * 2;
+
+                        double RrangeDamage = RMaxDamage * ((dis / 1200) * 100);
+
+                        if (RrangeDamage < RMinDamage) RrangeDamage = RMinDamage; else if (RrangeDamage > RMaxDamage) RrangeDamage = RMaxDamage;
+
+                        double RbonusDamage = ((20 + (5 * R.Level)) / 100) * (Rtarget.MaxHealth - Rtarget.Health);
+
+                        var RDamage = RrangeDamage + RbonusDamage;
+                        var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
+
+                        if (Rtarget.IsValidTarget(GetQActiveRange))
+                            predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 2;
+
+                        if (predhealth <= RCalcDamage && !Player.IsWindingUp)
+                        {
+                            if (CollisionCheck(Player, Rpred.CastPosition, 50))
+                                R.Cast(Rtarget);
+                        }
                     }
                 }
             }
@@ -352,7 +351,12 @@ namespace Sharpshooter.Champions
                 return;
 
             if (SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>() && Q.IsReady())
-                QSwitch((Mobs.Count >= 2));
+            {
+                var target = Orbwalker.GetTarget();
+
+                if (target != null)
+                    QSwitch((CountEnemyMinionsInRange(target.Position, 160) >= 2));
+            }
 
             if (!Orbwalking.CanMove(1))
                 return;
