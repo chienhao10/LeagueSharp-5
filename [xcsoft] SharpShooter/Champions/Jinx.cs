@@ -254,10 +254,10 @@ namespace Sharpshooter.Champions
                 {
                     var Rpred = R.GetPrediction(Rtarget);
 
-                    if (R.CanCast(Rtarget) && Rpred.Hitchance >= HitChance.VeryHigh)
+                    if (R.CanCast(Rtarget) && Rpred.Hitchance >= HitChance.VeryHigh && !Player.IsWindingUp)
                     {
                         var dis = Player.Distance(Rpred.CastPosition);
-                        double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000);
+                        double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000) + Rtarget.HPRegenRate;
 
                         double RMinDamage = 75 + (50 * R.Level) + (Player.FlatPhysicalDamageMod * 0.5);
                         double RMaxDamage = RMinDamage * 2;
@@ -271,16 +271,31 @@ namespace Sharpshooter.Champions
                         var RDamage = RrangeDamage + RbonusDamage;
                         var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
 
+                        //overkill check
                         if(Rtarget.IsValidTarget(DefaultRange))
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 2;
                         else
                         if (Rtarget.IsValidTarget(GetQActiveRange - 50))
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 1;
+                        //--------------
 
-                        if (predhealth <= RCalcDamage && !Player.IsWindingUp)
+                        if (CollisionCheck(Player, Rpred.CastPosition, R.Width))
                         {
-                            if (CollisionCheck(Player, Rpred.CastPosition, R.Width))
+                            if (predhealth <= RCalcDamage)
                                 R.Cast(Rtarget);
+                        }
+                        else
+                        {
+                            if (predhealth <= RCalcDamage * 0.8)//can explosion kill check
+                            {
+                                foreach (Obj_AI_Hero ExplosionTarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && x.IsValidTarget(235, true, Rtarget.ServerPosition)))
+                                {
+                                    R.Cast(ExplosionTarget);
+                                    Render.Circle.DrawCircle(ExplosionTarget.Position, 225, Color.Red);
+                                    Render.Circle.DrawCircle(Rtarget.Position, Player.BoundingRadius, Color.Red);
+                                }
+                            }
+                                
                         }
                     }
                 }
