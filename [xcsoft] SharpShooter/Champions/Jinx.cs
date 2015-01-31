@@ -31,7 +31,7 @@ namespace Sharpshooter.Champions
 
             W.SetSkillshot(0.65f, 60f, 1200f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(1.1f, 100f, 1750f, false, SkillshotType.SkillshotCircle);
-            R.SetSkillshot(0.7f, 140f, 1550f, false, SkillshotType.SkillshotLine);
+            R.SetSkillshot(0.7f, 140f, 1700f, false, SkillshotType.SkillshotLine);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
@@ -271,12 +271,15 @@ namespace Sharpshooter.Champions
                         var RDamage = RrangeDamage + RbonusDamage;
                         var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
 
-                        if (Rtarget.IsValidTarget(GetQActiveRange))
+                        if(Rtarget.IsValidTarget(DefaultRange))
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 2;
+                        else
+                        if (Rtarget.IsValidTarget(GetQActiveRange - 50))
+                            predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 1;
 
                         if (predhealth <= RCalcDamage && !Player.IsWindingUp)
                         {
-                            if (CollisionCheck(Player, Rpred.CastPosition, 50))
+                            if (CollisionCheck(Player, Rpred.CastPosition, R.Width))
                                 R.Cast(Rtarget);
                         }
                     }
