@@ -279,18 +279,22 @@ namespace Sharpshooter.Champions
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 1;
                         //--------------
 
-                        if (CollisionCheck(Player, Rpred.CastPosition, R.Width))
+                        if (CollisionCheck(Player, Rpred.UnitPosition, R.Width))
                         {
                             if (predhealth <= RCalcDamage)
                                 R.Cast(Rtarget);
                         }
                         else
                         {
-                            if (predhealth <= RCalcDamage * 0.8)//can explosion kill check
+                            //can explosion kill check
+                            if (predhealth <= RCalcDamage * 0.8)
                             {
                                 foreach (Obj_AI_Hero ExplosionTarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && x.IsValidTarget(235, true, Rtarget.ServerPosition)))
                                 {
-                                    R.Cast(ExplosionTarget);
+                                    var pred = R.GetPrediction(ExplosionTarget);
+                                    if (pred.Hitchance >= HitChance.VeryHigh && CollisionCheck(Player, pred.UnitPosition, R.Width))
+                                        R.Cast(ExplosionTarget);
+
                                     Render.Circle.DrawCircle(ExplosionTarget.Position, 225, Color.Red);
                                     Render.Circle.DrawCircle(Rtarget.Position, Player.BoundingRadius, Color.Red);
                                 }
