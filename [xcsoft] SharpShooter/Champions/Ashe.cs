@@ -26,7 +26,7 @@ namespace Sharpshooter.Champions
             E = new Spell(SpellSlot.E);
             R = new Spell(SpellSlot.R, 2500f);
 
-            W.SetSkillshot(0.25f, (float)(24.32f * Math.PI / 180), 1600f, true, SkillshotType.SkillshotCone);
+            W.SetSkillshot(0.25f, (float)(24.32f * Math.PI / 180), 902f, true, SkillshotType.SkillshotCone);
             R.SetSkillshot(0.25f, 130f, 1600f, false, SkillshotType.SkillshotLine);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
@@ -101,7 +101,7 @@ namespace Sharpshooter.Champions
             }
                 
             if (R.IsReady() && drawingR.Active)
-                Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player)+10, drawingR.Color);
+                Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player)+50, drawingR.Color);
         }
 
         static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -193,7 +193,7 @@ namespace Sharpshooter.Champions
             {
                 var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
 
-                if(R.IsReady() && Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 10) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
+                if(R.IsReady() && Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 50) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
                     R.Cast(Rtarget);
             }
                 

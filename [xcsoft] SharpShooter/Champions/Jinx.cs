@@ -276,7 +276,7 @@ namespace Sharpshooter.Champions
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 2;
                         else
                         if (Rtarget.IsValidTarget(GetQActiveRange - 50))
-                            predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 1;
+                            predhealth -= Player.GetAutoAttackDamage(Rtarget, true);
                         //--------------
 
                         if (CollisionCheck(Player, Rpred.UnitPosition, R.Width))
