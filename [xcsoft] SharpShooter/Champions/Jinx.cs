@@ -256,7 +256,7 @@ namespace Sharpshooter.Champions
 
                     if (R.CanCast(Rtarget) && Rpred.Hitchance >= HitChance.VeryHigh && !Player.IsWindingUp)
                     {
-                        var dis = Player.Distance(Rpred.CastPosition);
+                        var dis = Player.Distance(Rpred.UnitPosition);
                         double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000) + Rtarget.HPRegenRate;
 
                         double RMinDamage = 75 + (50 * R.Level) + (Player.FlatPhysicalDamageMod * 0.5);
@@ -284,22 +284,16 @@ namespace Sharpshooter.Champions
                             if (predhealth <= RCalcDamage)
                                 R.Cast(Rtarget);
                         }
-                        else
+                        else 
+                        if (predhealth <= RCalcDamage * 0.8)
                         {
-                            //can explosion kill check
-                            if (predhealth <= RCalcDamage * 0.8)
+                            foreach (Obj_AI_Hero ExplosionTarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && x.IsValidTarget(235, true, Rtarget.ServerPosition)))
                             {
-                                foreach (Obj_AI_Hero ExplosionTarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && x.IsValidTarget(235, true, Rtarget.ServerPosition)))
-                                {
-                                    var pred = R.GetPrediction(ExplosionTarget);
-                                    if (pred.Hitchance >= HitChance.VeryHigh && CollisionCheck(Player, pred.UnitPosition, R.Width))
-                                        R.Cast(ExplosionTarget);
+                                var pred = R.GetPrediction(ExplosionTarget);
 
-                                    Render.Circle.DrawCircle(ExplosionTarget.Position, 235, Color.Red);
-                                    Render.Circle.DrawCircle(Rtarget.Position, Player.BoundingRadius, Color.Red);
-                                }
+                                if (pred.Hitchance >= HitChance.VeryHigh && CollisionCheck(Player, pred.UnitPosition, R.Width))
+                                    R.Cast(ExplosionTarget);
                             }
-                                
                         }
                     }
                 }
@@ -333,6 +327,14 @@ namespace Sharpshooter.Champions
 
         static void Laneclear()
         {
+            var Minions = MinionManager.GetMinions(Player.ServerPosition, GetQActiveRange, MinionTypes.All, MinionTeam.Enemy);
+
+            if (Minions.Count <= 0)
+            {
+                QSwitch(false);
+                return;
+            }
+
             if (!(Player.ManaPercentage() > SharpShooter.Menu.Item("laneclearMana", true).GetValue<Slider>().Value))
             {
                 if (SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>()) 
@@ -340,11 +342,6 @@ namespace Sharpshooter.Champions
 
                 return;
             }
-
-            var Minions = MinionManager.GetMinions(Player.ServerPosition, GetQActiveRange, MinionTypes.All, MinionTeam.Enemy);
-
-            if (Minions.Count <= 0)
-                return;
 
             if (SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
             {
@@ -358,6 +355,14 @@ namespace Sharpshooter.Champions
 
         static void Jungleclear()
         {
+            var Mobs = MinionManager.GetMinions(Player.ServerPosition, GetQActiveRange, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+
+            if (Mobs.Count <= 0)
+            {
+                QSwitch(false);
+                return;
+            }
+
             if (!(Player.ManaPercentage() > SharpShooter.Menu.Item("jungleclearMana", true).GetValue<Slider>().Value))
             {
                 if (SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
@@ -365,11 +370,6 @@ namespace Sharpshooter.Champions
 
                 return;
             }
-
-            var Mobs = MinionManager.GetMinions(Player.ServerPosition, GetQActiveRange, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-
-            if (Mobs.Count <= 0)
-                return;
 
             if (SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>() && Q.IsReady())
             {
