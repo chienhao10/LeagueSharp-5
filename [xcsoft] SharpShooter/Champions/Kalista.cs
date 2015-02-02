@@ -205,7 +205,7 @@ namespace Sharpshooter.Champions
 
             var Mobs = MinionManager.GetMinions(Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(Player) + 100, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
-            if (Mobs.Count < 1)
+            if (Mobs.Count <= 0)
                 return;
 
             if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())

@@ -30,7 +30,7 @@ namespace Sharpshooter.Champions
             R = new Spell(SpellSlot.R, 2500f);
 
             W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(1.1f, 50f, 1750f, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(1.1f, 120f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.6f, 140f, 1700f, false, SkillshotType.SkillshotLine);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
@@ -143,7 +143,7 @@ namespace Sharpshooter.Champions
                 Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.Gold, "Gapcloser");
             }
 
-            if (E.CanCast(gapcloser.Sender) && E.GetPrediction(gapcloser.Sender).Hitchance >= HitChance.VeryHigh)
+            if (E.CanCast(gapcloser.Sender))
                 E.Cast(Player);
         }
 
@@ -215,6 +215,7 @@ namespace Sharpshooter.Champions
             };
 
             input.CollisionObjects[0] = CollisionableObjects.Heroes;
+            input.CollisionObjects[1] = CollisionableObjects.YasuoWall;
 
             return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count() <= 1;
         }

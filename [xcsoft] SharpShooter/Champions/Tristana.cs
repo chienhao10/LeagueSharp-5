@@ -22,7 +22,7 @@ namespace Sharpshooter.Champions
         {
             Q = new Spell(SpellSlot.Q);
             W = new Spell(SpellSlot.W, 900f);
-            E = new Spell(SpellSlot.E);//tristanaechargesound
+            E = new Spell(SpellSlot.E);
             R = new Spell(SpellSlot.R);
             
             W.SetSkillshot(0.5f, 270f, 1500f, false, SkillshotType.SkillshotCircle);
