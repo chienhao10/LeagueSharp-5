@@ -29,9 +29,9 @@ namespace Sharpshooter.Champions
             E = new Spell(SpellSlot.E, 900f);
             R = new Spell(SpellSlot.R, 2500f);
 
-            W.SetSkillshot(0.65f, 60f, 1200f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(1.1f, 100f, 1750f, false, SkillshotType.SkillshotCircle);
-            R.SetSkillshot(0.7f, 140f, 1700f, false, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
+            E.SetSkillshot(1.1f, 50f, 1750f, false, SkillshotType.SkillshotCircle);
+            R.SetSkillshot(0.6f, 140f, 1700f, false, SkillshotType.SkillshotLine);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
@@ -219,7 +219,7 @@ namespace Sharpshooter.Champions
             return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count() <= 1;
         }
 
-        public static int CountEnemyMinionsInRange(this Vector3 point, float range)
+        static int CountEnemyMinionsInRange(this Vector3 point, float range)
         {
             return ObjectManager.Get<Obj_AI_Minion>().Count(h => h.IsValidTarget(range, true, point));
         }
@@ -248,7 +248,7 @@ namespace Sharpshooter.Champions
                     E.Cast(Etarget);
             }
 
-            if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady())
             {
                 foreach (Obj_AI_Hero Rtarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
                 {
@@ -295,7 +295,7 @@ namespace Sharpshooter.Champions
                                     if (pred.Hitchance >= HitChance.VeryHigh && CollisionCheck(Player, pred.UnitPosition, R.Width))
                                         R.Cast(ExplosionTarget);
 
-                                    Render.Circle.DrawCircle(ExplosionTarget.Position, 225, Color.Red);
+                                    Render.Circle.DrawCircle(ExplosionTarget.Position, 235, Color.Red);
                                     Render.Circle.DrawCircle(Rtarget.Position, Player.BoundingRadius, Color.Red);
                                 }
                             }

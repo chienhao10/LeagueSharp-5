@@ -49,8 +49,8 @@ namespace Sharpshooter.Champions
             
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
         }
 
@@ -152,20 +152,20 @@ namespace Sharpshooter.Champions
                 Q.Cast(Player.ServerPosition.Extend(gapcloser.Sender.ServerPosition, - 300));
         }
 
-        static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
+        static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
             if (!SharpShooter.Menu.Item("autointerrupt", true).GetValue<Boolean>() || Player.IsDead)
                 return;
 
-            if (unit.IsValidTarget(1000))
+            if (sender.IsValidTarget(1000))
             {
-                Render.Circle.DrawCircle(unit.Position, unit.BoundingRadius, Color.Gold, 5);
-                var targetpos = Drawing.WorldToScreen(unit.Position);
+                Render.Circle.DrawCircle(sender.Position, sender.BoundingRadius, Color.Gold, 5);
+                var targetpos = Drawing.WorldToScreen(sender.Position);
                 Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.Gold, "Interrupt");
             }
 
-            if (E.CanCast(unit))
-                E.Cast(unit);
+            if (E.CanCast(sender))
+                E.Cast(sender);
         }
 
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)

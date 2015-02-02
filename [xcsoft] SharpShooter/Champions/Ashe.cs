@@ -55,7 +55,7 @@ namespace Sharpshooter.Champions
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Drawing.OnDraw += Drawing_OnDraw;
         }
 
@@ -136,18 +136,18 @@ namespace Sharpshooter.Champions
             }
         }
 
-        static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
+        static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
             if (!SharpShooter.Menu.Item("autointerrupt", true).GetValue<Boolean>() || Player.IsDead)
                 return;
 
-            if (unit.IsValidTarget(1500))
+            if (sender.IsValidTarget(1500))
             {
-                if (R.CanCast(unit))
-                    R.Cast(unit);
+                if (R.CanCast(sender))
+                    R.Cast(sender);
 
-                Render.Circle.DrawCircle(unit.Position, unit.BoundingRadius, Color.Gold, 5);
-                var targetpos = Drawing.WorldToScreen(unit.Position);
+                Render.Circle.DrawCircle(sender.Position, sender.BoundingRadius, Color.Gold, 5);
+                var targetpos = Drawing.WorldToScreen(sender.Position);
                 Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.Gold, "Interrupt");
             }
         }
