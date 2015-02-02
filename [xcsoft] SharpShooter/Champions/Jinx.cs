@@ -272,13 +272,11 @@ namespace Sharpshooter.Champions
                         var RDamage = RrangeDamage + RbonusDamage;
                         var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
 
-                        //overkill check
                         if(Rtarget.IsValidTarget(DefaultRange))
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 2;
                         else
                         if (Rtarget.IsValidTarget(GetQActiveRange - 50))
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true);
-                        //--------------
 
                         if (CollisionCheck(Player, Rpred.UnitPosition, R.Width))
                         {
