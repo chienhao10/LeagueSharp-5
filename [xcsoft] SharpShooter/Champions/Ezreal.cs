@@ -17,7 +17,7 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
-            Q = new Spell(SpellSlot.Q, 1100f);
+            Q = new Spell(SpellSlot.Q, 1180f);
             W = new Spell(SpellSlot.W, 1000f);
             E = new Spell(SpellSlot.E, 475f);
             R = new Spell(SpellSlot.R, 2500f);
@@ -33,9 +33,11 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseW", "Use W", true).SetValue(false));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
+            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassAuto", "Auto Harass", true).SetValue(true));
+            
 
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
+            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearMana", "if Mana % >", true).SetValue(new Slider(60, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearMana", "if Mana % >", true).SetValue(new Slider(20, 0, 100)));
@@ -78,6 +80,9 @@ namespace Sharpshooter.Champions
                     E.Cast(Game.CursorPos);
                 }
             }
+
+            if (SharpShooter.Menu.Item("harassAuto", true).GetValue<Boolean>())
+                Harass();
 
             Killsteal();
         }
@@ -125,10 +130,21 @@ namespace Sharpshooter.Champions
             {
                 if (target != null)
                 {
-                    if (R.CanCast(target) && (target.Health + target.HPRegenRate * 2) <= R.GetDamage(target))
+                    if (Q.CanCast(target) && (target.Health + target.HPRegenRate) <= Q.GetDamage(target))
+                        Q.Cast(target);
+
+                    if (W.CanCast(target) && (target.Health + target.HPRegenRate) <= W.GetDamage(target))
+                        R.Cast(target);
+
+                    if (R.CanCast(target) && (target.Health + target.HPRegenRate) <= R.GetDamage(target) && !target.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && R.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
                         R.Cast(target);
                 }
             }
+        }
+
+        static Boolean aaKillCheck(Obj_AI_Base aatarget)
+        {
+            return !(aatarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && aatarget.Health > Player.GetAutoAttackDamage(aatarget));
         }
 
         static void Combo()
@@ -140,7 +156,7 @@ namespace Sharpshooter.Champions
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
+                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh && aaKillCheck(Qtarget))
                     Q.Cast(Qtarget);
             }
 
@@ -148,7 +164,7 @@ namespace Sharpshooter.Champions
             {
                 var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
 
-                if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
+                if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh && aaKillCheck(Wtarget))
                     W.Cast(Wtarget);
             }
 
@@ -156,7 +172,7 @@ namespace Sharpshooter.Champions
             {
                 var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical, true);
 
-                if (R.CanCast(Rtarget) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
+                if (R.CanCast(Rtarget) && !Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && aaKillCheck(Rtarget))
                     R.CastIfWillHit(Rtarget, 2);
             }
         }
@@ -212,7 +228,7 @@ namespace Sharpshooter.Champions
             if (Mobs.Count <= 0)
                 return;
 
-            if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
+            if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>() && aaKillCheck(Mobs[0]))
                 Q.Cast(Mobs[0].Position);
         }
     }
