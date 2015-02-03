@@ -34,6 +34,9 @@ namespace Sharpshooter.Champions
             E.SetSkillshot(1.1f, 120f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.6f, 140f, 1700f, false, SkillshotType.SkillshotLine);
 
+            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw R Damage").SetValue(true);
+            var drawFill = new MenuItem("Draw_Fill", "Draw R Damage Fill").SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
+
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
@@ -58,6 +61,27 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingPTimer", "Passive Timer", true).SetValue(true));
+
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(drawDamageMenu);
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(drawFill);
+
+            DamageIndicator.DamageToUnit = GetComboDamage;
+            DamageIndicator.Enabled = drawDamageMenu.GetValue<bool>();
+            DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
+            DamageIndicator.FillColor = drawFill.GetValue<Circle>().Color;
+
+            drawDamageMenu.ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+
+            drawFill.ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
+                DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
+            };
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -238,6 +262,11 @@ namespace Sharpshooter.Champions
             return !(aatarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && aatarget.Health > Player.GetAutoAttackDamage(aatarget));
         }
 
+        static float GetComboDamage(Obj_AI_Base enemy)
+        {
+            return R.IsReady() ? R.GetDamage(enemy) : 0;
+        }
+
         static void Combo()
         {
             if (!Orbwalking.CanMove(1))
@@ -273,18 +302,6 @@ namespace Sharpshooter.Champions
                         var dis = Player.Distance(Rpred.UnitPosition);
                         double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000) + Rtarget.HPRegenRate;
 
-                        double RMinDamage = 75 + (50 * R.Level) + (Player.FlatPhysicalDamageMod * 0.5);
-                        double RMaxDamage = RMinDamage * 2;
-
-                        double RRangeBonusDamage = RMaxDamage * ((dis / 1200) * 100);
-
-                        if (RRangeBonusDamage < RMinDamage) RRangeBonusDamage = RMinDamage; else if (RRangeBonusDamage > RMaxDamage) RRangeBonusDamage = RMaxDamage;
-
-                        double RhpBonusDamage = ((20 + (5 * R.Level)) / 100) * (Rtarget.MaxHealth - Rtarget.Health);
-
-                        var RDamage = RRangeBonusDamage + RhpBonusDamage;
-                        var RCalcDamage = Damage.CalcDamage(Player, Rtarget, Damage.DamageType.Physical, RDamage);
-
                         if(Rtarget.IsValidTarget(DefaultRange))
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true) * 2;
                         else
@@ -293,26 +310,26 @@ namespace Sharpshooter.Champions
 
                         if (CollisionCheck(Player, Rpred.UnitPosition, R.Width))
                         {
-                            if (predhealth <= RCalcDamage)
+                            if (predhealth <= R.GetDamage(Rtarget))
                             {
                                 R.Cast(Rtarget);
                                 break;
                             }
                         }
                         else
-                        if (predhealth <= RCalcDamage * 0.8)
-                        {
-                            foreach (Obj_AI_Hero ExplosionTarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && x.IsValidTarget(235, true, Rtarget.ServerPosition)))
+                            if (predhealth <= R.GetDamage(Rtarget) * 0.8)
                             {
-                                var pred = R.GetPrediction(ExplosionTarget);
-
-                                if (pred.Hitchance >= HitChance.VeryHigh && CollisionCheck(Player, pred.UnitPosition, R.Width))
+                                foreach (Obj_AI_Hero ExplosionTarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range)))
                                 {
-                                    R.Cast(ExplosionTarget);
-                                    break;
+                                    var pred = R.GetPrediction(ExplosionTarget);
+
+                                    if (pred.Hitchance >= HitChance.VeryHigh && CollisionCheck(Player, pred.UnitPosition, R.Width) && Rtarget.IsValidTarget(235, true, ExplosionTarget.ServerPosition))
+                                    {
+                                        R.Cast(ExplosionTarget);
+                                        break;
+                                    }
                                 }
                             }
-                        }
                     }
                 }
             }
