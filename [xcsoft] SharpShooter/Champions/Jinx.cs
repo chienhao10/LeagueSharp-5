@@ -297,7 +297,7 @@ namespace Sharpshooter.Champions
                 {
                     var Rpred = R.GetPrediction(Rtarget);
 
-                    if (R.CanCast(Rtarget) && Rpred.Hitchance >= HitChance.VeryHigh && !Player.IsWindingUp && aaKillunableCheck(Rtarget))
+                    if (R.CanCast(Rtarget) && Rpred.Hitchance >= HitChance.High && !Player.IsWindingUp && aaKillunableCheck(Rtarget))
                     {
                         var dis = Player.Distance(Rpred.UnitPosition);
                         double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000) + Rtarget.HPRegenRate;
@@ -323,7 +323,7 @@ namespace Sharpshooter.Champions
                                 {
                                     var pred = R.GetPrediction(ExplosionTarget);
 
-                                    if (pred.Hitchance >= HitChance.VeryHigh && CollisionCheck(Player, pred.UnitPosition, R.Width) && Rtarget.IsValidTarget(235, true, ExplosionTarget.ServerPosition))
+                                    if (pred.Hitchance >= HitChance.High && CollisionCheck(Player, pred.UnitPosition, R.Width) && Rtarget.IsValidTarget(235, true, ExplosionTarget.ServerPosition))
                                     {
                                         R.Cast(ExplosionTarget);
                                         break;
