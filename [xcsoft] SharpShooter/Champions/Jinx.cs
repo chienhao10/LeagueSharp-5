@@ -287,7 +287,7 @@ namespace Sharpshooter.Champions
             {
                 var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, false);
 
-                if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellImmunity) && E.GetPrediction(Etarget).Hitchance >= HitChance.VeryHigh && Etarget.IsMoving && aaKillunableCheck(Etarget))
+                if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellImmunity) && E.GetPrediction(Etarget).Hitchance >= HitChance.VeryHigh && aaKillunableCheck(Etarget))
                     E.Cast(Etarget);
             }
 
