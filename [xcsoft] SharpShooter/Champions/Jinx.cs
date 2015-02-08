@@ -13,6 +13,7 @@ namespace Sharpshooter.Champions
     public static class Jinx
     {
         static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+
         static Orbwalking.Orbwalker Orbwalker { get { return SharpShooter.Orbwalker; } }
 
         static Spell Q, W, E, R;
@@ -20,9 +21,11 @@ namespace Sharpshooter.Champions
         static bool QisActive { get { return Player.HasBuff("JinxQ", true); } }
 
         static readonly int DefaultRange = 590;
+
         static float GetQActiveRange { get { return DefaultRange + ((25 * Q.Level) + 50); } }
 
         static float WLastCastedTime;
+
         public static void Load()
         {
             Q = new Spell(SpellSlot.Q);
@@ -295,11 +298,9 @@ namespace Sharpshooter.Champions
             {
                 foreach (Obj_AI_Hero Rtarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
                 {
-                    var Rpred = R.GetPrediction(Rtarget);
-
-                    if (R.CanCast(Rtarget) && Rpred.Hitchance >= HitChance.High && !Player.IsWindingUp && aaKillunableCheck(Rtarget))
+                    if (R.CanCast(Rtarget) && R.GetPrediction(Rtarget).Hitchance >= HitChance.High && !Player.IsWindingUp && aaKillunableCheck(Rtarget))
                     {
-                        var dis = Player.Distance(Rpred.UnitPosition);
+                        var dis = Player.Distance(Rtarget.ServerPosition);
                         double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000) + Rtarget.HPRegenRate;
 
                         if(Rtarget.IsValidTarget(DefaultRange))
@@ -308,7 +309,7 @@ namespace Sharpshooter.Champions
                         if (Rtarget.IsValidTarget(GetQActiveRange - 50))
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true);
 
-                        if (CollisionCheck(Player, Rpred.UnitPosition, R.Width))
+                        if (CollisionCheck(Player, Rtarget.ServerPosition, R.Width))
                         {
                             if (predhealth <= R.GetDamage(Rtarget))
                             {
@@ -323,7 +324,7 @@ namespace Sharpshooter.Champions
                                 {
                                     var pred = R.GetPrediction(ExplosionTarget);
 
-                                    if (pred.Hitchance >= HitChance.High && CollisionCheck(Player, pred.UnitPosition, R.Width) && Rtarget.IsValidTarget(235, true, ExplosionTarget.ServerPosition))
+                                    if (pred.Hitchance >= HitChance.High && CollisionCheck(Player, pred.UnitPosition, R.Width) && Rtarget.IsValidTarget(224, true, ExplosionTarget.ServerPosition))
                                     {
                                         R.Cast(ExplosionTarget);
                                         break;
