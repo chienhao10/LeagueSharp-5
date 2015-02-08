@@ -42,7 +42,7 @@ namespace Sharpshooter
             Type.GetType("Sharpshooter.Champions." + Player.ChampionName).GetMethod("Load").Invoke(null, null);
 
             Menu.SubMenu("Drawings").AddItem(new MenuItem("brank", " "));
-            Menu.SubMenu("Drawings").AddItem(new MenuItem("pptxt", "--public options--"));
+            Menu.SubMenu("Drawings").AddItem(new MenuItem("potxt", "--public options--"));
 
             Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingTarget", "AA Target").SetValue(true));
             Menu.SubMenu("Drawings").AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, Color.GreenYellow)));
@@ -72,13 +72,9 @@ namespace Sharpshooter
                 foreach (var xMinion in xMinions)
                 {
                     if (drawMinionLastHit.Active && Player.GetAutoAttackDamage(xMinion, true) >= xMinion.Health)
-                    {
                         Render.Circle.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionLastHit.Color, 5);
-                    }
                     else if (drawMinionNearKill.Active && Player.GetAutoAttackDamage(xMinion, true) * 2 >= xMinion.Health)
-                    {
                         Render.Circle.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionNearKill.Color, 5);
-                    }
                 }
             }
 
