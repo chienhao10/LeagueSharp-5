@@ -69,7 +69,7 @@ namespace _xcsoft__Information
                 return;
 
             Target = TargetSelector.GetSelectedTarget() != null ? TargetSelector.GetSelectedTarget() : Player;
-
+            
             var buffs = "";
 
             foreach (var buff in Target.Buffs)
@@ -83,6 +83,8 @@ namespace _xcsoft__Information
                 "SkinName: " + Target.SkinName + NewLine +
                 "Gold: " + Target.Gold + NewLine +
                 "Level: " + Target.Level + NewLine +
+                "TotalAttackDamage: " + Utility.TotalAttackDamage(Target) + NewLine +
+                "TotalMagicalDamage: " + Utility.TotalMagicalDamage(Target) + NewLine +
                 "Armor: " + Target.Armor + NewLine +
                 "Health: " + Target.Health + " / " + Target.MaxHealth + " (" + Target.HealthPercentage() + "%)" + NewLine +
                 "Mana: " + Target.Mana + " / " + Target.MaxMana + " (" + Target.ManaPercentage() + "%)" + NewLine +
