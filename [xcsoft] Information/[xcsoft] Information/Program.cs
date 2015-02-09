@@ -117,13 +117,14 @@ namespace _xcsoft__Information
                 "IsMelee: " + Target.IsMelee() + NewLine +
                 "IsDashing: " + Target.IsDashing() + NewLine +
                 "IsValid: " + Target.IsValid + NewLine +
-                "IsMovementImpaired: " + Target.IsMovementImpaired() + NewLine +
+                "IsMovementImpaired: " + Utility.IsMovementImpaired(Target) + NewLine +
                 "IsBot: " + Target.IsBot + NewLine +
                 "IsAlly: " + Target.IsAlly + NewLine +
                 "IsEnemy: " + Target.IsEnemy + NewLine +
                 "CanAttack: " + Target.CanAttack + NewLine +
                 "InFountain: " + Target.InFountain() + NewLine +
                 "InShop: " + Target.InShop() + NewLine +
+                "UnderTurret: " + Target.UnderTurret() + NewLine +
                 NewLine +
                 "Game_CursorPos: " + Game.CursorPos + NewLine +
                 "Game_ClockTime: " + Game.ClockTime + NewLine +
@@ -135,7 +136,8 @@ namespace _xcsoft__Information
                 "Game_Port: " + Game.Port + NewLine +
                 "Game_Ping: " + Game.Ping + NewLine +
                 "Game_Mode: " + Game.Mode + NewLine +
-                "Game_MapId: " + Game.MapId
+                "Game_MapId: " + Game.MapId + NewLine +
+                "Game_MapName: " + Utility.Map.GetMap().Name
                 ;
 
 
