@@ -125,7 +125,7 @@ namespace Sharpshooter.Champions
                 foreach (var En in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy && hero.IsValidTarget(1100)))
                 {
                     var EPred = E.GetPrediction(En);
-                    int pushDist = 460;
+                    int pushDist = 450;
 
                     for (int i = 0; i < pushDist; i += (int)En.BoundingRadius)
                     {
@@ -256,7 +256,7 @@ namespace Sharpshooter.Champions
                     //Part of VayneHunterRework
 
                     var EPred = E.GetPrediction(En);
-                    int pushDist = 460;
+                    int pushDist = 450;
                     var FinalPosition = EPred.UnitPosition.To2D().Extend(Player.ServerPosition.To2D(), -pushDist).To3D();
 
                     for (int i = 1; i < pushDist; i += (int)En.BoundingRadius)
