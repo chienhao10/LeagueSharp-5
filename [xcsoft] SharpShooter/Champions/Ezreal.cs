@@ -166,11 +166,6 @@ namespace Sharpshooter.Champions
             }
         }
 
-        static Boolean aaKillCheck(Obj_AI_Base aatarget)
-        {
-            return !(aatarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && aatarget.Health > Player.GetAutoAttackDamage(aatarget));
-        }
-
         static float GetComboDamage(Obj_AI_Base enemy)
         {
             return R.IsReady() ? R.GetDamage(enemy) : 0;
@@ -185,7 +180,7 @@ namespace Sharpshooter.Champions
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh && aaKillCheck(Qtarget))
+                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
                     Q.Cast(Qtarget);
             }
 
@@ -193,7 +188,7 @@ namespace Sharpshooter.Champions
             {
                 var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
 
-                if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh && aaKillCheck(Wtarget))
+                if (W.CanCast(Wtarget) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
                     W.Cast(Wtarget);
             }
 
@@ -201,7 +196,7 @@ namespace Sharpshooter.Champions
             {
                 var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical, true);
 
-                if (R.CanCast(Rtarget) && !Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && aaKillCheck(Rtarget))
+                if (R.CanCast(Rtarget) && !Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)))
                     R.CastIfWillHit(Rtarget, 2);
             }
         }
@@ -257,7 +252,7 @@ namespace Sharpshooter.Champions
             if (Mobs.Count <= 0)
                 return;
 
-            if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>() && aaKillCheck(Mobs[0]))
+            if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
                 Q.Cast(Mobs[0].Position);
         }
     }

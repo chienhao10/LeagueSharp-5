@@ -260,11 +260,6 @@ namespace Sharpshooter.Champions
             return ObjectManager.Get<Obj_AI_Minion>().Count(h => h.IsValidTarget(range, true, point));
         }
 
-        static bool aaKillunableCheck(Obj_AI_Base aatarget)
-        {
-            return !(aatarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && aatarget.Health > Player.GetAutoAttackDamage(aatarget));
-        }
-
         static float GetComboDamage(Obj_AI_Base enemy)
         {
             return R.IsReady() ? R.GetDamage(enemy) : 0;
@@ -282,7 +277,7 @@ namespace Sharpshooter.Champions
             {
                 var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
 
-                if (W.CanCast(Wtarget) && !Wtarget.IsValidTarget(DefaultRange / 3) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh && aaKillunableCheck(Wtarget))
+                if (W.CanCast(Wtarget) && !Wtarget.IsValidTarget(DefaultRange / 3) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
                     W.Cast(Wtarget);
             }
 
@@ -290,7 +285,7 @@ namespace Sharpshooter.Champions
             {
                 var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, false);
 
-                if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellImmunity) && E.GetPrediction(Etarget).Hitchance >= HitChance.VeryHigh && aaKillunableCheck(Etarget))
+                if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellImmunity) && E.GetPrediction(Etarget).Hitchance >= HitChance.VeryHigh)
                     E.Cast(Etarget);
             }
 
@@ -298,7 +293,7 @@ namespace Sharpshooter.Champions
             {
                 foreach (Obj_AI_Hero Rtarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
                 {
-                    if (R.CanCast(Rtarget) && R.GetPrediction(Rtarget).Hitchance >= HitChance.High && !Player.IsWindingUp && aaKillunableCheck(Rtarget))
+                    if (R.CanCast(Rtarget) && R.GetPrediction(Rtarget).Hitchance >= HitChance.High)
                     {
                         var dis = Player.Distance(Rtarget.ServerPosition);
                         double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000) + Rtarget.HPRegenRate;
