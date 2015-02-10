@@ -38,7 +38,7 @@ namespace _xcsoft__Information
             Menu.AddItem(new MenuItem("switch", "Switch")).SetValue<Boolean>(true);
             Menu.AddItem(new MenuItem("x", "X")).SetValue<Slider>(new Slider(150 ,0 , Drawing.Width));
             Menu.AddItem(new MenuItem("y", "Y")).SetValue<Slider>(new Slider(30 ,0 , Drawing.Height));
-            Menu.AddItem(new MenuItem("size", "Size")).SetValue<Slider>(new Slider(13, 10, 20));
+            Menu.AddItem(new MenuItem("size", "Size")).SetValue<Slider>(new Slider(14, 10, 20));
 
             Menu.Item("x").ValueChanged +=
                 delegate(object sender, OnValueChangeEventArgs eventArgs)
