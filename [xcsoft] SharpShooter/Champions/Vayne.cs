@@ -17,9 +17,9 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
-            Q = new Spell(SpellSlot.Q, 900f);
+            Q = new Spell(SpellSlot.Q, 915f);
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 595f);
+            E = new Spell(SpellSlot.E, 615f);
 
             E.SetTargetted(0.25f, 2200f);
 
