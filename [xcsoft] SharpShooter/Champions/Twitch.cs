@@ -29,11 +29,11 @@ namespace Sharpshooter.Champions
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseEStack", "Cast E if Stack ==", true).SetValue(new Slider(6, 1, 6)));
+            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseEStack", "Cast E if Stack >=", true).SetValue(new Slider(6, 1, 6)));
 
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseW", "Use W", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseE", "Use E", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseEStack", "Cast E if Stack ==", true).SetValue(new Slider(4, 1, 6)));
+            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseEStack", "Cast E if Stack >=", true).SetValue(new Slider(4, 1, 6)));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "If Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseW", "Use W", true).SetValue(true));
