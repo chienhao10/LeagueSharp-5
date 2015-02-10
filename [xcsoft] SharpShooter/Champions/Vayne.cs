@@ -43,7 +43,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("antigapcloser", "Use Anti-Gapcloser", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("autointerrupt", "Use Auto-Interrupt", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("AutoRQ", "Autocast Q When Using Ultimate", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("QSafeCheck", "Q Safe Check", true).SetValue(false));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("LogicalQ", "Use Logical Q (?)", true).SetValue(false));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.FromArgb(183,0,0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingP", "Passive Range", true).SetValue(new Circle(true, Color.FromArgb(183, 0, 0))));
@@ -51,7 +51,6 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(false, Color.FromArgb(183, 0, 0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingRtimer", "R Timer", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingCond", "E Crash Prediction", true).SetValue(new Circle(true, Color.Red)));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQsafecheck", "Q Safe Check", true).SetValue(false));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(drawDamageMenu);
             SharpShooter.Menu.SubMenu("Drawings").AddItem(drawFill);
@@ -158,18 +157,6 @@ namespace Sharpshooter.Champions
                 if(Q.IsReady())
                     Render.Circle.DrawCircle(Game.CursorPos, 50, Color.Red);
             }
-
-            if (SharpShooter.Menu.Item("drawingQsafecheck", true).GetValue<Boolean>())
-            {
-                var QEndpos = Player.Position.Extend(Game.CursorPos, 300);
-
-                Drawing.DrawLine(Drawing.WorldToScreen(Player.Position),Drawing.WorldToScreen(QEndpos), 5, Color.Blue);
-
-                if (QEndpos.CountEnemiesInRange(307) == 0)
-                    Render.Circle.DrawCircle(QEndpos, 307, Color.Blue);
-                else
-                    Render.Circle.DrawCircle(QEndpos, 307, Color.Red);
-            }
         }
 
 
@@ -248,7 +235,7 @@ namespace Sharpshooter.Champions
             return 0;
         }
 
-        static void SafeQ()
+        static void LogicalQ()
         {
             if (!SharpShooter.Menu.Item("QSafeCheck", true).GetValue<Boolean>())
             {
@@ -258,8 +245,14 @@ namespace Sharpshooter.Champions
 
             var QEndpos = Player.ServerPosition.Extend(Game.CursorPos, 300);
 
-            if(QEndpos.CountEnemiesInRange(307) == 0)
-                Q.Cast(Game.CursorPos);
+            foreach (var enemy in QEndpos.GetEnemiesInRange(307))
+            {
+                if (enemy.IsMelee())
+                    return;
+            }
+           
+
+            Q.Cast(Game.CursorPos);
         }
 
         static void Combo()
@@ -272,7 +265,7 @@ namespace Sharpshooter.Champions
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
                 if (Q.CanCast(Qtarget))
-                    SafeQ();
+                    LogicalQ();
             }
                 
             if (E.IsReady() && SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
@@ -305,7 +298,7 @@ namespace Sharpshooter.Champions
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
             if (Q.CanCast(target) && SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
-                SafeQ();
+                LogicalQ();
 
             if (E.CanCast(target) && SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
             {
@@ -331,7 +324,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (Q.IsReady() && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
-                SafeQ();
+                LogicalQ();
         }
 
         static void Jungleclear()
@@ -345,7 +338,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
-                SafeQ();
+                LogicalQ();
 
             if (E.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseE", true).GetValue<Boolean>())
                 E.Cast(Mobs[0]);
