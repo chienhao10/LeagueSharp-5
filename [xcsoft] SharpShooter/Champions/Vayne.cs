@@ -237,7 +237,7 @@ namespace Sharpshooter.Champions
 
         static void LogicalQ()
         {
-            if (!SharpShooter.Menu.Item("QSafeCheck", true).GetValue<Boolean>())
+            if (!SharpShooter.Menu.Item("LogicalQ", true).GetValue<Boolean>())
             {
                 Q.Cast(Game.CursorPos);
                 return;
