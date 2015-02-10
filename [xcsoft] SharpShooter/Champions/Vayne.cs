@@ -21,7 +21,7 @@ namespace Sharpshooter.Champions
             W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 615f);
 
-            E.SetTargetted(0.25f, 2200f);
+            E.SetTargetted(0.25f, 2400f);
 
             var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw W Damage", true).SetValue(true);
             var drawFill = new MenuItem("Draw_Fill", "Draw W Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
