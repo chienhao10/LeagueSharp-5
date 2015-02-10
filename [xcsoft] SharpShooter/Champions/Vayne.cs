@@ -165,10 +165,10 @@ namespace Sharpshooter.Champions
 
                 Drawing.DrawLine(Drawing.WorldToScreen(Player.Position),Drawing.WorldToScreen(QEndpos), 5, Color.Blue);
 
-                if(QEndpos.CountEnemiesInRange(300) == 0)
-                    Render.Circle.DrawCircle(QEndpos, 300, Color.Blue);
+                if (QEndpos.CountEnemiesInRange(307) == 0)
+                    Render.Circle.DrawCircle(QEndpos, 307, Color.Blue);
                 else
-                    Render.Circle.DrawCircle(QEndpos, 300, Color.Red);
+                    Render.Circle.DrawCircle(QEndpos, 307, Color.Red);
             }
         }
 
@@ -258,7 +258,7 @@ namespace Sharpshooter.Champions
 
             var QEndpos = Player.ServerPosition.Extend(Game.CursorPos, 300);
 
-            if(QEndpos.CountEnemiesInRange(300) == 0)
+            if(QEndpos.CountEnemiesInRange(307) == 0)
                 Q.Cast(Game.CursorPos);
         }
 
