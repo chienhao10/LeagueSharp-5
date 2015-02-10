@@ -15,11 +15,13 @@ namespace Sharpshooter.Champions
 
         static Spell Q, W, E;
 
+        static readonly int DeafaltRange = 615;
+
         public static void Load()
         {
-            Q = new Spell(SpellSlot.Q, 915f);
+            Q = new Spell(SpellSlot.Q, (DeafaltRange + 300));
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 615f);
+            E = new Spell(SpellSlot.E, DeafaltRange);
 
             E.SetTargetted(0.25f, 2400f);
 
@@ -253,7 +255,7 @@ namespace Sharpshooter.Champions
 
             if(!combomode)
             {
-                if (QEndpos.UnderTurret(true) || QEndpos.CountEnemiesInRange(615) > 0)
+                if (QEndpos.UnderTurret(true) || QEndpos.CountEnemiesInRange(DeafaltRange) > 0)
                     return;
             }
            
