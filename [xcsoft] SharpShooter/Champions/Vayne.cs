@@ -235,7 +235,7 @@ namespace Sharpshooter.Champions
             return 0;
         }
 
-        static void LogicalQ()//WIP
+        static void LogicalQ()
         {
             if (!SharpShooter.Menu.Item("LogicalQ", true).GetValue<Boolean>())
             {
@@ -250,9 +250,6 @@ namespace Sharpshooter.Champions
                 if (enemy.IsMelee())
                     return;
             }
-
-            if (QEndpos.UnderTurret(true))
-                return;
            
             Q.Cast(Game.CursorPos);
         }
