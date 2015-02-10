@@ -323,7 +323,7 @@ namespace Sharpshooter.Champions
             if (!Orbwalking.CanMove(1) || !(Player.ManaPercentage() > SharpShooter.Menu.Item("laneclearMana", true).GetValue<Slider>().Value))
                 return;
 
-            var Minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy);
+            var Minions = MinionManager.GetMinions(Player.ServerPosition.Extend(Game.CursorPos, 300), Orbwalking.GetRealAutoAttackRange(Player), MinionTypes.All, MinionTeam.Enemy);
 
             if (Minions.Count <= 0)
                 return;
