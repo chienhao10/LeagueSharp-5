@@ -205,7 +205,7 @@ namespace Sharpshooter.Champions
 
         static float GetComboDamage(Obj_AI_Base enemy)
         {
-            return E.IsReady() ? E.GetDamage(enemy, 1) * 6 : 0;
+            return E.IsReady() ? E.GetDamage(enemy) : 0;
         }
 
         static void Combo()
