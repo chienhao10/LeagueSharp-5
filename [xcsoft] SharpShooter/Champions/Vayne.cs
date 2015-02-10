@@ -13,14 +13,18 @@ namespace Sharpshooter.Champions
         static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         static Orbwalking.Orbwalker Orbwalker { get { return SharpShooter.Orbwalker; } }
 
-        static Spell Q, E;
+        static Spell Q, W, E;
 
         public static void Load()
         {
             Q = new Spell(SpellSlot.Q, 900f);
+            W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 595f);
 
             E.SetTargetted(0.25f, 2200f);
+
+            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw W Damage", true).SetValue(true);
+            var drawFill = new MenuItem("Draw_Fill", "Draw W Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
@@ -46,7 +50,28 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(false, Color.FromArgb(183, 0, 0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingRtimer", "R Timer", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingCond", "E Crash Prediction", true).SetValue(new Circle(true, Color.Red)));
-            
+
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(drawDamageMenu);
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(drawFill);
+
+            DamageIndicator.DamageToUnit = GetComboDamage;
+            DamageIndicator.Enabled = drawDamageMenu.GetValue<bool>();
+            DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
+            DamageIndicator.FillColor = drawFill.GetValue<Circle>().Color;
+
+            drawDamageMenu.ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+
+            drawFill.ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
+                DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
+            };
+
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
@@ -196,6 +221,19 @@ namespace Sharpshooter.Champions
             }
             return
                 ObjectManager.Get<GameObject>().Where(spawnPoint => spawnPoint is Obj_SpawnPoint && spawnPoint.IsAlly).Any(spawnPoint => Vector2.Distance(Position.To2D(), spawnPoint.Position.To2D()) < fountainRange);
+        }
+
+        static float GetComboDamage(Obj_AI_Base enemy)
+        {
+            foreach (var Buff in enemy.Buffs)
+	        {
+		        if(Buff.Name == "vaynesilvereddebuff" && Buff.Count == 2)
+                {
+                    return W.GetDamage(enemy);
+                }
+	        }
+
+            return 0;
         }
 
         static void Combo()
