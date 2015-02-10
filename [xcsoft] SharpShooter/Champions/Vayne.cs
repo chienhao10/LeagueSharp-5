@@ -229,7 +229,7 @@ namespace Sharpshooter.Champions
 	        {
 		        if(Buff.Name == "vaynesilvereddebuff" && Buff.Count == 2)
                 {
-                    return W.GetDamage(enemy);
+                    return W.GetDamage(enemy) + (float)Player.GetAutoAttackDamage(enemy, true);
                 }
 	        }
 
