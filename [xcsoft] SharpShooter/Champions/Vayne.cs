@@ -235,7 +235,7 @@ namespace Sharpshooter.Champions
             return 0;
         }
 
-        static void LogicalQ()
+        static void LogicalQ()//WIP
         {
             if (!SharpShooter.Menu.Item("LogicalQ", true).GetValue<Boolean>())
             {
@@ -245,13 +245,15 @@ namespace Sharpshooter.Champions
 
             var QEndpos = Player.ServerPosition.Extend(Game.CursorPos, 300);
 
-            foreach (var enemy in QEndpos.GetEnemiesInRange(307))
+            foreach (var enemy in QEndpos.GetEnemiesInRange(308))
             {
                 if (enemy.IsMelee())
                     return;
             }
-           
 
+            if (QEndpos.UnderTurret(true))
+                return;
+           
             Q.Cast(Game.CursorPos);
         }
 
