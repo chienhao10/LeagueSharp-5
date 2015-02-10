@@ -163,10 +163,10 @@ namespace Sharpshooter.Champions
             {
                 var QEndpos = Player.Position.Extend(Game.CursorPos, 300);
 
-                Drawing.DrawLine(Drawing.WorldToScreen(Player.Position),Drawing.WorldToScreen(QEndpos),10, Color.Blue);
+                Drawing.DrawLine(Drawing.WorldToScreen(Player.Position),Drawing.WorldToScreen(QEndpos), 5, Color.Blue);
 
                 if(QEndpos.CountEnemiesInRange(615) == 0)
-                    Render.Circle.DrawCircle(QEndpos, 615, Color.Green);
+                    Render.Circle.DrawCircle(QEndpos, 615, Color.Blue);
                 else
                     Render.Circle.DrawCircle(QEndpos, 615, Color.Red);
             }
