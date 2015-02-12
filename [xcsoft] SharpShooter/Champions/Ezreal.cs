@@ -26,8 +26,8 @@ namespace Sharpshooter.Champions
             W.SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
 
-            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw R Damage", true).SetValue(true);
-            var drawFill = new MenuItem("Draw_Fill", "Draw R Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
+            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (R) Damage", true).SetValue(true);
+            var drawFill = new MenuItem("Draw_Fill", "Draw (R) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
