@@ -157,7 +157,7 @@ namespace Sharpshooter.Champions
             if (!SharpShooter.Menu.Item("AutoR", true).GetValue<Boolean>())
                 return;
 
-            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range)))
+            foreach (Obj_AI_Hero target in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range)))
             {
                 if (R.CanCast(target) && UnitIsImmobileUntil(target) >= R.Delay + (Player.Distance(target, false) / R.Speed))
                     R.Cast(target);

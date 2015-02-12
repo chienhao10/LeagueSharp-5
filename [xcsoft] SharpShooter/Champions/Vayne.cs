@@ -125,7 +125,7 @@ namespace Sharpshooter.Champions
 
             if (drawingCond.Active)
             {
-                foreach (var En in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy && hero.IsValidTarget(1100)))
+                foreach (var En in HeroManager.Enemies.Where(hero => hero.IsValidTarget(1100)))
                 {
                     var EPred = E.GetPrediction(En);
                     int pushDist = 450;
@@ -277,7 +277,7 @@ namespace Sharpshooter.Champions
                 
             if (E.IsReady() && SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
             {
-                foreach (var En in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy && hero.IsValidTarget(E.Range) && !hero.HasBuffOfType(BuffType.SpellShield) && !hero.HasBuffOfType(BuffType.SpellImmunity)))
+                foreach (var En in HeroManager.Enemies.Where(hero => hero.IsValidTarget(E.Range) && !hero.HasBuffOfType(BuffType.SpellShield) && !hero.HasBuffOfType(BuffType.SpellImmunity)))
                 {
                     //Part of VayneHunterRework
 

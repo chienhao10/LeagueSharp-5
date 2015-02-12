@@ -29,6 +29,7 @@ namespace Sharpshooter
 
             Menu = new Menu("[xcsoft] SharpShooter", "xcsoft_sharpshooter", true);
             Orbwalker = new Orbwalking.Orbwalker(Menu.AddSubMenu(new Menu(Player.ChampionName + ": Orbwalker", "Orbwalker")));
+            
             TargetSelector.AddToMenu(Menu.AddSubMenu(new Menu(ObjectManager.Player.ChampionName + ": Target Selector", "Target Selector")));
             Menu.AddToMainMenu();
 

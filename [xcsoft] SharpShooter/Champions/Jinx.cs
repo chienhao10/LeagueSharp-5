@@ -222,7 +222,7 @@ namespace Sharpshooter.Champions
             if (!SharpShooter.Menu.Item("AutoE", true).GetValue<Boolean>())
                 return;
 
-            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(E.Range)))
+            foreach (Obj_AI_Hero target in HeroManager.Enemies.Where(x => x.IsValidTarget(E.Range)))
             {
                 if (E.CanCast(target) && UnitIsImmobileUntil(target) >= E.Delay)
                     E.Cast(target);
@@ -291,7 +291,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady() && WLastCastedTime + 1.0 < Game.ClockTime)
             {
-                foreach (Obj_AI_Hero Rtarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
+                foreach (Obj_AI_Hero Rtarget in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
                 {
                     if (R.CanCast(Rtarget) && R.GetPrediction(Rtarget).Hitchance >= HitChance.High)
                     {
@@ -315,7 +315,7 @@ namespace Sharpshooter.Champions
                         else
                             if (predhealth <= R.GetDamage(Rtarget) * 0.8)
                             {
-                                foreach (Obj_AI_Hero ExplosionTarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(R.Range)))
+                                foreach (Obj_AI_Hero ExplosionTarget in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range)))
                                 {
                                     var pred = R.GetPrediction(ExplosionTarget);
 

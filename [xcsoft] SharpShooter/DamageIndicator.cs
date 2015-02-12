@@ -47,7 +47,7 @@ namespace Sharpshooter
                 return;
             }
 
-            foreach (var unit in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValid && h.IsHPBarRendered && h.IsEnemy))
+            foreach (var unit in HeroManager.Enemies.Where(h => h.IsValid && h.IsHPBarRendered))
             {
                 var barPos = unit.HPBarPosition;
                 var damage = _damageToUnit(unit);

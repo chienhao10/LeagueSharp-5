@@ -142,7 +142,7 @@ namespace Sharpshooter.Champions
             if (!SharpShooter.Menu.Item("AutoW", true).GetValue<Boolean>())
                 return;
 
-            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(W.Range) && x.IsEnemy))
+            foreach (Obj_AI_Hero target in HeroManager.Enemies.Where(x => x.IsValidTarget(W.Range)))
             {
                 if (target != null)
                 {

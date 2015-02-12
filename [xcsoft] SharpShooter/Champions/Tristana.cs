@@ -15,8 +15,6 @@ namespace Sharpshooter.Champions
         static Orbwalking.Orbwalker Orbwalker { get { return SharpShooter.Orbwalker; } }
 
         static Spell Q, W, E, R;
-
-        static int GetExtraRange { get { return 543 + (7 * Player.Level); } }
         
         public static void Load()
         {
@@ -157,7 +155,7 @@ namespace Sharpshooter.Champions
             if (!SharpShooter.Menu.Item("killsteal", true).GetValue<Boolean>())
                 return;
 
-            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && x.IsEnemy && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)))
+            foreach (Obj_AI_Hero target in HeroManager.Enemies.Where(x => x.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)))
             {
                 if (target != null)
                 {
@@ -204,7 +202,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>() && W.IsReady())
             {
-                foreach (Obj_AI_Hero Wtarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(W.Range) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
+                foreach (Obj_AI_Hero Wtarget in HeroManager.Enemies.Where(x => x.IsValidTarget(W.Range) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
                 {
                     var Wpred = W.GetPrediction(Wtarget);
 
@@ -235,7 +233,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady())
             {
-                foreach (Obj_AI_Hero Rtarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
+                foreach (Obj_AI_Hero Rtarget in HeroManager.Enemies.Where(x => x.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability)))
                 {
                     if (Rtarget.Health + Rtarget.HPRegenRate <= R.GetDamage(Rtarget))
                     {
