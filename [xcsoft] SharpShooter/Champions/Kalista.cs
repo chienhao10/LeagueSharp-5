@@ -17,12 +17,15 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
-            Q = new Spell(SpellSlot.Q, 1150f);
+            Q = new Spell(SpellSlot.Q, 1100f);
             W = new Spell(SpellSlot.W, 5500f);
             E = new Spell(SpellSlot.E, 1000f);
-            R = new Spell(SpellSlot.R, 1200);
+            R = new Spell(SpellSlot.R, 1200f);
 
             Q.SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
+
+            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw W Damage", true).SetValue(true);
+            var drawFill = new MenuItem("Draw_Fill", "Draw W Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
@@ -31,7 +34,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
-            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(false));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearMana", "if Mana % >", true).SetValue(new Slider(60, 0, 100)));
 
@@ -39,13 +42,34 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearMana", "if Mana % >", true).SetValue(new Slider(20, 0, 100)));
 
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal (With E)", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQ", "Q Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingW", "W Range", true).SetValue(new Circle(false, Color.FromArgb(0, 230, 255))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(false, Color.FromArgb(0, 230, 255))));
+
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(drawDamageMenu);
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(drawFill);
+
+            DamageIndicator.DamageToUnit = GetComboDamage;
+            DamageIndicator.Enabled = drawDamageMenu.GetValue<bool>();
+            DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
+            DamageIndicator.FillColor = drawFill.GetValue<Circle>().Color;
+
+            drawDamageMenu.ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+
+            drawFill.ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
+                DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
+            };
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -118,6 +142,11 @@ namespace Sharpshooter.Champions
                         E.Cast();
                 }
             }
+        }
+
+        static float GetComboDamage(Obj_AI_Base enemy)
+        {
+            return E.IsReady() ? E.GetDamage(enemy) : 0;
         }
 
         static void Combo()
