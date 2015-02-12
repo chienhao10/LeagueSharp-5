@@ -21,7 +21,7 @@ namespace Sharpshooter.Champions
         public static void Load()
         {
             Q = new Spell(SpellSlot.Q);
-            W = new Spell(SpellSlot.W, 900f);
+            W = new Spell(SpellSlot.W, 1170f);
             E = new Spell(SpellSlot.E);
             R = new Spell(SpellSlot.R);
             
@@ -47,7 +47,7 @@ namespace Sharpshooter.Champions
 
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("antigapcloser", "Use Anti-Gapcloser", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("autointerrupt", "Use Auto-Interrupt", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("jump", "Jump to mouse", true).SetValue(new KeyBind('G', KeyBindType.Press)));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal (With R)", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.FromArgb(255, 178, 217))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingW", "W Range", true).SetValue(new Circle(true, Color.FromArgb(255, 178, 217))));
@@ -97,14 +97,7 @@ namespace Sharpshooter.Champions
                 Jungleclear();
             }
 
-            if(SharpShooter.Menu.Item("jump", true).GetValue<KeyBind>().Active)
-            {
-                if (W.IsReady())
-                {
-                    Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-                    W.Cast(Game.CursorPos);
-                }
-            }
+            Killsteal();
         }
 
         static void Drawing_OnDraw(EventArgs args)
@@ -120,13 +113,6 @@ namespace Sharpshooter.Champions
 
             if (W.IsReady() && drawingW.Active)
                 Render.Circle.DrawCircle(Player.Position, W.Range, drawingW.Color);
-
-            if (SharpShooter.Menu.Item("jump", true).GetValue<KeyBind>().Active)
-            {
-                Render.Circle.DrawCircle(Game.CursorPos, W.Width, Color.Gold);
-                var targetpos = Drawing.WorldToScreen(Game.CursorPos);
-                Drawing.DrawText(targetpos[0] - 30, targetpos[1] + 40, Color.Gold, "W Jump");
-            }
         }
 
         static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -166,12 +152,39 @@ namespace Sharpshooter.Champions
                 Utility.DelayAction.Add(250, Orbwalking.ResetAutoAttackTimer);
         }
 
+        static void Killsteal()
+        {
+            if (!SharpShooter.Menu.Item("killsteal", true).GetValue<Boolean>())
+                return;
+
+            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && x.IsEnemy && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)))
+            {
+                if (target != null)
+                {
+                    if (R.IsReady() && (target.Health + (target.HPRegenRate / 2)) <= E.GetDamage(target))
+                    {
+                        R.Cast(target);
+                        break;
+                    }
+                }
+            }
+        }
+
         static float GetComboDamage(Obj_AI_Base enemy)
         {
             float damage = 0f;
 
             if (R.IsReady())
                 damage += R.GetDamage(enemy);
+
+            foreach (var buff in enemy.Buffs)
+            {
+                if (buff.Name == "tristanaecharge")
+                {
+                    damage += (float)(E.GetDamage(enemy) * (buff.Count * 0.25)) + E.GetDamage(enemy);
+                    break;
+                }
+            }
 
             return damage;
         }
