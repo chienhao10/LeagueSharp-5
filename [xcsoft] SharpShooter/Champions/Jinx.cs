@@ -190,7 +190,7 @@ namespace Sharpshooter.Champions
                 return;
             }
 
-            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= 2)
+            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= 3)
             {
                 QSwitch(true);
                 return;
