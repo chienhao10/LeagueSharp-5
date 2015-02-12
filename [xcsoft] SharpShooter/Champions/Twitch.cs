@@ -194,7 +194,7 @@ namespace Sharpshooter.Champions
             {
                 if (target != null)
                 {
-                    if (E.CanCast(target) && (target.Health + target.HPRegenRate) <= E.GetDamage(target))
+                    if (E.CanCast(target) && (target.Health + (target.HPRegenRate / 2)) <= E.GetDamage(target))
                     {
                         E.Cast();
                         break;

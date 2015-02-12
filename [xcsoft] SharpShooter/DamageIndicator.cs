@@ -24,7 +24,7 @@ namespace Sharpshooter
         private static DamageToUnitDelegate _damageToUnit;
 
         private static readonly Render.Text Text = new Render.Text(
-            0, 0, "", 11, new ColorBGRA(255, 0, 0, 255), "monospace");
+            0, 0, "", 11, SharpDX.Color.White, "monospace");
 
         public static DamageToUnitDelegate DamageToUnit
         {
@@ -60,11 +60,11 @@ namespace Sharpshooter
                 {
                     Text.X = (int)barPos.X + XOffset;
                     Text.Y = (int)barPos.Y + YOffset - 13;
-                    Text.text = ((int)(unit.Health - damage)).ToString();
+                    Text.text = "Killable:" + (unit.Health - damage);
                     Text.OnEndScene();
                 }
 
-                Drawing.DrawLine(xPosDamage, yPos, xPosDamage, yPos + Height, 2, Color);
+                Drawing.DrawLine(xPosDamage, yPos, xPosDamage, yPos + Height, 1, Color);
 
                 if (Fill)
                 {

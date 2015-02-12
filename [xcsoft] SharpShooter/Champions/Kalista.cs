@@ -22,7 +22,7 @@ namespace Sharpshooter.Champions
             E = new Spell(SpellSlot.E, 1000f);
             R = new Spell(SpellSlot.R, 1200f);
 
-            Q.SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 40f, 1700f, true, SkillshotType.SkillshotLine);
 
             var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw E Damage", true).SetValue(true);
             var drawFill = new MenuItem("Draw_Fill", "Draw E Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
@@ -126,7 +126,7 @@ namespace Sharpshooter.Champions
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
-                Orbwalking.ResetAutoAttackTimer();
+                Utility.DelayAction.Add(250, Orbwalking.ResetAutoAttackTimer);
         }
 
         static void Killsteal()
@@ -138,7 +138,7 @@ namespace Sharpshooter.Champions
             {
                 if (target != null)
                 {
-                    if (E.CanCast(target) && (target.Health + target.HPRegenRate) <= E.GetDamage(target))
+                    if (E.CanCast(target) && (target.Health + (target.HPRegenRate / 2)) <= E.GetDamage(target))
                         E.Cast();
                 }
             }
@@ -167,7 +167,7 @@ namespace Sharpshooter.Champions
             {
                 var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
 
-                if (E.CanCast(Etarget) && (Etarget.Health + Etarget.HPRegenRate) <= E.GetDamage(Etarget))
+                if (E.CanCast(Etarget) && (Etarget.Health + (Etarget.HPRegenRate / 2)) <= E.GetDamage(Etarget))
                     E.Cast();
             }
 
@@ -191,7 +191,7 @@ namespace Sharpshooter.Champions
             {
                 var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
 
-                if (E.CanCast(Etarget) && (Etarget.Health + Etarget.HPRegenRate) <= E.GetDamage(Etarget))
+                if (E.CanCast(Etarget) && (Etarget.Health + (Etarget.HPRegenRate / 2)) <= E.GetDamage(Etarget))
                     E.Cast();
             }
         }
