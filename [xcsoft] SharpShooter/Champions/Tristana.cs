@@ -172,7 +172,7 @@ namespace Sharpshooter.Champions
                             }
                         }
 
-                        if (Player.Health + Player.HPRegenRate <= W.GetDamage(Wtarget) + Player.GetAutoAttackDamage(Wtarget, true))
+                        if (Player.Health + (Player.HPRegenRate / 2) <= W.GetDamage(Wtarget) + Player.GetAutoAttackDamage(Wtarget, true))
                             W.Cast(Wtarget);
                     }
                 }
@@ -182,7 +182,7 @@ namespace Sharpshooter.Champions
             {
                 var Etarget = Orbwalker.GetTarget();
 
-                if (E.IsReady() && Etarget != null && Etarget.IsEnemy)
+                if (E.IsReady() && Etarget != null && Etarget.IsEnemy && !Player.IsWindingUp)
                     E.Cast((Obj_AI_Hero)Etarget);
             }
 
@@ -208,7 +208,7 @@ namespace Sharpshooter.Champions
             {
                 var Etarget = Orbwalker.GetTarget();
 
-                if (E.IsReady() && Etarget != null && Etarget.IsEnemy)
+                if (E.IsReady() && Etarget != null && Etarget.IsEnemy && !Player.IsWindingUp)
                     E.Cast((Obj_AI_Hero)Etarget);
             }
         }
@@ -232,7 +232,7 @@ namespace Sharpshooter.Champions
 
         static void Jungleclear()
         {
-            if (Q.IsReady())
+            if (Q.IsReady() && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
                 Q.Cast();
 
             if (!Orbwalking.CanMove(1) || !(Player.ManaPercentage() > SharpShooter.Menu.Item("jungleclearMana", true).GetValue<Slider>().Value))
@@ -243,7 +243,7 @@ namespace Sharpshooter.Champions
             if (Mobs.Count <= 0)
                 return;
 
-            if (E.IsReady() && SharpShooter.Menu.Item("jungleclearUseE", true).GetValue<Boolean>())
+            if (E.IsReady() && SharpShooter.Menu.Item("jungleclearUseE", true).GetValue<Boolean>() && !Player.IsWindingUp)
                 E.Cast(Mobs[0]);
         }
     }
