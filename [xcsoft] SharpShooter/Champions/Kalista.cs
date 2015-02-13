@@ -24,8 +24,8 @@ namespace Sharpshooter.Champions
 
             Q.SetSkillshot(0.25f, 40f, 1700f, true, SkillshotType.SkillshotLine);
 
-            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (E) Damage", true).SetValue(true);
-            var drawFill = new MenuItem("Draw_Fill", "Draw (E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
+            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (Q, E) Damage", true).SetValue(true);
+            var drawFill = new MenuItem("Draw_Fill", "Draw (Q, E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
@@ -162,7 +162,15 @@ namespace Sharpshooter.Champions
 
         static float GetComboDamage(Obj_AI_Base enemy)
         {
-            return E.IsReady() ? E.GetDamage(enemy) : 0;
+            float damage = 0;
+
+            if (Q.IsReady())
+                damage += Q.GetDamage(enemy);
+
+            if (E.IsReady())
+                damage += E.GetDamage(enemy);
+
+            return damage;
         }
 
         static void Combo()

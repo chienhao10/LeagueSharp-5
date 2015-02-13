@@ -103,7 +103,7 @@ namespace Sharpshooter
                 var target = Orbwalker.GetTarget();
 
                 if (target != null)
-                    Render.Circle.DrawCircle(target.Position, target.BoundingRadius, Color.Red);
+                    Render.Circle.DrawCircle(target.Position, target.BoundingRadius+15, Color.Red, 10);
             }
 
         }
