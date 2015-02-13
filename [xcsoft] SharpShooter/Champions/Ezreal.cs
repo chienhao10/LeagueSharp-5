@@ -36,7 +36,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseW", "Use W", true).SetValue(false));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
-            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassAuto", "Auto Harass", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassAuto", "Auto Harass (Toggle)", true).SetValue(new KeyBind('T', KeyBindType.Toggle, true)));
             
 
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(true));
@@ -105,7 +105,7 @@ namespace Sharpshooter.Champions
                 }
             }
 
-            if (SharpShooter.Menu.Item("harassAuto", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("harassAuto", true).GetValue<Boolean>() && !Player.UnderTurret(true))
                 Harass();
 
             Killsteal();
