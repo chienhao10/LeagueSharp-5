@@ -22,7 +22,7 @@ namespace Sharpshooter.Champions
             E = new Spell(SpellSlot.E, 1200f);
             Recall = new Spell(SpellSlot.Recall);
 
-            W.SetSkillshot(0.25f, 120f, 1400f, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(0.25f, 250f, 1400f, false, SkillshotType.SkillshotCircle);
 
             var drawDamageMenu = new MenuItem("Draw_EDamage", "Draw (E) Damage", true).SetValue(true);
             var drawFill = new MenuItem("Draw_Fill", "Draw (E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
