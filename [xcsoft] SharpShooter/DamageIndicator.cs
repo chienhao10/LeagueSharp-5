@@ -23,8 +23,7 @@ namespace Sharpshooter
         public static bool Enabled = true;
         private static DamageToUnitDelegate _damageToUnit;
 
-        private static readonly Render.Text Text = new Render.Text(
-            0, 0, "", 11, SharpDX.Color.White, "monospace");
+        private static readonly Render.Text Text = new Render.Text(0, 0, "", 14, SharpDX.Color.Red, "monospace");
 
         public static DamageToUnitDelegate DamageToUnit
         {
@@ -60,7 +59,7 @@ namespace Sharpshooter
                 {
                     Text.X = (int)barPos.X + XOffset;
                     Text.Y = (int)barPos.Y + YOffset - 13;
-                    Text.text = "Killable:" + (unit.Health - damage);
+                    Text.text = "Killable: " + (unit.Health - damage);
                     Text.OnEndScene();
                 }
 

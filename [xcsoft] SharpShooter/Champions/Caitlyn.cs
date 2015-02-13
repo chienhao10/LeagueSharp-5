@@ -21,12 +21,12 @@ namespace Sharpshooter.Champions
         {
             Q = new Spell(SpellSlot.Q, 1300f);
             W = new Spell(SpellSlot.W, 800f);
-            E = new Spell(SpellSlot.E, 950f);
+            E = new Spell(SpellSlot.E, 1000f);
             R = new Spell(SpellSlot.R);
 
-            Q.SetSkillshot(0.7f, 60f, 2200f, false, SkillshotType.SkillshotLine);
-            W.SetSkillshot(1.3f, 100f, float.MaxValue, false, SkillshotType.SkillshotCircle);
-            E.SetSkillshot(0.25f, 80f, 1600f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.625f, 90f, 2200f, false, SkillshotType.SkillshotLine);
+            W.SetSkillshot(1.3f, 80f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(0.125f, 80f, 2000f, true, SkillshotType.SkillshotLine);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
@@ -175,7 +175,7 @@ namespace Sharpshooter.Champions
             input.CollisionObjects[0] = CollisionableObjects.Heroes;
             input.CollisionObjects[1] = CollisionableObjects.YasuoWall;
 
-            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count() >= 1;
+            return !Collision.GetCollision(new List<Vector3> { targetpos }, input).Where(col => col != source).Any();
         }
 
         static void Combo()
@@ -199,12 +199,13 @@ namespace Sharpshooter.Champions
                     W.Cast(Wtarget);
             }
                 
-            if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady())
             {
-                var Rtarget = TargetSelector.GetTarget(1500 + (500 * R.Level), TargetSelector.DamageType.Physical, true);
-
-                if (R.IsReady() && Orbwalker.GetTarget() == null && Rtarget.IsValidTarget(1500 + (500 * R.Level)) && Rtarget.Health + Rtarget.HPRegenRate * 2 <= R.GetDamage(Rtarget) && CollisionCheck(Player, Rtarget.ServerPosition, 150))
-                   R.Cast(Rtarget);
+                foreach (var Rtarget in HeroManager.Enemies.Where(t => t.IsValidTarget(1500 + (500 * R.Level)) && !t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && !t.HasBuffOfType(BuffType.Invulnerability) && !t.HasBuffOfType(BuffType.SpellShield)))
+                {
+                    if (Rtarget.Health + Rtarget.HPRegenRate <= R.GetDamage(Rtarget) && CollisionCheck(Player, Rtarget.ServerPosition, 150))
+                        R.Cast(Rtarget);
+                }
             }
         }
 
