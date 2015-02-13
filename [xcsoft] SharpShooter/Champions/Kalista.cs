@@ -43,6 +43,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearMana", "if Mana % >", true).SetValue(new Slider(20, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal (With E)", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("mobsteal", "Use Mobsteal (With E)", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQ", "Q Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
@@ -94,6 +95,7 @@ namespace Sharpshooter.Champions
             }
 
             Killsteal();
+            Mobsteal();
         }
 
         static void Drawing_OnDraw(EventArgs args)
@@ -141,6 +143,20 @@ namespace Sharpshooter.Champions
                     if (E.CanCast(target) && (target.Health + (target.HPRegenRate / 2)) <= E.GetDamage(target))
                         E.Cast();
                 }
+            }
+        }
+
+        static void Mobsteal()
+        {
+            if (!SharpShooter.Menu.Item("mobsteal", true).GetValue<Boolean>())
+                return;
+
+            var Mobs = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+
+            foreach (var Mob in Mobs)
+            {
+                if(Mob.Health+(Mob.HPRegenRate/2) <= E.GetDamage(Mob))
+                    E.Cast();
             }
         }
 
@@ -216,14 +232,16 @@ namespace Sharpshooter.Champions
 
             if (E.IsReady() && SharpShooter.Menu.Item("laneclearUseE", true).GetValue<Boolean>())
             {
+                var minionkillcount = 0;
+
                 foreach (var Minion in Minions)
                 {
                     if (Minion.Health <= E.GetDamage(Minion))
-                    {
-                        E.Cast();
-                        break;
-                    }
+                        minionkillcount++;
                 }
+
+                if (minionkillcount >= 2)
+                    E.Cast();
             }
         }
 
@@ -238,11 +256,11 @@ namespace Sharpshooter.Champions
                 return;
 
             if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
-                Q.Cast(Mobs[0].Position);
+                Q.Cast(Mobs[0]);
 
             if (E.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseE", true).GetValue<Boolean>())
             {
-                if ((Mobs[0].Health + Mobs[0].HPRegenRate) <= E.GetDamage(Mobs[0]))
+                if (Mobs[0].Health + Mobs[0].HPRegenRate <= E.GetDamage(Mobs[0]))
                     E.Cast();
             }
         }
