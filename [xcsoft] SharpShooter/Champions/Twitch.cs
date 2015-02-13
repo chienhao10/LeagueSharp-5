@@ -298,6 +298,7 @@ namespace Sharpshooter.Champions
             if (E.IsReady() && SharpShooter.Menu.Item("laneclearUseE", true).GetValue<Boolean>())
             {
                 var killcount = 0;
+
                 foreach (var Minion in Minions)
                 {
                     foreach (var buff in Minion.Buffs)
@@ -332,7 +333,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (W.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseW", true).GetValue<Boolean>())
-                W.Cast(Mobs[0].Position);
+                W.Cast(Mobs[0]);
 
             if (E.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseE", true).GetValue<Boolean>())
             {
