@@ -18,12 +18,12 @@ namespace Sharpshooter
         {
             try 
 	        {
-                Console.WriteLine("[xcsoft] SharpShooter: " + Type.GetType("Sharpshooter.Champions." + Player.ChampionName).Name + " Support");
+                Console.WriteLine("[xcsoft] SharpShooter: " + Type.GetType("Sharpshooter.Champions." + Player.ChampionName).Name + " support");
 	        }
 	        catch
 	        {
-                Console.WriteLine("[xcsoft] SharpShooter: " + ObjectManager.Player.ChampionName + " not support");
-                Game.PrintChat("<font color = \"#00D8FF\">[xcsoft] SharpShooter: </font><font color = \"#7ED2FF\">" + Player.ChampionName + "</font> Not Support");
+                Console.WriteLine("[xcsoft] SharpShooter: " + ObjectManager.Player.ChampionName + " does not support");
+                Game.PrintChat("<font color = \"#00D8FF\">[xcsoft] SharpShooter: </font><font color = \"#FF007F\">" + Player.ChampionName + "</font> Does not support, Unload.");
 		        return;
 	        }
 
@@ -52,7 +52,7 @@ namespace Sharpshooter
 
             Drawing.OnDraw += Drawing_OnDraw;
 
-            Game.PrintChat("<font color = \"#00D8FF\">[xcsoft] SharpShooter:</font> <font color = \"#7ED2FF\">" + Player.ChampionName + "</font> Loaded");
+            Game.PrintChat("<font color = \"#00D8FF\">[xcsoft] SharpShooter:</font> <font color = \"#FF007F\">" + Player.ChampionName + "</font> Loaded");
         }
 
         static void Drawing_OnDraw(EventArgs args)
@@ -103,7 +103,7 @@ namespace Sharpshooter
                 var target = Orbwalker.GetTarget();
 
                 if (target != null)
-                    Render.Circle.DrawCircle(target.Position, target.BoundingRadius+15, Color.Red, 10);
+                    Render.Circle.DrawCircle(target.Position, target.BoundingRadius + 15, Color.Red, 6);
             }
 
         }
