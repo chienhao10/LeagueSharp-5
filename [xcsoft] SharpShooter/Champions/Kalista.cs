@@ -183,7 +183,7 @@ namespace Sharpshooter.Champions
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
                 var Qpred = Q.GetPrediction(Qtarget);
 
-                if(Q.CanCast(Qtarget) && !Player.IsWindingUp && Qpred.Hitchance >= HitChance.VeryHigh)
+                if(Q.CanCast(Qtarget) && !Player.IsWindingUp && !Player.IsDashing() && Qpred.Hitchance >= HitChance.VeryHigh)
                     Q.Cast(Qtarget);
             }
                 
@@ -207,7 +207,7 @@ namespace Sharpshooter.Champions
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
                 var Qpred = Q.GetPrediction(Qtarget);
 
-                if (Q.CanCast(Qtarget) && !Player.IsWindingUp && Qpred.Hitchance >= HitChance.VeryHigh)
+                if (Q.CanCast(Qtarget) && !Player.IsWindingUp && !Player.IsDashing() && Qpred.Hitchance >= HitChance.VeryHigh)
                     Q.Cast(Qtarget);
             }
 
