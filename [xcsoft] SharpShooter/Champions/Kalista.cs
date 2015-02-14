@@ -20,7 +20,7 @@ namespace Sharpshooter.Champions
             Q = new Spell(SpellSlot.Q, 1100f);
             W = new Spell(SpellSlot.W, 5500f);
             E = new Spell(SpellSlot.E, 1000f);
-            R = new Spell(SpellSlot.R, 1200f);
+            R = new Spell(SpellSlot.R, 1400f);
 
             Q.SetSkillshot(0.25f, 40f, 1700f, true, SkillshotType.SkillshotLine);
 
@@ -28,10 +28,10 @@ namespace Sharpshooter.Champions
             var drawFill = new MenuItem("Draw_Fill", "Draw (Q, E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
+            //SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseE", "Use E", true).SetValue(true));
+            //SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(false));
@@ -187,13 +187,13 @@ namespace Sharpshooter.Champions
                     Q.Cast(Qtarget);
             }
                 
-            if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
-            {
-                var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
+            //if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
+            //{
+            //    var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
 
-                if (E.CanCast(Etarget) && (Etarget.Health + (Etarget.HPRegenRate / 2)) <= E.GetDamage(Etarget))
-                    E.Cast();
-            }
+            //    if (E.CanCast(Etarget) && (Etarget.Health + (Etarget.HPRegenRate / 2)) <= E.GetDamage(Etarget))
+            //        E.Cast();
+            //}
 
         }
 
@@ -211,13 +211,13 @@ namespace Sharpshooter.Champions
                     Q.Cast(Qtarget);
             }
 
-            if (SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
-            {
-                var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
+            //if (SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
+            //{
+            //    var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
 
-                if (E.CanCast(Etarget) && (Etarget.Health + (Etarget.HPRegenRate / 2)) <= E.GetDamage(Etarget))
-                    E.Cast();
-            }
+            //    if (E.CanCast(Etarget) && (Etarget.Health + (Etarget.HPRegenRate / 2)) <= E.GetDamage(Etarget))
+            //        E.Cast();
+            //}
         }
 
         static void Laneclear()
