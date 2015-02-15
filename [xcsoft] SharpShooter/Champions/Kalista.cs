@@ -17,7 +17,7 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
-            Q = new Spell(SpellSlot.Q, 1200f);
+            Q = new Spell(SpellSlot.Q, 1100f);
             W = new Spell(SpellSlot.W, 5500f);
             E = new Spell(SpellSlot.E, 1000f);
             R = new Spell(SpellSlot.R, 1400f);
@@ -157,7 +157,7 @@ namespace Sharpshooter.Champions
             }
 
 
-            var Minions = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy);
+            var Minions = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
 
             foreach (var Minion in Minions.Where(x => x.Health <= E.GetDamage(x)))
             {
