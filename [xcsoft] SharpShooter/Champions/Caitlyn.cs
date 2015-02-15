@@ -175,7 +175,7 @@ namespace Sharpshooter.Champions
             input.CollisionObjects[0] = CollisionableObjects.Heroes;
             input.CollisionObjects[1] = CollisionableObjects.YasuoWall;
 
-            return !Collision.GetCollision(new List<Vector3> { targetpos }, input).Where(col => col != source).Any();
+            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count <= 1;
         }
 
         static void Combo()
