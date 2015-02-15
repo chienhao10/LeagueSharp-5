@@ -116,7 +116,10 @@ namespace Sharpshooter.Champions
 
         static void Orbwalking_OnAfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (!W.IsReady() || !unit.IsMe || !(target is Obj_AI_Hero))
+            if (!W.IsReady() || !unit.IsMe || !(target.Type == GameObjectType.obj_AI_Hero))
+                return;
+
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
                 return;
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
