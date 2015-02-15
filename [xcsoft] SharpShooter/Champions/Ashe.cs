@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
+using Collision = LeagueSharp.Common.Collision;
 
 namespace Sharpshooter.Champions
 {
@@ -159,7 +161,7 @@ namespace Sharpshooter.Champions
 
             foreach (Obj_AI_Hero target in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range)))
             {
-                if (R.CanCast(target) && UnitIsImmobileUntil(target) >= R.Delay + (Player.Distance(target, false) / R.Speed))
+                if (R.CanCast(target) && UnitIsImmobileUntil(target) >= R.Delay + (Player.Distance(target, false) / R.Speed) && CollisionCheck(Player, target, R.Width))
                     R.Cast(target);
             }
         }
@@ -174,6 +176,20 @@ namespace Sharpshooter.Champions
                          buff.Type == BuffType.Suppression || buff.Type == BuffType.Snare))
                     .Aggregate(0d, (current, buff) => Math.Max(current, buff.EndTime));
             return (result - Game.Time);
+        }
+
+        static bool CollisionCheck(Obj_AI_Hero source, Obj_AI_Hero target, float width)
+        {
+            var input = new PredictionInput
+            {
+                Radius = width,
+                Unit = source,
+            };
+
+            input.CollisionObjects[0] = CollisionableObjects.Heroes;
+            input.CollisionObjects[1] = CollisionableObjects.YasuoWall;
+
+            return !Collision.GetCollision(new List<Vector3> { target.ServerPosition }, input).Where(x => x.NetworkId != x.NetworkId).Any();
         }
 
         static void Combo()
@@ -193,7 +209,7 @@ namespace Sharpshooter.Champions
             {
                 var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical, true);
 
-                if(R.IsReady() && Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 50) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh)
+                if (R.IsReady() && Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 50) && !Rtarget.HasBuffOfType(BuffType.SpellImmunity) && R.GetPrediction(Rtarget).Hitchance >= HitChance.VeryHigh && CollisionCheck(Player, Rtarget, R.Width))
                     R.Cast(Rtarget);
             }
                 
