@@ -41,7 +41,6 @@ namespace Sharpshooter.Champions
             var drawFill = new MenuItem("Draw_Fill", "Draw (W, R) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboQnum", "Switch to FISHBONES If Can Hit Enemy Number >=", true).SetValue(new Slider(2, 2, 5)));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseR", "Use R", true).SetValue(true));
@@ -51,6 +50,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearQnum", "Switch to FISHBONES If Can Hit Minion Number >=", true).SetValue(new Slider(2, 2, 7)));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearMana", "if Mana % >", true).SetValue(new Slider(60, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseQ", "Use Q", true).SetValue(true));
@@ -59,6 +59,7 @@ namespace Sharpshooter.Champions
 
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("antigapcloser", "Use Anti-Gapcloser", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("AutoE", "Autocast E On Immobile Targets", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("FISHBONES", "Switch to FISHBONES If Can Hit Enemy Number >=", true).SetValue(new Slider(2, 2, 5)));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingW", "W Range", true).SetValue(new Circle(true, Color.HotPink)));
@@ -191,7 +192,7 @@ namespace Sharpshooter.Champions
                 return;
             }
 
-            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= SharpShooter.Menu.Item("comboQnum").GetValue<Slider>().Value)
+            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= SharpShooter.Menu.Item("FISHBONES").GetValue<Slider>().Value)
             {
                 QSwitch(true);
                 return;
@@ -386,7 +387,7 @@ namespace Sharpshooter.Champions
                 var target = Orbwalker.GetTarget();
 
                 if(target != null)
-                    QSwitch((CountEnemyMinionsInRange(target.Position, 160) >= 2));
+                    QSwitch((CountEnemyMinionsInRange(target.Position, 160) >= SharpShooter.Menu.Item("laneclearQnum", true).GetValue<Slider>().Value));
             }
                 
         }
