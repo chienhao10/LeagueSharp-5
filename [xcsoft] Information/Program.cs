@@ -74,8 +74,18 @@ namespace _xcsoft__Information
 
             foreach (var buff in Target.Buffs)
             {
-                buffs += "\n" + buff.Name + "(Count:" + buff.Count + "/Duration:" + (buff.EndTime - Game.ClockTime).ToString("0.00") +"),";
+                buffs += "\n" + buff.Name + "[Count:" + buff.Count + "/Duration:" + (buff.EndTime - Game.ClockTime).ToString("0.00") +"],";
             }
+
+            var Mobs = MinionManager.GetMinions(1500, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.MaxHealth);
+            var MobsList = "";
+
+            foreach (var Mob in Mobs)
+            {
+                MobsList += "\n" + Mob.Name + "[Skinname:" + Mob.SkinName + "/HP:" + Mob.Health + " / " + Mob.MaxHealth + "(" + Mob.HealthPercentage().ToString("0.00") + "%)],";
+            }
+
+            Render.Circle.DrawCircle(Player.Position, 1500, Color.Red, 10);
 
             Text.text =
                 "Name: " + Target.Name + NewLine +
@@ -116,15 +126,10 @@ namespace _xcsoft__Information
                 "IsRooted: " + Target.IsRooted + NewLine +
                 "IsMelee: " + Target.IsMelee() + NewLine +
                 "IsDashing: " + Target.IsDashing() + NewLine +
-                "IsValid: " + Target.IsValid + NewLine +
-                "IsMovementImpaired: " + Utility.IsMovementImpaired(Target) + NewLine +
-                "IsBot: " + Target.IsBot + NewLine +
                 "IsAlly: " + Target.IsAlly + NewLine +
-                "IsEnemy: " + Target.IsEnemy + NewLine +
-                "CanAttack: " + Target.CanAttack + NewLine +
-                "InFountain: " + Target.InFountain() + NewLine +
-                "InShop: " + Target.InShop() + NewLine +
                 "UnderTurret: " + Target.UnderTurret() + NewLine +
+                NewLine +
+                "Mobs: " + MobsList + NewLine +
                 NewLine +
                 "Game_CursorPos: " + Game.CursorPos + NewLine +
                 "Game_ClockTime: " + Game.ClockTime + NewLine +

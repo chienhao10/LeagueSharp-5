@@ -17,21 +17,19 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
-            Q = new Spell(SpellSlot.Q, 1100f);
+            Q = new Spell(SpellSlot.Q, 1200f);
             W = new Spell(SpellSlot.W, 5500f);
             E = new Spell(SpellSlot.E, 1000f);
             R = new Spell(SpellSlot.R, 1400f);
 
-            Q.SetSkillshot(0.25f, 40f, 1700f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 40f, 1200f, true, SkillshotType.SkillshotLine);
 
             var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (Q, E) Damage", true).SetValue(true);
             var drawFill = new MenuItem("Draw_Fill", "Draw (Q, E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
-            //SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
-            //SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(false));
@@ -152,10 +150,20 @@ namespace Sharpshooter.Champions
                 return;
 
             var Mobs = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-
-            foreach (var Mob in Mobs)
+            
+            foreach (var Mob in Mobs.Where(x => x.Health+(x.HPRegenRate/2) <= E.GetDamage(x)))
             {
-                if(Mob.Health+(Mob.HPRegenRate/2) <= E.GetDamage(Mob))
+                E.Cast();
+            }
+
+
+            var Minions = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy);
+
+            foreach (var Minion in Minions.Where(x => x.Health <= E.GetDamage(x)))
+            {
+                var miniontype = Minion.SkinName.ToLower();
+
+                if (miniontype.Contains("siege") || miniontype.Contains("super"))
                     E.Cast();
             }
         }
@@ -186,15 +194,6 @@ namespace Sharpshooter.Champions
                 if(Q.CanCast(Qtarget) && !Player.IsWindingUp && !Player.IsDashing() && Qpred.Hitchance >= HitChance.VeryHigh)
                     Q.Cast(Qtarget);
             }
-                
-            //if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
-            //{
-            //    var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
-
-            //    if (E.CanCast(Etarget) && (Etarget.Health + (Etarget.HPRegenRate / 2)) <= E.GetDamage(Etarget))
-            //        E.Cast();
-            //}
-
         }
 
         static void Harass()
@@ -210,14 +209,6 @@ namespace Sharpshooter.Champions
                 if (Q.CanCast(Qtarget) && !Player.IsWindingUp && !Player.IsDashing() && Qpred.Hitchance >= HitChance.VeryHigh)
                     Q.Cast(Qtarget);
             }
-
-            //if (SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
-            //{
-            //    var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, true);
-
-            //    if (E.CanCast(Etarget) && (Etarget.Health + (Etarget.HPRegenRate / 2)) <= E.GetDamage(Etarget))
-            //        E.Cast();
-            //}
         }
 
         static void Laneclear()
