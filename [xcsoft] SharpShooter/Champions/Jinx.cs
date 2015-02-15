@@ -34,7 +34,7 @@ namespace Sharpshooter.Champions
             R = new Spell(SpellSlot.R, 2500f);
 
             W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(1.1f, 100f, 1750f, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(1.1f, 50f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.6f, 140f, 1700f, false, SkillshotType.SkillshotLine);
 
             var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (W, R) Damage", true).SetValue(true);
@@ -241,7 +241,7 @@ namespace Sharpshooter.Champions
             return (result - Game.Time);
         }
 
-        static bool CollisionCheck(Obj_AI_Hero source, Vector3 targetpos, float width)
+        static bool CollisionCheck(Obj_AI_Hero source, Obj_AI_Hero target, float width)
         {
             var input = new PredictionInput
             {
@@ -252,7 +252,7 @@ namespace Sharpshooter.Champions
             input.CollisionObjects[0] = CollisionableObjects.Heroes;
             input.CollisionObjects[1] = CollisionableObjects.YasuoWall;
 
-            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count <= 1;
+            return !Collision.GetCollision(new List<Vector3> { target.ServerPosition }, input).Where(x => x.NetworkId != x.NetworkId).Any();
         }
 
         static int CountEnemyMinionsInRange(this Vector3 point, float range)
@@ -312,7 +312,7 @@ namespace Sharpshooter.Champions
                         if (Rtarget.IsValidTarget(GetQActiveRange - 50))
                             predhealth -= Player.GetAutoAttackDamage(Rtarget, true);
 
-                        if (CollisionCheck(Player, Rtarget.ServerPosition, R.Width))
+                        if (CollisionCheck(Player, Rtarget, R.Width))
                         {
                             if (predhealth <= R.GetDamage(Rtarget))
                             {
@@ -325,9 +325,7 @@ namespace Sharpshooter.Champions
                             {
                                 foreach (Obj_AI_Hero ExplosionTarget in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range)))
                                 {
-                                    var pred = R.GetPrediction(ExplosionTarget);
-
-                                    if (pred.Hitchance >= HitChance.High && CollisionCheck(Player, pred.UnitPosition, R.Width) && Rtarget.IsValidTarget(224, true, ExplosionTarget.ServerPosition))
+                                    if (R.GetPrediction(ExplosionTarget).Hitchance >= HitChance.High && CollisionCheck(Player, ExplosionTarget, R.Width) && Rtarget.IsValidTarget(224, true, ExplosionTarget.ServerPosition))
                                     {
                                         R.Cast(ExplosionTarget);
                                         break;

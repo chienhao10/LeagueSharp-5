@@ -164,7 +164,7 @@ namespace Sharpshooter.Champions
             return (result - Game.Time);
         }
 
-        static bool CollisionCheck(Obj_AI_Hero source, Vector3 targetpos, float width)
+        static bool CollisionCheck(Obj_AI_Hero source, Obj_AI_Hero target, float width)
         {
             var input = new PredictionInput
             {
@@ -175,7 +175,7 @@ namespace Sharpshooter.Champions
             input.CollisionObjects[0] = CollisionableObjects.Heroes;
             input.CollisionObjects[1] = CollisionableObjects.YasuoWall;
 
-            return Collision.GetCollision(new List<Vector3> { targetpos }, input).Count <= 1;
+            return !Collision.GetCollision(new List<Vector3> { target.ServerPosition }, input).Where(x => x.NetworkId != x.NetworkId).Any();
         }
 
         static void Combo()
@@ -203,7 +203,7 @@ namespace Sharpshooter.Champions
             {
                 foreach (var Rtarget in HeroManager.Enemies.Where(t => t.IsValidTarget(1500 + (500 * R.Level)) && !t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && !t.HasBuffOfType(BuffType.Invulnerability) && !t.HasBuffOfType(BuffType.SpellShield)))
                 {
-                    if (Rtarget.Health + Rtarget.HPRegenRate <= R.GetDamage(Rtarget) && CollisionCheck(Player, Rtarget.ServerPosition, 150))
+                    if (Rtarget.Health + Rtarget.HPRegenRate <= R.GetDamage(Rtarget) && CollisionCheck(Player, Rtarget, 150))
                         R.Cast(Rtarget);
                 }
             }
