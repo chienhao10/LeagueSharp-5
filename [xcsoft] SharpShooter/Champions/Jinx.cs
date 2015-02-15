@@ -41,6 +41,7 @@ namespace Sharpshooter.Champions
             var drawFill = new MenuItem("Draw_Fill", "Draw (W, R) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboQnum", "Switch to FISHBONES If Can Hit Enemy Number >=", true).SetValue(new Slider(2, 2, 5)));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseR", "Use R", true).SetValue(true));
@@ -190,7 +191,7 @@ namespace Sharpshooter.Champions
                 return;
             }
 
-            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= 3)
+            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= SharpShooter.Menu.Item("comboQnum").GetValue<Slider>().Value)
             {
                 QSwitch(true);
                 return;
