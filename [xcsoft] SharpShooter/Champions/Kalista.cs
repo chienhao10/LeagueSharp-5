@@ -258,9 +258,8 @@ namespace Sharpshooter.Champions
             if (Minions.Count <= 0)
                 return;
 
-            if (Q.IsReady() && !Player.IsWindingUp && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
+            if (Q.IsReady() && !Player.IsWindingUp && !Player.IsDashing() && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
             {
-                //---------Nice Q Logic----------------------
                 foreach (var minion in Minions.Where(x => x.Health <= Q.GetDamage(x)))
                 {
                     var killcount = 0;
@@ -276,7 +275,6 @@ namespace Sharpshooter.Champions
                     if (killcount >= SharpShooter.Menu.Item("laneclearQnum", true).GetValue<Slider>().Value)
                         Q.Cast(minion.ServerPosition);
                 }
-                //-------------------------------------------
             }
 
             if (E.IsReady() && SharpShooter.Menu.Item("laneclearUseE", true).GetValue<Boolean>())
@@ -305,7 +303,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
-                Q.Cast(Mobs[0]);
+                Q.Cast(Mobs[0].ServerPosition);
 
             if (E.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseE", true).GetValue<Boolean>())
             {
