@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
+using Collision = LeagueSharp.Common.Collision;
 
 namespace Sharpshooter.Champions
 {
@@ -24,16 +26,18 @@ namespace Sharpshooter.Champions
 
             Q.SetSkillshot(0.25f, 40f, 1200f, true, SkillshotType.SkillshotLine);
 
-            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (Q, E) Damage", true).SetValue(true);
-            var drawFill = new MenuItem("Draw_Fill", "Draw (Q, E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
+            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (E) Damage", true).SetValue(true);
+            var drawFill = new MenuItem("Draw_Fill", "Draw (E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
-            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(false));
+            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearQnum", "Cast Q If Can Kill Minion Number >=", true).SetValue(new Slider(3, 1, 5)));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseE", "Use E", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearEnum", "Cast E If Can Kill Minion Number >=", true).SetValue(new Slider(2, 1, 5)));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearMana", "if Mana % >", true).SetValue(new Slider(60, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseQ", "Use Q", true).SetValue(true));
@@ -42,6 +46,8 @@ namespace Sharpshooter.Champions
 
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal (With E)", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("mobsteal", "Use Mobsteal (With E)", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("lasthitassist", "Use Lasthit Assist (With E)", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("soulboundsaver", "Use Soulbound Saver (With R)", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQ", "Q Range", true).SetValue(new Circle(true, Color.FromArgb(0, 230, 255))));
@@ -73,6 +79,7 @@ namespace Sharpshooter.Champions
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
+            Orbwalking.OnNonKillableMinion += Orbwalking_OnNonKillableMinion;
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -127,6 +134,17 @@ namespace Sharpshooter.Champions
         {
             if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
                 Utility.DelayAction.Add(250, Orbwalking.ResetAutoAttackTimer);
+
+            if (SharpShooter.Menu.Item("soulboundsaver", true).GetValue<Boolean>())
+            {
+                if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy)
+                {
+                    var soulboundhero = HeroManager.Allies.FirstOrDefault(hero => hero.HasBuff("kalistacoopstrikeally", true));
+
+                    if (R.IsReady() && args.Target.NetworkId == soulboundhero.NetworkId && soulboundhero.HealthPercentage() <= 15)
+                        R.Cast();
+                }
+            }
         }
 
         static void Killsteal()
@@ -146,7 +164,7 @@ namespace Sharpshooter.Champions
 
         static void Mobsteal()
         {
-            if (!SharpShooter.Menu.Item("mobsteal", true).GetValue<Boolean>())
+            if (!SharpShooter.Menu.Item("mobsteal", true).GetValue<Boolean>() || !E.IsReady())
                 return;
 
             var Mobs = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -172,13 +190,32 @@ namespace Sharpshooter.Champions
         {
             float damage = 0;
 
-            if (Q.IsReady())
-                damage += Q.GetDamage(enemy);
-
             if (E.IsReady())
                 damage += E.GetDamage(enemy);
 
             return damage;
+        }
+
+        static List<Obj_AI_Base> GetCollisionMinions(Obj_AI_Hero source, Vector3 targetposition, float width)
+        {
+            var input = new PredictionInput
+            {
+                Radius = width,
+                Unit = source,
+            };
+
+            input.CollisionObjects[0] = CollisionableObjects.Minions;
+
+            return Collision.GetCollision(new List<Vector3> { targetposition }, input).OrderByDescending(obj => obj.Distance(source, false)).ToList();
+        }
+
+        static void Orbwalking_OnNonKillableMinion(AttackableUnit minion)
+        {
+            if (!SharpShooter.Menu.Item("lasthitassist", true).GetValue<Boolean>())
+                return;
+
+            if (E.CanCast((Obj_AI_Base)minion) && minion.Health <= E.GetDamage((Obj_AI_Base)minion))
+                E.Cast();
         }
 
         static void Combo()
@@ -221,12 +258,25 @@ namespace Sharpshooter.Champions
             if (Minions.Count <= 0)
                 return;
 
-            if (Q.IsReady() && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
+            if (Q.IsReady() && !Player.IsWindingUp && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
             {
-                var Farmloc = Q.GetLineFarmLocation(Minions);
+                //---------Nice Q Logic----------------------
+                foreach (var minion in Minions.Where(x => x.Health <= Q.GetDamage(x)))
+                {
+                    var killcount = 0;
 
-                if (Farmloc.MinionsHit >= 3)
-                    Q.Cast(Farmloc.Position);
+                    foreach (var colminion in GetCollisionMinions(Player, Player.ServerPosition.Extend(minion.ServerPosition, Q.Range), Q.Width))
+                    {
+                        if (colminion.Health <= Q.GetDamage(colminion))
+                            killcount++;
+                        else
+                            break;
+                    }
+
+                    if (killcount >= SharpShooter.Menu.Item("laneclearQnum", true).GetValue<Slider>().Value)
+                        Q.Cast(minion.ServerPosition);
+                }
+                //-------------------------------------------
             }
 
             if (E.IsReady() && SharpShooter.Menu.Item("laneclearUseE", true).GetValue<Boolean>())
@@ -239,7 +289,7 @@ namespace Sharpshooter.Champions
                         minionkillcount++;
                 }
 
-                if (minionkillcount >= 2)
+                if (minionkillcount >= SharpShooter.Menu.Item("laneclearEnum", true).GetValue<Slider>().Value)
                     E.Cast();
             }
         }

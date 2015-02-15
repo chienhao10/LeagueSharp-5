@@ -23,7 +23,7 @@ namespace Sharpshooter
 	        catch
 	        {
                 Console.WriteLine("[xcsoft] SharpShooter: " + ObjectManager.Player.ChampionName + " does not support");
-                Game.PrintChat("<font color = \"#00D8FF\">[xcsoft] SharpShooter: </font><font color = \"#FF007F\">" + Player.ChampionName + "</font> Does not support, Unload.");
+                Game.PrintChat("<font color = \"#00D8FF\">[xcsoft] SharpShooter: </font><font color = \"#FF007F\">" + Player.ChampionName + "</font> does not support, Unload.");
 		        return;
 	        }
 
