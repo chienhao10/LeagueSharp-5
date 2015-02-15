@@ -192,7 +192,7 @@ namespace Sharpshooter.Champions
                 return;
             }
 
-            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= SharpShooter.Menu.Item("FISHBONES").GetValue<Slider>().Value)
+            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= SharpShooter.Menu.Item("FISHBONES", true).GetValue<Slider>().Value)
             {
                 QSwitch(true);
                 return;
