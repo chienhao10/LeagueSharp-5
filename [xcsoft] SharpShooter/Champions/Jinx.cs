@@ -156,7 +156,7 @@ namespace Sharpshooter.Champions
                 if(target != null)
                 {
                     if(QisActive)
-                        Render.Circle.DrawCircle(target.Position, 160, Color.Red);
+                        Render.Circle.DrawCircle(target.Position, 200, Color.Red);
                 }
             }
 
@@ -192,7 +192,7 @@ namespace Sharpshooter.Champions
                 return;
             }
 
-            if (Utility.CountEnemiesInRange(Unit.Position, 160) >= SharpShooter.Menu.Item("FISHBONES", true).GetValue<Slider>().Value)
+            if (Utility.CountEnemiesInRange(Unit.Position, 200) >= SharpShooter.Menu.Item("FISHBONES", true).GetValue<Slider>().Value)
             {
                 QSwitch(true);
                 return;
@@ -387,7 +387,7 @@ namespace Sharpshooter.Champions
                 var target = Orbwalker.GetTarget();
 
                 if(target != null)
-                    QSwitch((CountEnemyMinionsInRange(target.Position, 160) >= SharpShooter.Menu.Item("laneclearQnum", true).GetValue<Slider>().Value));
+                    QSwitch((CountEnemyMinionsInRange(target.Position, 200) >= SharpShooter.Menu.Item("laneclearQnum", true).GetValue<Slider>().Value));
             }
                 
         }
@@ -415,7 +415,7 @@ namespace Sharpshooter.Champions
                 var target = Orbwalker.GetTarget();
 
                 if (target != null)
-                    QSwitch((CountEnemyMinionsInRange(target.Position, 160) >= 2));
+                    QSwitch((CountEnemyMinionsInRange(target.Position, 200) >= 2));
             }
 
             if (!Orbwalking.CanMove(1))
