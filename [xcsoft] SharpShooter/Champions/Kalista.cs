@@ -20,7 +20,7 @@ namespace Sharpshooter.Champions
         public static void Load()
         {
             Q = new Spell(SpellSlot.Q, 1100f);
-            W = new Spell(SpellSlot.W, 5500f);
+            W = new Spell(SpellSlot.W, 5200f);
             E = new Spell(SpellSlot.E, 1000f);
             R = new Spell(SpellSlot.R, 1400f);
 
@@ -30,6 +30,7 @@ namespace Sharpshooter.Champions
             var drawFill = new MenuItem("Draw_Fill", "Draw (E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseE", "Use E", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
@@ -80,6 +81,7 @@ namespace Sharpshooter.Champions
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
             Orbwalking.OnNonKillableMinion += Orbwalking_OnNonKillableMinion;
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -133,33 +135,35 @@ namespace Sharpshooter.Champions
         static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
-                Utility.DelayAction.Add(250, Orbwalking.ResetAutoAttackTimer);
+                    Utility.DelayAction.Add(250, Orbwalking.ResetAutoAttackTimer);
 
             if (SharpShooter.Menu.Item("soulboundsaver", true).GetValue<Boolean>())
             {
                 if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy)
                 {
-                    var soulboundhero = HeroManager.Allies.FirstOrDefault(hero => hero.HasBuff("kalistacoopstrikeally", true));
+                    var soulboundhero = HeroManager.Allies.FirstOrDefault(hero => hero.HasBuff("kalistacoopstrikeally", true) && args.Target.NetworkId == hero.NetworkId && hero.HealthPercentage() <= 15);
 
-                    if (R.IsReady() && args.Target.NetworkId == soulboundhero.NetworkId && soulboundhero.HealthPercentage() <= 15)
+                    if (R.CanCast(soulboundhero))
                         R.Cast();
                 }
             }
         }
 
+        private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (sender.Owner.IsMe && args.Slot == SpellSlot.Q && (Player.IsDashing() || Player.IsWindingUp))
+                args.Process = false;
+        }
+
         static void Killsteal()
         {
-            if (!SharpShooter.Menu.Item("killsteal", true).GetValue<Boolean>())
+            if (!SharpShooter.Menu.Item("killsteal", true).GetValue<Boolean>() || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>()))
                 return;
 
-            foreach (Obj_AI_Hero target in HeroManager.Enemies.Where(x => x.IsValidTarget(E.Range) && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)))
-            {
-                if (target != null)
-                {
-                    if (E.CanCast(target) && (target.Health + (target.HPRegenRate / 2)) <= E.GetDamage(target))
-                        E.Cast();
-                }
-            }
+            var target = HeroManager.Enemies.FirstOrDefault(x => !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield) && E.CanCast(x) && (x.Health + (x.HPRegenRate / 2)) <= E.GetDamage(x));
+
+            if (E.CanCast(target))
+                E.Cast();
         }
 
         static void Mobsteal()
@@ -167,23 +171,15 @@ namespace Sharpshooter.Champions
             if (!SharpShooter.Menu.Item("mobsteal", true).GetValue<Boolean>() || !E.IsReady())
                 return;
 
-            var Mobs = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-            
-            foreach (var Mob in Mobs.Where(x => x.Health+(x.HPRegenRate/2) <= E.GetDamage(x)))
-            {
+            var Mob = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= E.GetDamage(x));
+
+            if (E.CanCast(Mob))
                 E.Cast();
-            }
 
+            var Minion = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health <= E.GetDamage(x) && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
-            var Minions = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-
-            foreach (var Minion in Minions.Where(x => x.Health <= E.GetDamage(x)))
-            {
-                var miniontype = Minion.SkinName.ToLower();
-
-                if (miniontype.Contains("siege") || miniontype.Contains("super"))
-                    E.Cast();
-            }
+            if (E.CanCast(Minion))
+                E.Cast();
         }
 
         static float GetComboDamage(Obj_AI_Base enemy)
@@ -226,10 +222,18 @@ namespace Sharpshooter.Champions
             if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
-                var Qpred = Q.GetPrediction(Qtarget);
 
-                if(Q.CanCast(Qtarget) && !Player.IsWindingUp && !Player.IsDashing() && Qpred.Hitchance >= HitChance.VeryHigh)
+                if(Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
                     Q.Cast(Qtarget);
+            }
+
+            if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>() && E.IsReady())
+            {
+                var Minion = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy).FirstOrDefault(x => x.Health <= E.GetDamage(x));
+                var Target = HeroManager.Enemies.FirstOrDefault(x => E.CanCast(x) && E.GetDamage(x) >= 1);
+
+                if ((E.CanCast(Minion) && E.CanCast(Target)) || Target.Health <= E.GetDamage(Target))
+                    E.Cast();
             }
         }
 
@@ -241,9 +245,8 @@ namespace Sharpshooter.Champions
             if (SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
-                var Qpred = Q.GetPrediction(Qtarget);
 
-                if (Q.CanCast(Qtarget) && !Player.IsWindingUp && !Player.IsDashing() && Qpred.Hitchance >= HitChance.VeryHigh)
+                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
                     Q.Cast(Qtarget);
             }
         }
@@ -258,8 +261,9 @@ namespace Sharpshooter.Champions
             if (Minions.Count <= 0)
                 return;
 
-            if (Q.IsReady() && !Player.IsWindingUp && !Player.IsDashing() && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>() && Q.IsReady())
             {
+                //-------------------------------------------------------------------------------------------------------------------------------
                 foreach (var minion in Minions.Where(x => x.Health <= Q.GetDamage(x)))
                 {
                     var killcount = 0;
@@ -273,19 +277,22 @@ namespace Sharpshooter.Champions
                     }
 
                     if (killcount >= SharpShooter.Menu.Item("laneclearQnum", true).GetValue<Slider>().Value)
-                        Q.Cast(minion.ServerPosition);
+                    {
+                        if(Q.GetPrediction(minion).Hitchance >= HitChance.High)
+                        { 
+                            Q.Cast(minion);
+                            break;
+                        }
+                    }
                 }
+                //-------------------------------------------------------------------------------------------------------------------------------
             }
 
-            if (E.IsReady() && SharpShooter.Menu.Item("laneclearUseE", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("laneclearUseE", true).GetValue<Boolean>() && E.IsReady())
             {
                 var minionkillcount = 0;
 
-                foreach (var Minion in Minions)
-                {
-                    if (Minion.Health <= E.GetDamage(Minion))
-                        minionkillcount++;
-                }
+                foreach (var Minion in Minions.Where(x => E.CanCast(x) && x.Health <= E.GetDamage(x))){minionkillcount++;}
 
                 if (minionkillcount >= SharpShooter.Menu.Item("laneclearEnum", true).GetValue<Slider>().Value)
                     E.Cast();
@@ -302,12 +309,12 @@ namespace Sharpshooter.Champions
             if (Mobs.Count <= 0)
                 return;
 
-            if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
-                Q.Cast(Mobs[0].ServerPosition);
+            if (SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>() && Q.CanCast(Mobs[0]))
+                Q.Cast(Mobs[0]);
 
-            if (E.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseE", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("jungleclearUseE", true).GetValue<Boolean>() && E.CanCast(Mobs[0]))
             {
-                if (Mobs[0].Health + Mobs[0].HPRegenRate <= E.GetDamage(Mobs[0]))
+                if (Mobs[0].Health + (Mobs[0].HPRegenRate/2) <= E.GetDamage(Mobs[0]))
                     E.Cast();
             }
         }
