@@ -19,6 +19,7 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
+            //Why did you shoot the Q strange? really i don't know . _.
             Q = new Spell(SpellSlot.Q, 1100f);
             W = new Spell(SpellSlot.W, 5200f);
             E = new Spell(SpellSlot.E, 1000f);
@@ -216,7 +217,7 @@ namespace Sharpshooter.Champions
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-                if(Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
+                if(Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh && !Player.IsWindingUp)
                     Q.Cast(Qtarget);
             }
 
@@ -239,7 +240,7 @@ namespace Sharpshooter.Champions
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh)
+                if (Q.CanCast(Qtarget) && Q.GetPrediction(Qtarget).Hitchance >= HitChance.VeryHigh && !Player.IsWindingUp)
                     Q.Cast(Qtarget);
             }
         }
