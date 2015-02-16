@@ -154,13 +154,13 @@ namespace Sharpshooter.Champions
             {
                 if (target != null)
                 {
-                    if (Q.CanCast(target) && (target.Health + target.HPRegenRate) <= Q.GetDamage(target))
+                    if (Q.CanCast(target) && target.Health + (target.HPRegenRate/2) <= Q.GetDamage(target))
                         Q.Cast(target);
-
-                    if (W.CanCast(target) && (target.Health + target.HPRegenRate) <= W.GetDamage(target))
-                        R.Cast(target);
-
-                    if (R.CanCast(target) && (target.Health + target.HPRegenRate) <= R.GetDamage(target) && !target.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && R.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+                    else
+                    if (W.CanCast(target) && target.Health + (target.HPRegenRate/2) <= W.GetDamage(target))
+                        W.Cast(target);
+                    else
+                    if (R.CanCast(target) && target.Health + (target.HPRegenRate/2) <= R.GetDamage(target) && !target.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && R.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
                         R.Cast(target);
                 }
             }
@@ -253,7 +253,7 @@ namespace Sharpshooter.Champions
                 return;
 
             if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
-                Q.Cast(Mobs[0].Position);
+                Q.Cast(Mobs[0]);
         }
     }
 }
