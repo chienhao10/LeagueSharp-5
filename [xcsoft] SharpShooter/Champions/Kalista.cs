@@ -24,7 +24,7 @@ namespace Sharpshooter.Champions
             E = new Spell(SpellSlot.E, 1000f);
             R = new Spell(SpellSlot.R, 1400f);
 
-            Q.SetSkillshot(0.25f, 40f, 1700f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 36f, 1700f, true, SkillshotType.SkillshotLine);
 
             var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (E) Damage", true).SetValue(true);
             var drawFill = new MenuItem("Draw_Fill", "Draw (E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
@@ -81,7 +81,6 @@ namespace Sharpshooter.Champions
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
             Orbwalking.OnNonKillableMinion += Orbwalking_OnNonKillableMinion;
-            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -147,12 +146,6 @@ namespace Sharpshooter.Champions
                         R.Cast();
                 }
             }
-        }
-
-        private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
-        {
-            if (sender.Owner.IsMe && args.Slot == SpellSlot.Q && (Player.IsDashing() || Player.IsWindingUp))
-                args.Process = false;
         }
 
         static void Killsteal()
@@ -232,7 +225,7 @@ namespace Sharpshooter.Champions
                 var Minion = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy).FirstOrDefault(x => x.Health <= E.GetDamage(x));
                 var Target = HeroManager.Enemies.FirstOrDefault(x => E.CanCast(x) && E.GetDamage(x) >= 1);
 
-                if ((E.CanCast(Minion) && E.CanCast(Target)) || Target.Health <= E.GetDamage(Target))
+                if (Target.Health <= E.GetDamage(Target) || (E.CanCast(Minion) && E.CanCast(Target)))
                     E.Cast();
             }
         }
