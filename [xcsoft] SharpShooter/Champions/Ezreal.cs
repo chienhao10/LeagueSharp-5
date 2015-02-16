@@ -35,10 +35,9 @@ namespace Sharpshooter.Champions
 
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseW", "Use W", true).SetValue(false));
-            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassAuto", "Auto Harass (Toggle)", true).SetValue(new KeyBind('T', KeyBindType.Toggle, true)));
-            
-
+            SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
+           
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearMana", "if Mana % >", true).SetValue(new Slider(60, 0, 100)));
 
@@ -46,7 +45,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearMana", "if Mana % >", true).SetValue(new Slider(20, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("jump", "Jump to mouse", true).SetValue(new KeyBind('G', KeyBindType.Press)));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("jump", "World Fastest Jump to MouseCursor", true).SetValue(new KeyBind('E', KeyBindType.Press)));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.Gold)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQ", "Q Range", true).SetValue(new Circle(true, Color.Gold)));
@@ -100,8 +99,8 @@ namespace Sharpshooter.Champions
             {
                 if (E.IsReady())
                 {
+                    E.Cast(Game.CursorPos, true);
                     Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-                    E.Cast(Game.CursorPos);
                 }
             }
 

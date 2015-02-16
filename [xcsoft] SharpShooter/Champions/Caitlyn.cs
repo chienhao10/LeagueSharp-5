@@ -79,8 +79,8 @@ namespace Sharpshooter.Champions
             {
                 if(E.IsReady())
                 {
-                    Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                     E.Cast(Game.CursorPos.Extend(Player.Position, 5000));
+                    Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 }
             }
         }
