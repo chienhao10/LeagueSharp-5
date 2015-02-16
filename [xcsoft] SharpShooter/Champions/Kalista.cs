@@ -136,7 +136,7 @@ namespace Sharpshooter.Champions
             if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
                     Utility.DelayAction.Add(250, Orbwalking.ResetAutoAttackTimer);
 
-            if (SharpShooter.Menu.Item("soulboundsaver", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("soulboundsaver", true).GetValue<Boolean>() && R.IsReady())
             {
                 if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy)
                 {
@@ -150,7 +150,7 @@ namespace Sharpshooter.Champions
 
         static void Killsteal()
         {
-            if (!SharpShooter.Menu.Item("killsteal", true).GetValue<Boolean>() || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>()))
+            if (!SharpShooter.Menu.Item("killsteal", true).GetValue<Boolean>() || !E.IsReady())
                 return;
 
             var target = HeroManager.Enemies.FirstOrDefault(x => !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield) && E.CanCast(x) && (x.Health + (x.HPRegenRate / 2)) <= E.GetDamage(x));
