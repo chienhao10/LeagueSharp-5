@@ -255,7 +255,7 @@ namespace Sharpshooter.Champions
 
             if(!combomode)
             {
-                if (QEndpos.UnderTurret(true) || QEndpos.CountEnemiesInRange(DeafaltRange) > 0)
+                if (QEndpos.UnderTurret(true) || QEndpos.CountEnemiesInRange(800) > 0)
                     return;
             }
            
@@ -305,7 +305,7 @@ namespace Sharpshooter.Champions
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
             if (Q.CanCast(target) && SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
-                LogicalQ(false);
+                LogicalQ(true);
 
             if (E.CanCast(target) && SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
             {
