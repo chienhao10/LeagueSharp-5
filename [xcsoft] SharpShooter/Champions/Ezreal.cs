@@ -104,7 +104,7 @@ namespace Sharpshooter.Champions
                 }
             }
 
-            if (SharpShooter.Menu.Item("harassAuto", true).GetValue<Boolean>() && !Player.UnderTurret(true))
+            if (SharpShooter.Menu.Item("harassAuto", true).GetValue<KeyBind>().Active && !Player.UnderTurret(true))
                 Harass();
 
             Killsteal();
