@@ -44,7 +44,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearMana", "if Mana % >", true).SetValue(new Slider(20, 0, 100)));
 
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal (With R)", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("jump", "World Fastest Jump to MouseCursor", true).SetValue(new KeyBind('E', KeyBindType.Press)));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.Gold)));
@@ -76,6 +76,7 @@ namespace Sharpshooter.Champions
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Orbwalking.AfterAttack += Orbwalking_AfterAttack;
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -165,6 +166,18 @@ namespace Sharpshooter.Champions
             }
         }
 
+        static void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (target.Type == GameObjectType.obj_AI_Hero && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                if (Q.CanCast((Obj_AI_Base)target))
+                    Q.Cast((Obj_AI_Base)target);
+                else
+                if (W.CanCast((Obj_AI_Base)target))
+                    W.Cast((Obj_AI_Base)target);
+            }
+        }
+
         static float GetComboDamage(Obj_AI_Base enemy)
         {
             return R.IsReady() ? R.GetDamage(enemy) : 0;
@@ -202,7 +215,7 @@ namespace Sharpshooter.Champions
 
         static void Harass()
         {
-            if (!Orbwalking.CanMove(1) || !(Player.ManaPercentage() > SharpShooter.Menu.Item("harassMana", true).GetValue<Slider>().Value))
+            if (!Orbwalking.CanMove(1) || !(Player.ManaPercentage() > SharpShooter.Menu.Item("harassMana", true).GetValue<Slider>().Value) || Player.IsRecalling())
                 return;
 
             if (SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
@@ -236,8 +249,7 @@ namespace Sharpshooter.Champions
             {
                 var Farmloc = Q.GetLineFarmLocation(Minions);
 
-                if (Farmloc.MinionsHit >= 1 && !Player.IsWindingUp)
-                    Q.Cast(Farmloc.Position);
+                Q.Cast(Farmloc.Position);
             }
         }
 
