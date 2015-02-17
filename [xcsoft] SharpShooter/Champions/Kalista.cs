@@ -224,7 +224,7 @@ namespace Sharpshooter.Champions
             if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>() && E.IsReady())
             {
                 var Minion = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy).FirstOrDefault(x => x.Health <= E.GetDamage(x));
-                var Target = HeroManager.Enemies.FirstOrDefault(x => E.CanCast(x) && E.GetDamage(x) >= 1);
+                var Target = HeroManager.Enemies.FirstOrDefault(x => E.CanCast(x) && E.GetDamage(x) >= 1 && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield));
 
                 if (Target.Health <= E.GetDamage(Target) || (E.CanCast(Minion) && E.CanCast(Target)))
                     E.Cast();
