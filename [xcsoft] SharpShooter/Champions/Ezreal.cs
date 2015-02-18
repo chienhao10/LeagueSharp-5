@@ -152,30 +152,43 @@ namespace Sharpshooter.Champions
 
             foreach (Obj_AI_Hero target in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range) && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)))
             {
-                if (target != null)
-                {
-                    if (Q.CanCast(target) && target.Health + (target.HPRegenRate/2) <= Q.GetDamage(target))
-                        Q.Cast(target);
-                    else
-                    if (W.CanCast(target) && target.Health + (target.HPRegenRate/2) <= W.GetDamage(target))
-                        W.Cast(target);
-                    else
-                    if (R.CanCast(target) && target.Health + (target.HPRegenRate/2) <= R.GetDamage(target) && !target.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && R.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
-                        R.Cast(target);
-                }
+                if (Q.CanCast(target) && target.Health + (target.HPRegenRate/2) <= Q.GetDamage(target))
+                    Q.Cast(target);
+                else
+                if (W.CanCast(target) && target.Health + (target.HPRegenRate/2) <= W.GetDamage(target))
+                    W.Cast(target);
+                else
+                if (R.CanCast(target) && target.Health + (target.HPRegenRate/2) <= R.GetDamage(target) && !target.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && R.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+                    R.Cast(target);
             }
         }
 
         static void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (target.Type == GameObjectType.obj_AI_Hero && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (target.Type == GameObjectType.obj_AI_Hero)
             {
-                if (Q.CanCast((Obj_AI_Base)target))
-                    Q.Cast((Obj_AI_Base)target);
+                var Target = (Obj_AI_Base)target;
+
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+                {
+                    if (Q.CanCast(Target) && SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
+                        Q.Cast(Target);
+                    else
+                        if (W.CanCast(Target) && SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
+                        W.Cast(Target);
+                }
                 else
-                if (W.CanCast((Obj_AI_Base)target))
-                    W.Cast((Obj_AI_Base)target);
+                    if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && Player.ManaPercentage() > SharpShooter.Menu.Item("harassMana", true).GetValue<Slider>().Value)
+                {
+                    if (Q.CanCast(Target) && SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
+                        Q.Cast(Target);
+                    else
+                        if (W.CanCast(Target) && SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>())
+                            W.Cast(Target);
+                }
             }
+
+
         }
 
         static float GetComboDamage(Obj_AI_Base enemy)
@@ -240,16 +253,17 @@ namespace Sharpshooter.Champions
             if (!Orbwalking.CanMove(1) || !(Player.ManaPercentage() > SharpShooter.Menu.Item("laneclearMana", true).GetValue<Slider>().Value))
                 return;
 
-            var Minions = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy);
+            var Minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy);
 
             if (Minions.Count <= 0)
                 return;
 
             if (Q.IsReady() && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
             {
-                var Farmloc = Q.GetLineFarmLocation(Minions);
+                var qtarget = Minions.Where(x => Q.GetPrediction(x).Hitchance >= HitChance.High).OrderBy(x => x.Health).First();
 
-                Q.Cast(Farmloc.Position);
+                if (Q.CanCast(qtarget))
+                    Q.Cast(qtarget);
             }
         }
 

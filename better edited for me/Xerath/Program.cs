@@ -105,7 +105,7 @@ namespace Xerath_edit
             SpellList.Add(R);
 
             //Create the menu
-            Config = new Menu("[Esk0r]" + ChampionName + "(edited by xcsoft)", ChampionName + "editedbyxcsoft", true);
+            Config = new Menu("[Esk0r]" + ChampionName, ChampionName + "editedbyxcsoft", true);
 
             //Orbwalker submenu
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
@@ -131,7 +131,7 @@ namespace Xerath_edit
             //Misc
             Config.AddSubMenu(new Menu("R", "R"));
             Config.SubMenu("R").AddItem(new MenuItem("EnableRUsage", "Auto use charges").SetValue(true));
-            Config.SubMenu("R").AddItem(new MenuItem("rMode", "Mode").SetValue(new StringList(new[] { "Normal", "Custom delays", "OnTap", "Hitchance Veryhigh"})));
+            Config.SubMenu("R").AddItem(new MenuItem("rMode", "Mode").SetValue(new StringList(new[] { "Normal", "Custom delays", "OnTap", "Hitchance high"})));
             Config.SubMenu("R").AddItem(new MenuItem("rModeKey", "OnTap key").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
             Config.SubMenu("R").AddSubMenu(new Menu("Custom delays", "Custom delays"));
             for (int i = 1; i <= 3; i++)
@@ -412,7 +412,7 @@ namespace Xerath_edit
                         break;
 
                     case 4://Hitchance Veryhigh[added by xcsoft]
-                        if(R.GetPrediction(rTarget).Hitchance >= HitChance.VeryHigh)
+                        if(R.GetPrediction(rTarget).Hitchance >= HitChance.High)
                             R.Cast(rTarget, true);
                         break;
                 }
