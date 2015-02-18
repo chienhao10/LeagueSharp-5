@@ -165,10 +165,10 @@ namespace Sharpshooter.Champions
 
         static void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
+            var Target = (Obj_AI_Base)target;
+
             if (target.Type == GameObjectType.obj_AI_Hero)
             {
-                var Target = (Obj_AI_Base)target;
-
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
                     if (Q.CanCast(Target) && SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
@@ -187,8 +187,6 @@ namespace Sharpshooter.Champions
                             W.Cast(Target);
                 }
             }
-
-
         }
 
         static float GetComboDamage(Obj_AI_Base enemy)
@@ -277,8 +275,14 @@ namespace Sharpshooter.Champions
             if (Mobs.Count <= 0)
                 return;
 
-            if (Q.CanCast(Mobs[0]) && SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
-                Q.Cast(Mobs[0]);
+            if (SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
+            {
+                var qtarget = Mobs.Where(x => Q.GetPrediction(x).Hitchance >= HitChance.High).OrderBy(x => x.Health).First();
+
+                if (Q.CanCast(qtarget))
+                    Q.Cast(qtarget);
+            }
+                
         }
     }
 }
