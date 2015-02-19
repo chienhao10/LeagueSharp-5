@@ -204,7 +204,7 @@ namespace Sharpshooter.Champions
             if (minion == null)
                 return false;
 
-            if (minion.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)))
+            if (minion.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player) + 15))
             {
                 if (minion.Health <= Player.GetAutoAttackDamage(minion, true))
                     return false;
