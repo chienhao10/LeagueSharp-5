@@ -70,19 +70,19 @@ namespace _xcsoft__Information
 
             Target = TargetSelector.GetSelectedTarget() != null ? TargetSelector.GetSelectedTarget() : Player;
             
-            var buffs = "";
+            var buffs = "Null";
 
             foreach (var buff in Target.Buffs)
             {
-                buffs += "\n" + buff.Name + "[Count:" + buff.Count + "/Duration:" + (buff.EndTime - Game.ClockTime).ToString("0.00") +"],";
+                buffs += "\n" + buff.Name + "[Count: " + buff.Count + "/Duration: " + (buff.EndTime - Game.ClockTime).ToString("0.00") +"],";
             }
 
             var Mobs = MinionManager.GetMinions(1500, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.MaxHealth);
-            var MobsList = "";
+            var MobsList = "Null";
 
             foreach (var Mob in Mobs)
             {
-                MobsList += "\n" + Mob.Name + "[Skinname:" + Mob.SkinName + "/HP:" + Mob.Health + " / " + Mob.MaxHealth + "(" + Mob.HealthPercentage().ToString("0.00") + "%)],";
+                MobsList += "\n" + Mob.Name + "[Skinname: " + Mob.SkinName + "/HP: " + Mob.Health + " / " + Mob.MaxHealth + "(" + Mob.HealthPercentage().ToString("0.00") + "%)],";
             }
 
             Render.Circle.DrawCircle(Player.Position, 1500, Color.Red, 10);
