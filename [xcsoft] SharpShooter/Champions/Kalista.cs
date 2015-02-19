@@ -272,7 +272,7 @@ namespace Sharpshooter.Champions
 
                     if (killcount >= SharpShooter.Menu.Item("laneclearQnum", true).GetValue<Slider>().Value)
                     {
-                        if(Q.GetPrediction(minion).Hitchance >= HitChance.High)
+                        if (Q.GetPrediction(minion).Hitchance >= HitChance.High && !Player.IsWindingUp && !Player.IsDashing())
                         { 
                             Q.Cast(minion);
                             break;
