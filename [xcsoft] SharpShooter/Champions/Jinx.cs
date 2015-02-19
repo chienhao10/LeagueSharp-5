@@ -274,7 +274,7 @@ namespace Sharpshooter.Champions
 
         static Obj_AI_Base E_GetBestTarget()
         {
-            return HeroManager.Enemies.Where(x => E.CanCast(x) && !x.HasBuffOfType(BuffType.SpellImmunity) && E.GetPrediction(x).Hitchance >= HitChance.VeryHigh && (x.MoveSpeed <= 300 || x.IsImmovable || x.IsMovementImpaired() || x.HasBuffOfType(BuffType.Slow) || x.HasBuffOfType(BuffType.Stun) || x.HasBuffOfType(BuffType.Taunt) || x.HasBuffOfType(BuffType.Suppression) || x.HasBuffOfType(BuffType.Charm) || x.HasBuffOfType(BuffType.Fear) || x.HasBuffOfType(BuffType.Flee))).OrderByDescending(x => x.Distance(Player, false)).FirstOrDefault();
+            return HeroManager.Enemies.Where(x => E.CanCast(x) && !x.HasBuffOfType(BuffType.SpellImmunity) && E.GetPrediction(x).Hitchance >= HitChance.VeryHigh && !x.IsFacing(Player) && x.IsValidTarget(DefaultRange)).OrderByDescending(x => x.Distance(Player, false)).FirstOrDefault();
         }
 
         static void Combo()
