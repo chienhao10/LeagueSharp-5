@@ -34,7 +34,7 @@ namespace Sharpshooter.Champions
             R = new Spell(SpellSlot.R, 2500f);
 
             W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(1.1f, 10f, 1750f, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(1.2f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.6f, 140f, 1700f, false, SkillshotType.SkillshotLine);
 
             var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (W, R) Damage", true).SetValue(true);
@@ -154,12 +154,9 @@ namespace Sharpshooter.Champions
                 var target = Orbwalker.GetTarget();
 
                 if(target != null)
-                {
                     if(QisActive)
                         Render.Circle.DrawCircle(target.Position, 200, Color.Red);
-                }
             }
-
         }
 
         static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -174,8 +171,8 @@ namespace Sharpshooter.Champions
                 Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.Gold, "Gapcloser");
             }
 
-            if (E.CanCast(gapcloser.Sender))
-                E.Cast(Player);
+            if (E.IsReady() && Player.Distance(gapcloser.End, false) <= 200)
+                E.Cast(gapcloser.Sender.ServerPosition.Extend(Player.ServerPosition, 100+Player.ServerPosition.Distance(gapcloser.Sender.ServerPosition, false)));
         }
 
         static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
@@ -275,6 +272,11 @@ namespace Sharpshooter.Champions
             return damage;
         }
 
+        static Obj_AI_Base E_GetBestTarget()
+        {
+            return HeroManager.Enemies.Where(x => E.CanCast(x) && !x.HasBuffOfType(BuffType.SpellImmunity) && E.GetPrediction(x).Hitchance >= HitChance.VeryHigh && (x.MoveSpeed <= 300 || x.IsImmovable || x.IsMovementImpaired() || x.HasBuffOfType(BuffType.Slow) || x.HasBuffOfType(BuffType.Stun) || x.HasBuffOfType(BuffType.Taunt) || x.HasBuffOfType(BuffType.Suppression) || x.HasBuffOfType(BuffType.Charm) || x.HasBuffOfType(BuffType.Fear) || x.HasBuffOfType(BuffType.Flee))).OrderByDescending(x => x.Distance(Player, false)).FirstOrDefault();
+        }
+
         static void Combo()
         {
             if (!Orbwalking.CanMove(1))
@@ -291,12 +293,13 @@ namespace Sharpshooter.Champions
                     W.Cast(Wtarget);
             }
 
-            if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>() && E.IsReady())
             {
-                var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical, false);
+                var Etarget = E_GetBestTarget();
 
-                if (E.CanCast(Etarget) && !Etarget.HasBuffOfType(BuffType.SpellImmunity) && E.GetPrediction(Etarget).Hitchance >= HitChance.VeryHigh)
+                if (E.CanCast(Etarget))
                     E.Cast(Etarget);
+                    
             }
 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady() && WLastCastedTime + 1.0 < Game.ClockTime)

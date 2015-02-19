@@ -258,7 +258,7 @@ namespace Sharpshooter.Champions
 
             if (Q.IsReady() && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
             {
-                var qtarget = Minions.Where(x => Q.GetPrediction(x).Hitchance >= HitChance.High).OrderBy(x => x.Health).First();
+                var qtarget = Minions.Where(x => Q.GetPrediction(x).Hitchance >= HitChance.High).OrderBy(x => x.Health).FirstOrDefault();
 
                 if (Q.CanCast(qtarget))
                     Q.Cast(qtarget);
@@ -277,7 +277,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
             {
-                var qtarget = Mobs.Where(x => Q.GetPrediction(x).Hitchance >= HitChance.High).OrderBy(x => x.Health).First();
+                var qtarget = Mobs.Where(x => Q.GetPrediction(x).Hitchance >= HitChance.High).OrderBy(x => x.Health).FirstOrDefault();
 
                 if (Q.CanCast(qtarget))
                     Q.Cast(qtarget);
