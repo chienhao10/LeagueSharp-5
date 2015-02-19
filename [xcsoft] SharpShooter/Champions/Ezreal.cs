@@ -17,7 +17,7 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
-            Q = new Spell(SpellSlot.Q, 1180f);
+            Q = new Spell(SpellSlot.Q, 1200f);
             W = new Spell(SpellSlot.W, 850f);
             E = new Spell(SpellSlot.E, 475f);
             R = new Spell(SpellSlot.R, 2500f);
@@ -199,6 +199,22 @@ namespace Sharpshooter.Champions
             return HeroManager.Enemies.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.VeryHigh).OrderBy(x => Q.GetDamage(x)).FirstOrDefault();
         }
 
+        static Boolean ExtraCheckForFarm(Obj_AI_Base minion)
+        {
+            if (minion == null)
+                return false;
+
+            if (minion.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)))
+            {
+                if (minion.Health <= Player.GetAutoAttackDamage(minion, true))
+                    return false;
+                else
+                    return true;
+            }
+            else
+                return true;
+        }
+
         static void Combo()
         {
             if (!Orbwalking.CanMove(1))
@@ -263,7 +279,7 @@ namespace Sharpshooter.Champions
 
             if (Q.IsReady() && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
             {
-                var qtarget = Minions.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.High || !(x.Health * 2 <= Player.GetAutoAttackDamage(x, true) && x.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)))).OrderBy(x => x.Health).FirstOrDefault();
+                var qtarget = Minions.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.High && ExtraCheckForFarm(x)).OrderBy(x => x.Health).FirstOrDefault();
 
                 if (Q.CanCast(qtarget))
                     Q.Cast(qtarget);
@@ -282,12 +298,11 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
             {
-                var qtarget = Mobs.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.High || !(x.Health * 2 <= Player.GetAutoAttackDamage(x, true) && x.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)))).OrderBy(x => x.Health).FirstOrDefault();
+                var qtarget = Mobs.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.High && ExtraCheckForFarm(x)).OrderBy(x => x.Health).FirstOrDefault();
 
                 if (Q.CanCast(qtarget))
                     Q.Cast(qtarget);
             }
-                
         }
     }
 }
