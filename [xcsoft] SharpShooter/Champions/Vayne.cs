@@ -267,7 +267,7 @@ namespace Sharpshooter.Champions
             if (!Orbwalking.CanMove(1))
                 return;
 
-            if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
+            if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>() && !Player.IsWindingUp)
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
@@ -304,7 +304,7 @@ namespace Sharpshooter.Champions
 
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
-            if (Q.CanCast(target) && SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
+            if (Q.CanCast(target) && SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>() && !Player.IsWindingUp)
                 LogicalQ(true);
 
             if (E.CanCast(target) && SharpShooter.Menu.Item("harassUseE", true).GetValue<Boolean>())
