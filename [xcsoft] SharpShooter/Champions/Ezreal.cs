@@ -196,7 +196,7 @@ namespace Sharpshooter.Champions
 
         static Obj_AI_Base Q_GetBestTarget()
         {
-            return HeroManager.Enemies.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.VeryHigh).OrderByDescending(x => x.Distance(Player.ServerPosition, false)).FirstOrDefault();
+            return HeroManager.Enemies.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.High).OrderByDescending(x => x.Distance(Player.ServerPosition, false)).FirstOrDefault();
         }
 
         static Boolean ExtraCheckForFarm(Obj_AI_Base minion)
