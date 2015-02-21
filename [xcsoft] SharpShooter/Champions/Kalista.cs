@@ -20,7 +20,7 @@ namespace Sharpshooter.Champions
         public static void Load()
         {
             //Why did you shoot the Q strange? really i don't know . _.
-            Q = new Spell(SpellSlot.Q, 1300f);
+            Q = new Spell(SpellSlot.Q, 1250f);
             W = new Spell(SpellSlot.W, 5200f);
             E = new Spell(SpellSlot.E, 1000f);
             R = new Spell(SpellSlot.R, 1400f);
