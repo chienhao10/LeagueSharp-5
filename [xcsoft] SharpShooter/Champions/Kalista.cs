@@ -19,13 +19,12 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
-            //Why did you shoot the Q strange? really i don't know . _.
-            Q = new Spell(SpellSlot.Q, 1200f);
+            Q = new Spell(SpellSlot.Q, 1180f);
             W = new Spell(SpellSlot.W, 5200f);
             E = new Spell(SpellSlot.E, 1000f);
             R = new Spell(SpellSlot.R, 1400f);
 
-            Q.SetSkillshot(0.25f, 36f, 2000f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 40f, 2000f, true, SkillshotType.SkillshotLine);
 
             var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (E) Damage", true).SetValue(true);
             var drawFill = new MenuItem("Draw_Fill", "Draw (E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
@@ -186,17 +185,19 @@ namespace Sharpshooter.Champions
             return damage;
         }
 
-        static List<Obj_AI_Base> GetCollisionMinions(Obj_AI_Hero source, Vector3 targetposition, float width)
+        static List<Obj_AI_Base> Q_GetCollisionMinions(Obj_AI_Hero source, Vector3 targetposition)
         {
             var input = new PredictionInput
             {
-                Radius = width,
                 Unit = source,
+                Radius = Q.Width,
+                Delay = Q.Delay,
+                Speed = Q.Speed,
             };
 
             input.CollisionObjects[0] = CollisionableObjects.Minions;
 
-            return Collision.GetCollision(new List<Vector3> { targetposition }, input).OrderByDescending(obj => obj.Distance(source, false)).ToList();
+            return Collision.GetCollision(new List<Vector3> { targetposition }, input).OrderBy(obj => obj.Distance(source, false)).ToList();
         }
 
         static void Orbwalking_OnNonKillableMinion(AttackableUnit minion)
@@ -224,7 +225,7 @@ namespace Sharpshooter.Champions
             if (SharpShooter.Menu.Item("comboUseE", true).GetValue<Boolean>() && E.IsReady())
             {
                 var Minion = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy).FirstOrDefault(x => x.Health <= E.GetDamage(x));
-                var Target = HeroManager.Enemies.Where(x => E.CanCast(x) && E.GetDamage(x) >= 1 && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)).OrderBy(x => E.GetDamage(x)).FirstOrDefault();
+                var Target = HeroManager.Enemies.Where(x => E.CanCast(x) && E.GetDamage(x) >= 1 && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield)).OrderByDescending(x => E.GetDamage(x)).FirstOrDefault();
 
                 if (Target.Health <= E.GetDamage(Target) || (E.CanCast(Minion) && E.CanCast(Target)))
                     E.Cast();
@@ -262,7 +263,7 @@ namespace Sharpshooter.Champions
                 {
                     var killcount = 0;
 
-                    foreach (var colminion in GetCollisionMinions(Player, Player.ServerPosition.Extend(minion.ServerPosition, Q.Range), Q.Width))
+                    foreach (var colminion in Q_GetCollisionMinions(Player, Player.ServerPosition.Extend(minion.ServerPosition, Q.Range)))
                     {
                         if (colminion.Health <= Q.GetDamage(colminion))
                             killcount++;
@@ -274,7 +275,7 @@ namespace Sharpshooter.Champions
                     {
                         if (Q.GetPrediction(minion).Hitchance >= HitChance.High && !Player.IsWindingUp && !Player.IsDashing())
                         { 
-                            Q.Cast(minion);
+                            Q.Cast(minion.ServerPosition);
                             break;
                         }
                     }

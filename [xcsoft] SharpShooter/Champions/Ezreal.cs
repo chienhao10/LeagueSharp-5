@@ -196,7 +196,7 @@ namespace Sharpshooter.Champions
 
         static Obj_AI_Base Q_GetBestTarget()
         {
-            return HeroManager.Enemies.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.High).OrderByDescending(x => x.Distance(Player.ServerPosition, false)).FirstOrDefault();
+            return HeroManager.Enemies.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.High).OrderBy(x => x.Distance(Player.ServerPosition, false)).FirstOrDefault();
         }
 
         static Boolean ExtraCheckForFarm(Obj_AI_Base minion)
@@ -280,7 +280,7 @@ namespace Sharpshooter.Champions
 
             if (Q.IsReady() && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
             {
-                var qtarget = Minions.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.Medium && ExtraCheckForFarm(x)).OrderBy(x => x.Health).FirstOrDefault();
+                var qtarget = Minions.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.Medium && ExtraCheckForFarm(x)).OrderByDescending(x => x.Health).FirstOrDefault();
 
                 if (Q.CanCast(qtarget))
                     Q.Cast(qtarget);
@@ -299,7 +299,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
             {
-                var qtarget = Mobs.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.Medium && ExtraCheckForFarm(x)).OrderBy(x => x.Health).FirstOrDefault();
+                var qtarget = Mobs.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.Medium && ExtraCheckForFarm(x)).OrderByDescending(x => x.Health).FirstOrDefault();
 
                 if (Q.CanCast(qtarget))
                     Q.Cast(qtarget);
