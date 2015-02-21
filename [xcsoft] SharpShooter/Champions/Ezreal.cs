@@ -44,7 +44,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearMana", "if Mana % >", true).SetValue(new Slider(20, 0, 100)));
 
-            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal (With R)", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("killsteal", "Use Killsteal (With R)", true).SetValue(false));
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("jump", "World Fastest Jump to MouseCursor", true).SetValue(new KeyBind('G', KeyBindType.Press)));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.FromArgb(250, 244, 192))));
@@ -238,10 +238,11 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>())
             {
-                var Rtarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical, true);
-
-                if (R.CanCast(Rtarget) && !Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)))
-                    R.CastIfWillHit(Rtarget, 2);
+                foreach (var Rtarget in HeroManager.Enemies.Where(x => R.CanCast(x) && R.GetPrediction(x).Hitchance >= HitChance.VeryHigh))
+                {
+                    if (R.CanCast(Rtarget) && !Rtarget.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)))
+                        R.CastIfWillHit(Rtarget, 2);
+                }
             }
         }
 
