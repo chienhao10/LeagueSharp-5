@@ -223,7 +223,7 @@ namespace Sharpshooter.Champions
 
             foreach (Obj_AI_Hero target in HeroManager.Enemies.Where(x => x.IsValidTarget(E.Range)))
             {
-                if (E.CanCast(target) && UnitIsImmobileUntil(target) >= E.Delay)
+                if (E.CanCast(target) && UnitIsImmobileUntil(target) >= E.Delay - 0.5)
                     E.Cast(target);
             }
         }
