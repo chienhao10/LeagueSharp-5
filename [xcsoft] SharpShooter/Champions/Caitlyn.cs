@@ -25,7 +25,7 @@ namespace Sharpshooter.Champions
             R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.625f, 90f, 2200f, false, SkillshotType.SkillshotLine);
-            W.SetSkillshot(1.3f, 80f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(1.3f, 1f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.125f, 80f, 2000f, true, SkillshotType.SkillshotLine);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
@@ -146,7 +146,7 @@ namespace Sharpshooter.Champions
             {
                 if (target != null)
                 {
-                    if (W.CanCast(target) && UnitIsImmobileUntil(target) >= W.Delay)
+                    if (W.CanCast(target) && UnitIsImmobileUntil(target) >= W.Delay - 0.5)
                         W.Cast(target);
                 }
             }

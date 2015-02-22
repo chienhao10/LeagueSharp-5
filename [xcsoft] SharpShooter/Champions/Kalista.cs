@@ -24,7 +24,7 @@ namespace Sharpshooter.Champions
             E = new Spell(SpellSlot.E, 1000f);
             R = new Spell(SpellSlot.R, 1400f);
 
-            Q.SetSkillshot(0.25f, 40f, 2000f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 40f, 1700f, true, SkillshotType.SkillshotLine);
 
             var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (E) Damage", true).SetValue(true);
             var drawFill = new MenuItem("Draw_Fill", "Draw (E) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
