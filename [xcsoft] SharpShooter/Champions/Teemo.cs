@@ -24,6 +24,7 @@ namespace Sharpshooter.Champions
             R.SetSkillshot(0.25f, 75f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseR", "Use R", true).SetValue(true));
 
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseQ", "Use Q", true).SetValue(true));
@@ -43,6 +44,7 @@ namespace Sharpshooter.Champions
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Orbwalking.AfterAttack += Orbwalking_OnAfterAttack;
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -101,6 +103,28 @@ namespace Sharpshooter.Champions
                 W.Cast();
         }
 
+        static void Orbwalking_OnAfterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (!unit.IsMe || !(target.Type == GameObjectType.obj_AI_Hero))
+                return;
+
+            if(!Q.CanCast((Obj_AI_Hero)target))
+                return;
+
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
+                    Q.Cast((Obj_AI_Hero)target);
+            }
+            else
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
+            {
+                if (SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
+                    Q.Cast((Obj_AI_Hero)target);
+            }
+
+        }
+
         static void Combo()
         {
             if (!Orbwalking.CanMove(1))
@@ -110,8 +134,16 @@ namespace Sharpshooter.Champions
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical, true);
 
-                if (Q.CanCast(Qtarget))
+                if (Q.CanCast(Qtarget) && !Qtarget.IsValidTarget(620))
                     Q.Cast(Qtarget);
+            }
+
+            if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>() & W.IsReady())
+            {
+                var Wtarget = HeroManager.Enemies.Where(x => x.IsValidTarget(700) && !x.IsFacing(Player)).FirstOrDefault();
+
+                if (Wtarget != null)
+                    W.Cast();
             }
 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() & R.IsReady())
@@ -132,7 +164,7 @@ namespace Sharpshooter.Champions
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical, true);
 
-                if (Q.CanCast(Qtarget))
+                if (Q.CanCast(Qtarget) && !Qtarget.IsValidTarget(620))
                     Q.Cast(Qtarget);
             }
         }
