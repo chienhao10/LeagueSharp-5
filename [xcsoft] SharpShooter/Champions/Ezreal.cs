@@ -280,7 +280,7 @@ namespace Sharpshooter.Champions
 
             if (Q.IsReady() && SharpShooter.Menu.Item("laneclearUseQ", true).GetValue<Boolean>())
             {
-                var qtarget = Minions.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.Medium && ExtraCheckForFarm(x)).OrderByDescending(x => x.Health).FirstOrDefault();
+                var qtarget = Minions.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.Medium && ExtraCheckForFarm(x) && x.Health <= Q.GetDamage(x)).OrderByDescending(x => x.Health).FirstOrDefault();
 
                 if (Q.CanCast(qtarget))
                     Q.Cast(qtarget);
