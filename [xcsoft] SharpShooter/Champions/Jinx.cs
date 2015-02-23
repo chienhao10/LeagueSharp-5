@@ -172,7 +172,7 @@ namespace Sharpshooter.Champions
             }
 
             if (E.IsReady() && Player.Distance(gapcloser.End, false) <= 200)
-                E.Cast(gapcloser.Sender.ServerPosition.Extend(Player.ServerPosition, 100+Player.ServerPosition.Distance(gapcloser.Sender.ServerPosition, false)));
+                E.Cast(gapcloser.End);
         }
 
         static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
@@ -301,7 +301,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady() && WLastCastedTime + 1.0 < Game.ClockTime)
             {
-                foreach (Obj_AI_Hero Rtarget in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range) && x.IsValidTarget(Orbwalking.GetRealAutoAttackRange(Player)) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability) && R.GetPrediction(x).Hitchance >= HitChance.High))
+                foreach (Obj_AI_Hero Rtarget in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range) && !x.IsValidTarget(DefaultRange) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability) && R.GetPrediction(x).Hitchance >= HitChance.High))
                 {
                     if (R.CanCast(Rtarget))
                     {
