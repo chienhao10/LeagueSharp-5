@@ -203,15 +203,6 @@ namespace Sharpshooter.Champions
             }
         }
 
-        static bool isUnderAllyTurret(Vector3 Position)
-        {
-            foreach (var tur in ObjectManager.Get<Obj_AI_Turret>().Where(turr => turr.IsAlly && (turr.Health != 0)))
-            {
-                if (tur.Distance(Position) <= 975f) return true;
-            }
-            return false;
-        }
-
         static bool isAllyFountain(Vector3 Position)
         {
             float fountainRange = 750;
@@ -289,7 +280,7 @@ namespace Sharpshooter.Champions
                     {
                         Vector3 loc3 = EPred.UnitPosition.To2D().Extend(Player.ServerPosition.To2D(), -i).To3D();
 
-                        if (loc3.IsWall() || isUnderAllyTurret(FinalPosition) || isAllyFountain(FinalPosition))
+                        if (loc3.IsWall() || isAllyFountain(FinalPosition))
                             E.Cast(En);
                     }
                 }
