@@ -17,7 +17,7 @@ namespace Sharpshooter.Champions
 
         public static void Load()
         {
-            Q = new Spell(SpellSlot.Q, 1150f);
+            Q = new Spell(SpellSlot.Q, 1180f);
             W = new Spell(SpellSlot.W, 850f);
             E = new Spell(SpellSlot.E, 475f);
             R = new Spell(SpellSlot.R, 2500f);
@@ -194,11 +194,6 @@ namespace Sharpshooter.Champions
             return R.IsReady() ? R.GetDamage(enemy) : 0;
         }
 
-        static Obj_AI_Base Q_GetBestTarget()
-        {
-            return HeroManager.Enemies.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.High).OrderBy(x => x.Distance(Player.ServerPosition, false)).FirstOrDefault();
-        }
-
         static Boolean ExtraCheckForFarm(Obj_AI_Base minion)
         {
             if (minion == null)
@@ -222,7 +217,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
             {
-                var Qtarget = Q_GetBestTarget();
+                var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
                 if (Q.CanCast(Qtarget))
                     Q.Cast(Qtarget);
@@ -253,7 +248,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
             {
-                var Qtarget = Q_GetBestTarget();
+                var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical, true);
 
                 if (Q.CanCast(Qtarget))
                     Q.Cast(Qtarget);
@@ -299,7 +294,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("jungleclearUseQ", true).GetValue<Boolean>())
             {
-                var qtarget = Mobs.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.Medium && ExtraCheckForFarm(x)).OrderByDescending(x => x.Health).FirstOrDefault();
+                var qtarget = Mobs.Where(x => Q.CanCast(x) && Q.GetPrediction(x).Hitchance >= HitChance.Medium && ExtraCheckForFarm(x)).OrderBy(x => x.Health).FirstOrDefault();
 
                 if (Q.CanCast(qtarget))
                     Q.Cast(qtarget);
