@@ -179,6 +179,14 @@ namespace Sharpshooter.Champions
                     Q.Cast(Qtarget);
             }
 
+            if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>() && W.IsReady())
+            {
+                var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
+
+                if (Q.CanCast(Wtarget))
+                    Q.Cast(Wtarget);
+            }
+
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady())
             {
                 var Rtarget = HeroManager.Enemies.Where(x => R.CanCast(x) && x.Health + (x.HPRegenRate / 2) <= R.GetDamage(x) && R.GetPrediction(x).Hitchance >= HitChance.VeryHigh).OrderByDescending(x => x.Health).FirstOrDefault();
