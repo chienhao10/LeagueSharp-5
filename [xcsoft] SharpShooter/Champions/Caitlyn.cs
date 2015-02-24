@@ -28,6 +28,9 @@ namespace Sharpshooter.Champions
             W.SetSkillshot(1.3f, 1f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.125f, 80f, 2000f, true, SkillshotType.SkillshotLine);
 
+            var drawDamageMenu = new MenuItem("Draw_RDamage", "Draw (R) Damage", true).SetValue(true);
+            var drawFill = new MenuItem("Draw_Fill", "Draw (R) Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
+
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseQ", "Use Q", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseW", "Use W", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Combo").AddItem(new MenuItem("comboUseR", "Use R", true).SetValue(true));
@@ -50,6 +53,27 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingW", "W Range", true).SetValue(new Circle(false, Color.FromArgb(255, 94, 0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(false, Color.FromArgb(255, 94, 0))));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(true, Color.FromArgb(255, 94, 0))));
+
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(drawDamageMenu);
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(drawFill);
+
+            DamageIndicator.DamageToUnit = GetComboDamage;
+            DamageIndicator.Enabled = drawDamageMenu.GetValue<bool>();
+            DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
+            DamageIndicator.FillColor = drawFill.GetValue<Circle>().Color;
+
+            drawDamageMenu.ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+
+            drawFill.ValueChanged +=
+            delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                DamageIndicator.Fill = eventArgs.GetNewValue<Circle>().Active;
+                DamageIndicator.FillColor = eventArgs.GetNewValue<Circle>().Color;
+            };
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -178,6 +202,21 @@ namespace Sharpshooter.Champions
             return !Collision.GetCollision(new List<Vector3> { target.ServerPosition }, input).Where(x => x.NetworkId != x.NetworkId).Any();
         }
 
+        static float GetComboDamage(Obj_AI_Base enemy)
+        {
+            float damage = 0;
+
+            if (R.IsReady())
+                damage += R.GetDamage(enemy);
+
+            return damage;
+        }
+
+        static Obj_AI_Base W_GetBestTarget()
+        {
+            return HeroManager.Enemies.Where(x => W.CanCast(x) && !x.HasBuffOfType(BuffType.SpellImmunity) && W.GetPrediction(x).Hitchance >= HitChance.VeryHigh && !x.IsFacing(Player) && x.IsValidTarget(550)).OrderBy(x => x.Distance(Player, false)).FirstOrDefault();
+        }
+
         static void Combo()
         {
             if (!Orbwalking.CanMove(1))
@@ -193,7 +232,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
             {
-                var Wtarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical, true);
+                var Wtarget = W_GetBestTarget();
 
                 if (W.CanCast(Wtarget)  && !Wtarget.HasBuffOfType(BuffType.SpellImmunity) && W.GetPrediction(Wtarget).Hitchance >= HitChance.VeryHigh)
                     W.Cast(Wtarget);
