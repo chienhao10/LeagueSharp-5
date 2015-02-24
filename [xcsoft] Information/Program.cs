@@ -127,6 +127,7 @@ namespace _xcsoft__Information
                 "IsMelee: " + Target.IsMelee() + NewLine +
                 "IsDashing: " + Target.IsDashing() + NewLine +
                 "IsAlly: " + Target.IsAlly + NewLine +
+                "IsCanMove: " + Orbwalking.CanMove(1) + NewLine +
                 "UnderTurret: " + Target.UnderTurret() + NewLine +
                 NewLine +
                 "Mobs: " + MobsList + NewLine +

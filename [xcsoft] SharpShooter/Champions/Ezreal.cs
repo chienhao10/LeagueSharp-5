@@ -165,27 +165,27 @@ namespace Sharpshooter.Champions
 
         static void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
+            if (target.Type != GameObjectType.obj_AI_Hero)
+                return;
+
             var Target = (Obj_AI_Base)target;
 
-            if (target.Type == GameObjectType.obj_AI_Hero)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-                {
-                    if (Q.CanCast(Target) && SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
-                        Q.Cast(Target);
-                    else
-                        if (W.CanCast(Target) && SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
-                        W.Cast(Target);
-                }
+                if (Q.CanCast(Target) && SharpShooter.Menu.Item("comboUseQ", true).GetValue<Boolean>())
+                    Q.Cast(Target);
                 else
-                    if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && Player.ManaPercentage() > SharpShooter.Menu.Item("harassMana", true).GetValue<Slider>().Value)
-                {
-                    if (Q.CanCast(Target) && SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
-                        Q.Cast(Target);
-                    else
-                        if (W.CanCast(Target) && SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>())
-                            W.Cast(Target);
-                }
+                if (W.CanCast(Target) && SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>())
+                    W.Cast(Target);
+            }
+            
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && Player.ManaPercentage() > SharpShooter.Menu.Item("harassMana", true).GetValue<Slider>().Value)
+            {
+                if (Q.CanCast(Target) && SharpShooter.Menu.Item("harassUseQ", true).GetValue<Boolean>())
+                    Q.Cast(Target);
+                else
+                if (W.CanCast(Target) && SharpShooter.Menu.Item("harassUseW", true).GetValue<Boolean>())
+                    W.Cast(Target);
             }
         }
 

@@ -60,6 +60,7 @@
     <Compile Include="Champions\Ashe.cs" />
     <Compile Include="Champions\Caitlyn.cs" />
     <Compile Include="Champions\Ezreal.cs" />
+    <Compile Include="Champions\Graves.cs" />
     <Compile Include="Champions\Jinx.cs" />
     <Compile Include="Champions\Kalista.cs" />
     <Compile Include="Champions\Sivir.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Champions\Tristana.cs" />
     <Compile Include="Champions\Twitch.cs" />
     <Compile Include="Champions\Vayne.cs" />
+    <Compile Include="Champions\_base.cs" />
     <Compile Include="DamageIndicator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
