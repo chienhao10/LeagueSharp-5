@@ -60,7 +60,7 @@ namespace Sharpshooter.Champions
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
-                //Laneclear();
+                Laneclear();
                 Jungleclear();
             }
         }
@@ -167,6 +167,14 @@ namespace Sharpshooter.Champions
                 if (Q.CanCast(Qtarget) && !Qtarget.IsValidTarget(670))
                     Q.Cast(Qtarget);
             }
+        }
+
+        static void Laneclear()
+        {
+            var bigminion = MinionManager.GetMinions(Q.Range, MinionTypes.All, MinionTeam.Enemy).Where(x => Q.CanCast(x) && x.Health <= Q.GetDamage(x) && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super"))).FirstOrDefault();
+
+            if (Q.CanCast(bigminion))
+                Q.Cast(bigminion);
         }
 
         static void Jungleclear()
