@@ -148,7 +148,7 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() & R.IsReady())
             {
-                var Rtarget = HeroManager.Enemies.Where(x => R.CanCast(x) && !x.HasBuff("bantamtraptarget", true)).OrderBy(x => x.ServerPosition.Distance(Player.ServerPosition)).FirstOrDefault();
+                var Rtarget = HeroManager.Enemies.Where(x => R.CanCast(x) && !x.HasBuff("bantamtraptarget", true)).OrderBy(x => x.Distance(Player.Position, false)).FirstOrDefault();
 
                 if (R.CanCast(Rtarget))
                     R.Cast(Rtarget);
