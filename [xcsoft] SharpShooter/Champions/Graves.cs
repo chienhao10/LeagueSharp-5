@@ -168,6 +168,14 @@ namespace Sharpshooter.Champions
 
         static void Combo()
         {
+            if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady())
+            {
+                var Rtarget = HeroManager.Enemies.Where(x => R.CanCast(x) && x.Health + (x.HPRegenRate / 2) <= R.GetDamage(x) && R.GetPrediction(x).Hitchance >= HitChance.VeryHigh).OrderByDescending(x => x.Health).FirstOrDefault();
+
+                if (R.CanCast(Rtarget))
+                    R.Cast(Rtarget);
+            }
+
             if (!Orbwalking.CanMove(1))
                 return;
 
@@ -185,14 +193,6 @@ namespace Sharpshooter.Champions
 
                 if (Q.CanCast(Wtarget))
                     Q.Cast(Wtarget);
-            }
-
-            if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady())
-            {
-                var Rtarget = HeroManager.Enemies.Where(x => R.CanCast(x) && x.Health + (x.HPRegenRate / 2) <= R.GetDamage(x) && R.GetPrediction(x).Hitchance >= HitChance.VeryHigh).OrderByDescending(x => x.Health).FirstOrDefault();
-
-                if (R.CanCast(Rtarget))
-                    R.Cast(Rtarget);
             }
         }
 

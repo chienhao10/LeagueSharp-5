@@ -134,13 +134,13 @@ namespace Sharpshooter.Champions
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical, true);
 
-                if (Q.CanCast(Qtarget) && !Qtarget.IsValidTarget(620))
+                if (Q.CanCast(Qtarget) && !Qtarget.IsValidTarget(670))
                     Q.Cast(Qtarget);
             }
 
             if (SharpShooter.Menu.Item("comboUseW", true).GetValue<Boolean>() & W.IsReady())
             {
-                var Wtarget = HeroManager.Enemies.Where(x => x.IsValidTarget(700) && !x.IsFacing(Player)).FirstOrDefault();
+                var Wtarget = HeroManager.Enemies.Where(x => x.IsValidTarget(1000) && !x.IsFacing(Player)).FirstOrDefault();
 
                 if (Wtarget != null)
                     W.Cast();
@@ -164,7 +164,7 @@ namespace Sharpshooter.Champions
             {
                 var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical, true);
 
-                if (Q.CanCast(Qtarget) && !Qtarget.IsValidTarget(620))
+                if (Q.CanCast(Qtarget) && !Qtarget.IsValidTarget(670))
                     Q.Cast(Qtarget);
             }
         }
