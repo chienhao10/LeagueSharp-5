@@ -73,38 +73,38 @@ namespace xc_TwistedFate
 
             var harassMenu = new Menu("Harass", "harassop");
             harassMenu.AddItem(new MenuItem("harassUseQ", "Use Q").SetValue(true));
-            harassMenu.AddItem(new MenuItem("harassrange", "Harass range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450))).ValueChanged +=
+            harassMenu.AddItem(new MenuItem("harassrange", "Harass Range").SetValue(new Slider(1200, (int)Orbwalking.GetRealAutoAttackRange(Player), 1450))).ValueChanged +=
             delegate(object sender, OnValueChangeEventArgs eventArgs)
             {
                 Render.Circle.DrawCircle(Player.Position, eventArgs.GetNewValue<Slider>().Value, Color.Aquamarine, 5);
             };
-            harassMenu.AddItem(new MenuItem("harassmana", "harass if mana % >").SetValue(new Slider(35, 0, 100)));
+            harassMenu.AddItem(new MenuItem("harassmana", "If Mana % >").SetValue(new Slider(35, 0, 100)));
             Menu.AddSubMenu(harassMenu);
 
             var lasthitMenu = new Menu("Lasthit", "lasthitset");
             lasthitMenu.AddItem(new MenuItem("lasthitUseW", "Use W (Blue only)").SetValue(true));
-            lasthitMenu.AddItem(new MenuItem("lasthitbluemana", "Lasthit with blue if mana % <").SetValue(new Slider(20, 0, 100)));
+            lasthitMenu.AddItem(new MenuItem("lasthitbluemana", "Lasthit With Blue If Mana % <").SetValue(new Slider(20, 0, 100)));
             Menu.AddSubMenu(lasthitMenu);
 
             var laneclearMenu = new Menu("Laneclear", "laneclearset");
             laneclearMenu.AddItem(new MenuItem("laneclearUseQ", "Use Q").SetValue(true));
-            laneclearMenu.AddItem(new MenuItem("laneclearQmana", "Cast Q if mana % >").SetValue(new Slider(50, 0, 100)));
-            laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Cast Q if Hit minions number >=").SetValue(new Slider(5, 2, 7)));
+            laneclearMenu.AddItem(new MenuItem("laneclearQmana", "Cast Q If Mana % >").SetValue(new Slider(50, 0, 100)));
+            laneclearMenu.AddItem(new MenuItem("laneclearQmc", "Cast Q If Hit Minion Number >=").SetValue(new Slider(5, 2, 7)));
             laneclearMenu.AddItem(new MenuItem("laneclearUseW", "Use W").SetValue(true));
-            laneclearMenu.AddItem(new MenuItem("laneclearredmc", "Red instead of blue if minions number >=").SetValue(new Slider(3, 2, 5)));
-            laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue instead of red if mana % <").SetValue(new Slider(30, 0, 100)));
+            laneclearMenu.AddItem(new MenuItem("laneclearredmc", "Red Instead of Blue If Minion Number >=").SetValue(new Slider(3, 2, 5)));
+            laneclearMenu.AddItem(new MenuItem("laneclearbluemana", "Blue Instead of Red If Mana % <").SetValue(new Slider(30, 0, 100)));
             Menu.AddSubMenu(laneclearMenu);
 
             var jungleclearMenu = new Menu("Jungleclear", "jungleclearset");
             jungleclearMenu.AddItem(new MenuItem("jungleclearUseQ", "Use Q").SetValue(true));
-            jungleclearMenu.AddItem(new MenuItem("jungleclearQmana", "Cast Q if mana % >").SetValue(new Slider(30, 0, 100)));
+            jungleclearMenu.AddItem(new MenuItem("jungleclearQmana", "Cast Q If Mana % >").SetValue(new Slider(30, 0, 100)));
             jungleclearMenu.AddItem(new MenuItem("jungleclearUseW", "Use W").SetValue(true));
-            jungleclearMenu.AddItem(new MenuItem("jungleclearbluemana", "Pick blue if mana % <").SetValue(new Slider(30, 0, 100)));
+            jungleclearMenu.AddItem(new MenuItem("jungleclearbluemana", "Pick Blue If Mana % <").SetValue(new Slider(30, 0, 100)));
             jungleclearMenu.AddItem(new MenuItem("jgtxt", "-Card Automatic selection"));
             Menu.AddSubMenu(jungleclearMenu);
 
             var AdditionalsMenu = new Menu("Misc", "additionals");
-            AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold when using ultimate(gate)").SetValue(true));
+            AdditionalsMenu.AddItem(new MenuItem("goldR", "Select Gold When Using Ultimate (gate)").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("killsteal", "Use Killsteal").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("gapcloser", "Use Anti-gapcloser").SetValue(true));
             AdditionalsMenu.AddItem(new MenuItem("interrupt", "Use Auto-interrupt").SetValue(true));
