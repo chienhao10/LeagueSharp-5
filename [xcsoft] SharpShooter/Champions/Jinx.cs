@@ -130,7 +130,7 @@ namespace Sharpshooter.Champions
             var drawingR = SharpShooter.Menu.Item("drawingR", true).GetValue<Circle>();
 
             if (drawingAA.Active)
-                Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), drawingAA.Color);
+                Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player)+30, drawingAA.Color);
 
             if (drawingQ.Active && Q.IsReady())
                 Render.Circle.DrawCircle(Player.Position, GetQActiveRange + 30, drawingQ.Color);
