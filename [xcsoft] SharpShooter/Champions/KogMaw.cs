@@ -54,7 +54,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassUseR", "Use R", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
-            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseW", "Use W", true).SetValue(true));
+            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseW", "Use W", true).SetValue(false));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseE", "Use E", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseR", "Use R", true).SetValue(true));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearMana", "if Mana % >", true).SetValue(new Slider(60, 0, 100)));
