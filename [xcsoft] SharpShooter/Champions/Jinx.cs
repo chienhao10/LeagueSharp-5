@@ -22,6 +22,9 @@ namespace Sharpshooter.Champions
 
         static readonly int DefaultRange = 590;
 
+        //Q 1 = 665
+        //Q 2 = 715
+        //Q 3 = 765
         static float GetQActiveRange { get { return DefaultRange + ((25 * Q.Level) + 50); } }
 
         static float WLastCastedTime;
@@ -62,8 +65,9 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Misc").AddItem(new MenuItem("FISHBONES", "Switch to FISHBONES If Can Hit Enemy Number >=", true).SetValue(new Slider(2, 2, 5)));
 
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingAA", "Real AA Range", true).SetValue(new Circle(true, Color.HotPink)));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingQ", "Q Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingW", "W Range", true).SetValue(new Circle(true, Color.HotPink)));
-            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(true, Color.HotPink)));
+            SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingE", "E Range", true).SetValue(new Circle(false, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingR", "R Range", true).SetValue(new Circle(true, Color.HotPink)));
             SharpShooter.Menu.SubMenu("Drawings").AddItem(new MenuItem("drawingPTimer", "Passive Timer", true).SetValue(true));
 
@@ -120,12 +124,16 @@ namespace Sharpshooter.Champions
                 return;
 
             var drawingAA = SharpShooter.Menu.Item("drawingAA", true).GetValue<Circle>();
+            var drawingQ = SharpShooter.Menu.Item("drawingQ", true).GetValue<Circle>();
             var drawingW = SharpShooter.Menu.Item("drawingW", true).GetValue<Circle>();
             var drawingE = SharpShooter.Menu.Item("drawingE", true).GetValue<Circle>();
             var drawingR = SharpShooter.Menu.Item("drawingR", true).GetValue<Circle>();
 
             if (drawingAA.Active)
                 Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(Player), drawingAA.Color);
+
+            if (drawingQ.Active && Q.IsReady())
+                Render.Circle.DrawCircle(Player.Position, GetQActiveRange + 30, drawingQ.Color);
 
             if (drawingW.Active && W.IsReady())
                 Render.Circle.DrawCircle(Player.Position, W.Range, drawingW.Color);
