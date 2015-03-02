@@ -275,7 +275,7 @@ namespace Sharpshooter.Champions
                     {
                         if (!Player.IsWindingUp && !Player.IsDashing())
                         { 
-                            Q.Cast(minion.ServerPosition);
+                            Q.Cast(minion);
                             break;
                         }
                     }

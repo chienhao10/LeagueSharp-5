@@ -22,7 +22,7 @@ namespace Sharpshooter
 	        }
 	        catch
 	        {
-                Console.WriteLine("[xcsoft] SharpShooter: " + ObjectManager.Player.ChampionName + " does not support");
+                Console.WriteLine("[xcsoft] SharpShooter: " + Player.ChampionName + " does not support");
                 Game.PrintChat("<font color = \"#00D8FF\">[xcsoft] SharpShooter: </font><font color = \"#FF007F\">" + Player.ChampionName + "</font> does not support, Unload.");
 		        return;
 	        }
@@ -30,7 +30,7 @@ namespace Sharpshooter
             Menu = new Menu("[xcsoft] SharpShooter", "xcsoft_sharpshooter", true);
             Orbwalker = new Orbwalking.Orbwalker(Menu.AddSubMenu(new Menu(Player.ChampionName + ": Orbwalker", "Orbwalker")));
             
-            TargetSelector.AddToMenu(Menu.AddSubMenu(new Menu(ObjectManager.Player.ChampionName + ": Target Selector", "Target Selector")));
+            TargetSelector.AddToMenu(Menu.AddSubMenu(new Menu(Player.ChampionName + ": Target Selector", "Target Selector")));
             Menu.AddToMainMenu();
 
             Menu.AddSubMenu(new Menu(Player.ChampionName + ": Combo", "Combo"));
