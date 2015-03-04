@@ -53,7 +53,7 @@ namespace Sharpshooter.Champions
             SharpShooter.Menu.SubMenu("Harass").AddItem(new MenuItem("harassMana", "if Mana % >", true).SetValue(new Slider(50, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearUseQ", "Use Q", true).SetValue(true));
-            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearQnum", "Switch to FISHBONES If Can Hit Minion Number >=", true).SetValue(new Slider(2, 2, 7)));
+            SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearQnum", "Switch to FISHBONES If Can Hit Minion Number >=", true).SetValue(new Slider(3, 2, 7)));
             SharpShooter.Menu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearMana", "if Mana % >", true).SetValue(new Slider(60, 0, 100)));
 
             SharpShooter.Menu.SubMenu("Jungleclear").AddItem(new MenuItem("jungleclearUseQ", "Use Q", true).SetValue(true));
@@ -309,9 +309,9 @@ namespace Sharpshooter.Champions
 
             if (SharpShooter.Menu.Item("comboUseR", true).GetValue<Boolean>() && R.IsReady() && WLastCastedTime + 1.0 < Game.ClockTime)
             {
-                foreach (Obj_AI_Hero Rtarget in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range) && !x.IsValidTarget(DefaultRange) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability) && R.GetPrediction(x).Hitchance >= HitChance.High && Utility.GetAlliesInRange(x, 800).Where(ally => !ally.IsMe).Count() <= 1))
+                foreach (Obj_AI_Hero Rtarget in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range) && !x.IsValidTarget(DefaultRange) && !Player.HasBuffOfType(BuffType.SpellShield) && !Player.HasBuffOfType(BuffType.Invulnerability) && R.GetPrediction(x).Hitchance >= HitChance.High))
                 {
-                    if (R.CanCast(Rtarget) && !Player.IsWindingUp)
+                    if (R.CanCast(Rtarget))
                     {
                         var dis = Player.Distance(Rtarget.ServerPosition);
                         double predhealth = HealthPrediction.GetHealthPrediction(Rtarget, (int)(R.Delay + dis / R.Speed) * 1000) + Rtarget.HPRegenRate;
